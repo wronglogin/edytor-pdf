@@ -1386,9 +1386,15 @@ function selRect(v, a) {
 }
 // uchwyty: ✥ przesuwanie (lewy górny róg), rozmiar: róg / prawa krawędź / dolna krawędź
 function handlesOf(v, a) {
-  const b = selRect(v, a), H = [{ id: 'move', x: b.x - 12, y: b.y - 12, cur: 'move' }];
-  if (a.box || a.type === 'image') H.push({ id: 'se', x: b.x + b.w, y: b.y + b.h, cur: 'nwse-resize' });
-  if (a.box) H.push({ id: 'e', x: b.x + b.w, y: b.y + b.h / 2, cur: 'ew-resize' }, { id: 's', x: b.x + b.w / 2, y: b.y + b.h, cur: 'ns-resize' });
+  const b = selRect(v, a), cx = b.x + b.w / 2, cy = b.y + b.h / 2, R = b.x + b.w, B = b.y + b.h;
+  // ✥ nad środkiem górnej krawędzi – nie koliduje z uchwytami w rogach
+  const H = [{ id: 'move', x: cx, y: b.y - 22, cur: 'move' }];
+  if (a.box || a.type === 'image') H.push(
+    { id: 'nw', x: b.x, y: b.y, cur: 'nwse-resize' }, { id: 'ne', x: R, y: b.y, cur: 'nesw-resize' },
+    { id: 'sw', x: b.x, y: B, cur: 'nesw-resize' }, { id: 'se', x: R, y: B, cur: 'nwse-resize' });
+  if (a.box) H.push(
+    { id: 'n', x: cx, y: b.y, cur: 'ns-resize' }, { id: 's', x: cx, y: B, cur: 'ns-resize' },
+    { id: 'w', x: b.x, y: cy, cur: 'ew-resize' }, { id: 'e', x: R, y: cy, cur: 'ew-resize' });
   return H;
 }
 function handleAt(i, x, y) {
@@ -1578,12 +1584,26 @@ function onMove(e, i) {
   if (!act.moved) { if (Math.hypot(dx, dy) < 3) return; act.moved = true; snap(); }
   if (act.kind === 'move') {
     a.pts = act.orig.pts.map(p => { const [sx, sy] = toScr(v, p); return toPdf(v, sx + dx, sy + dy); });
-  } else if (act.kind === 'tresize') {
-    if (act.h === 'se' || act.h === 'e') a.bw = Math.max(20, act.orig.bw * v.scale + dx) / v.scale;
-    if (act.h === 'se' || act.h === 's') a.bh = Math.max(12, act.orig.bh * v.scale + dy) / v.scale;
   } else {
-    const nw = Math.max(12, act.orig.w * v.scale + dx);
-    a.w = nw / v.scale; a.h = a.w * act.orig.h / act.orig.w;
+    // zmiana rozmiaru z dowolnego rogu/krawędzi; przeciwległa strona stoi w miejscu
+    const s = v.scale, h = act.h, L = h.includes('w'), Rr = h.includes('e'), T = h.includes('n'), Bt = h.includes('s');
+    const [sx, sy] = toScr(v, act.orig.pts[0]);
+    if (act.kind === 'tresize') {
+      const w0 = act.orig.bw * s, h0 = act.orig.bh * s;
+      let nw = w0, nh = h0, nx = sx, ny = sy;
+      if (Rr) nw = Math.max(20, w0 + dx);
+      if (L) { nw = Math.max(20, w0 - dx); nx = sx + w0 - nw; }
+      if (Bt) nh = Math.max(12, h0 + dy);
+      if (T) { nh = Math.max(12, h0 - dy); ny = sy + h0 - nh; }
+      a.bw = nw / s; a.bh = nh / s;
+      a.pts = [toPdf(v, nx, ny)];
+    } else {
+      // obraz / podpis: proporcje zachowane
+      const w0 = act.orig.w * s, h0 = act.orig.h * s, r = h0 / w0;
+      const nw = Math.max(12, L ? w0 - dx : w0 + dx), nh = nw * r;
+      a.w = nw / s; a.h = nh / s;
+      a.pts = [toPdf(v, L ? sx + w0 - nw : sx, T ? sy + h0 - nh : sy)];
+    }
   }
   drawOverlay(i);
 }
