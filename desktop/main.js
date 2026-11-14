@@ -146,9 +146,23 @@ ipcMain.handle('find-font', async (e, want) => {
 });
 ipcMain.handle('font-status', async () => { const idx = await loadFontIndex(); return { count: idx.length, dirs: fontDirs().map(d => d.dir) }; });
 
+/* ---------- ostatnio otwierane ---------- */
+const RECENT = () => path.join(USER(), 'recent.json');
+function recentList() { try { return JSON.parse(fs.readFileSync(RECENT(), 'utf8')).filter(r => exists(r.path)); } catch (e) { return []; } }
+function addRecent(p) {
+  const L = [{ path: p, name: path.basename(p), when: Date.now() }, ...recentList().filter(r => r.path !== p)].slice(0, 15);
+  try { fs.writeFileSync(RECENT(), JSON.stringify(L)); } catch (e) {}
+  try { app.addRecentDocument(p); } catch (e) {}
+  buildMenu();
+  for (const w of BrowserWindow.getAllWindows()) w.webContents.send('recent-changed');
+}
+ipcMain.handle('recent', () => recentList());
+ipcMain.handle('recent-clear', () => { try { fs.writeFileSync(RECENT(), '[]'); } catch (e) {} try { app.clearRecentDocuments(); } catch (e) {} buildMenu(); return true; });
+ipcMain.on('recent-add', (e, p) => { if (p && exists(p)) addRecent(p); });
+
 /* ---------- pliki: otwieranie i zapis do tego samego pliku ---------- */
-ipcMain.handle('read-file', async (e, p) => { const data = fs.readFileSync(p); return { path: p, name: path.basename(p), data }; });
-ipcMain.handle('write-file', async (e, p, bytes) => { fs.writeFileSync(p, Buffer.from(bytes)); return true; });
+ipcMain.handle('read-file', async (e, p) => { const data = fs.readFileSync(p); addRecent(p); return { path: p, name: path.basename(p), data }; });
+ipcMain.handle('write-file', async (e, p, bytes) => { fs.writeFileSync(p, Buffer.from(bytes)); addRecent(p); return true; });
 ipcMain.handle('save-dialog', async (e, name) => {
   const w = BrowserWindow.fromWebContents(e.sender);
   const r = await dialog.showSaveDialog(w, { defaultPath: name, filters: [{ name: 'Dokument PDF', extensions: ['pdf'] }] });
@@ -160,6 +174,8 @@ ipcMain.handle('open-dialog', async e => {
   return r.canceled ? [] : r.filePaths;
 });
 ipcMain.on('set-doc', (e, name) => { const w = BrowserWindow.fromWebContents(e.sender); if (w) w.hasDoc = !!name; });
+let quitting = false;
+app.on('before-quit', () => { quitting = true; });
 ipcMain.on('relaunch', () => { app.relaunch(); app.quit(); });
 
 const pdfArgs = argv => argv.slice(1).filter(a => /\.pdf$/i.test(a) && exists(a));
@@ -194,7 +210,28 @@ function createWindow() {
   // linki (pobieranie czcionek, GitHub) – w zwykłej przeglądarce
   w.webContents.setWindowOpenHandler(({ url }) => { if (/^https?:/.test(url)) shell.openExternal(url); return { action: 'deny' }; });
   w.webContents.on('will-navigate', (e, url) => { if (!url.startsWith('app://')) { e.preventDefault(); shell.openExternal(url); } });
-  // niezapisane zmiany przy zamykaniu
+  // niezapisane zmiany przy zamykaniu: Zapisz / Nie zapisuj / Anuluj
+  w.on('close', async e => {
+    if (w.forceClose) return;
+    e.preventDefault();
+    if (w.asking) return;
+    let st = { dirty: false, name: '' };
+    try { st = await w.webContents.executeJavaScript('({ dirty: !!(typeof isDirty === "function" && isDirty()), name: typeof S !== "undefined" ? S.name : "" })'); } catch (err) {}
+    if (st.dirty) {
+      w.asking = true; w.show(); w.focus();
+      const r = await dialog.showMessageBox(w, { type: 'warning', buttons: ['Zapisz', 'Nie zapisuj', 'Anuluj'], defaultId: 0, cancelId: 2, noLink: true,
+        title: 'Edytor PDF', message: 'Zapisać zmiany w pliku „' + (st.name || 'dokument') + '”?', detail: 'Jeśli nie zapiszesz, wprowadzone zmiany zostaną utracone.' });
+      w.asking = false;
+      if (r.response === 2) { quitting = false; return; }
+      if (r.response === 0) {
+        let ok = false;
+        try { ok = await w.webContents.executeJavaScript('exportPdf().then(() => !isDirty())'); } catch (err) {}
+        if (!ok) { quitting = false; return; } // anulowano zapis albo błąd – okno zostaje
+      }
+    }
+    w.forceClose = true; w.destroy();
+    if (quitting) setImmediate(() => app.quit());
+  });
   w.webContents.on('will-prevent-unload', e => {
     const c = dialog.showMessageBoxSync(w, { type: 'question', buttons: ['Zamknij bez zapisywania', 'Anuluj'], defaultId: 1, cancelId: 1,
       title: 'Edytor PDF', message: 'Masz niezapisane zmiany.', detail: 'Zamknąć dokument bez zapisywania?' });
@@ -211,6 +248,12 @@ function buildMenu() {
     { label: 'Plik', submenu: [
       { label: 'Nowe okno', accelerator: 'CmdOrCtrl+N', click: () => createWindow() },
       { label: 'Otwórz…', accelerator: 'CmdOrCtrl+O', click: send('open') },
+      { label: 'Otwórz ostatnie', submenu: (() => {
+        const L = recentList();
+        if (!L.length) return [{ label: 'Brak ostatnio otwieranych plików', enabled: false }];
+        return [...L.slice(0, 12).map(r => ({ label: r.name, sublabel: r.path, click: () => openPaths([r.path]) })), { type: 'separator' },
+          { label: 'Wyczyść listę', click: () => { try { fs.writeFileSync(RECENT(), '[]'); } catch (e) {} try { app.clearRecentDocuments(); } catch (e) {} buildMenu(); for (const w of BrowserWindow.getAllWindows()) w.webContents.send('recent-changed'); } }];
+      })() },
       { type: 'separator' },
       { label: 'Zapisz', accelerator: 'CmdOrCtrl+S', click: send('save') },
       { label: 'Zapisz jako…', accelerator: 'CmdOrCtrl+Shift+S', click: send('saveas') },

@@ -12,8 +12,11 @@ contextBridge.exposeInMainWorld('native', {
   fontStatus: () => ipcRenderer.invoke('font-status'),
   setDoc: name => ipcRenderer.send('set-doc', name),
   relaunch: () => ipcRenderer.send('relaunch'),
+  recent: () => ipcRenderer.invoke('recent'),
+  clearRecent: () => ipcRenderer.invoke('recent-clear'),
+  addRecent: p => ipcRenderer.send('recent-add', p),
   on: (ch, cb) => {
-    if (!['open-path', 'menu', 'editor-updated', 'app-updated', 'app-available'].includes(ch)) return;
+    if (!['open-path', 'menu', 'editor-updated', 'app-updated', 'app-available', 'recent-changed'].includes(ch)) return;
     ipcRenderer.on(ch, (e, ...a) => cb(...a));
   }
 });
