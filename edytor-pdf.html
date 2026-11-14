@@ -149,8 +149,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
     <option value="notosans">Noto Sans</option><option value="notoserif">Noto Serif</option>
     <option value="dejavusans">DejaVu Sans</option><option value="dejavuserif">DejaVu Serif</option>
     <option value="symbol">Symbol (α β ∑)</option><option value="dingbats">ZapfDingbats (✓ ✗ ☐)</option>
-    <option value="orig">Oryginalna (z PDF)</option><option value="local">Ta sama z komputera</option>
-    <option value="__fonts">📁 Moje czcionki (Word, Acrobat)…</option></select></label>
+    <option value="orig">Oryginalna (z PDF)</option><option value="local">Ta sama z komputera</option></select></label>
   <button id="bBold" class="tbtn" title="Pogrubienie (Ctrl+B)"><b>B</b></button><button id="bItal" class="tbtn" title="Kursywa (Ctrl+I)"><i style="font-family:Georgia,serif">I</i></button>
   <label class="ctl" title="Podkreśla błędy w pisanym tekście (słownik polski, działa w tle)"><input type="checkbox" id="cSpell" checked> Pisownia</label>
   <label class="ctl" title="Gdy edytowany akapit urośnie lub się skróci, treść pod nim przesunie się w dół lub w górę"><input type="checkbox" id="cReflow" checked> Przesuwaj treść</label>
@@ -2370,7 +2369,6 @@ function applyFontKey(a, key) {
 }
 $('#cFam').addEventListener('change', async e => {
   const val = e.target.value, a = selA(), t = a && a.type === 'text' ? a : null;
-  if (val === '__fonts') { updFontUI(); openFontsModal(); return; }
   if (FAMS[val]) {
     const p = keyParts(curKeyOf(t)), key = makeKey(val, p.bold, p.italic);
     if (t) applyFontKey(t, key); else S.font = key;
@@ -2381,7 +2379,7 @@ $('#cFam').addEventListener('change', async e => {
   const k = val === 'orig' ? t.ofont : t.lfont;
   if (!k || !OF[k] || !ofCan(OF[k], t.text)) {
     alert(val === 'orig' ? 'Oryginalnej czcionki z PDF nie da się użyć dla tego tekstu (brak czcionki lub niektórych znaków).'
-      : 'Nie znaleziono tej czcionki – ani w systemie, ani w folderach z „Moje czcionki”. Dodaj folder Worda lub Acrobata w „📁 Moje czcionki”.');
+      : 'Nie znaleziono tej czcionki – ani w systemie, ani w folderach z „Moje czcionki”. Dodaj folder Worda lub Acrobata przyciskiem „🔤 Czcionki”.');
     updFontUI(); return;
   }
   snap(); t.font = val; t.hs = 1; delete t.st; delete t.ws;
