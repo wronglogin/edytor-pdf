@@ -33,6 +33,8 @@ button:disabled{opacity:.35;cursor:default}
 .ctl{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);padding:0 6px}
 .ctl input[type=color]{width:30px;height:26px;border:1px solid var(--line);border-radius:6px;padding:1px;background:#fff}
 .ctl input[type=range]{width:80px}
+.tbtn{min-width:30px;justify-content:center;padding:4px 8px;border:1px solid var(--line);background:#fff}
+.tbtn.on{background:#fde8e9;color:var(--acc);border-color:#f5c2c5}
 .ctl select{padding:4px;border:1px solid var(--line);border-radius:6px;font:inherit;background:#fff}
 .ctl input[type=number]{width:52px;padding:4px;border:1px solid var(--line);border-radius:6px;font:inherit}
 #zoomTxt,#pageInfo{min-width:48px;text-align:center;font-size:12px;color:var(--muted)}
@@ -52,6 +54,14 @@ main{flex:1;display:flex;min-height:0;position:relative}
 body.drawing .overlay{touch-action:none;cursor:crosshair}
 body.t-text .overlay{cursor:text}
 body.t-place .overlay{cursor:copy}
+.spellmirror{position:absolute;z-index:6;pointer-events:none;color:transparent;overflow:hidden;margin:0;border:0;box-sizing:border-box}
+.sp-bad{text-decoration:underline wavy #dc2626;text-decoration-skip-ink:none;text-underline-offset:2px}
+.spellmenu{position:fixed;z-index:90;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 28px rgba(0,0,0,.18);padding:4px;min-width:190px;font-size:13px}
+.smi{padding:6px 10px;border-radius:5px;cursor:pointer}
+.smi:hover{background:#f0f1f4}
+.smi.sug{font-weight:600}
+.smi.muted{color:var(--muted);cursor:default}
+.smsep{height:1px;background:var(--line);margin:4px 2px}
 .editor{position:absolute;border:none;outline:1.5px dashed #2563eb;background:rgba(255,255,255,.7);padding:0;margin:0;resize:none;overflow:hidden;white-space:pre;line-height:1.25;z-index:5;min-width:60px}
 #empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:20px}
 .drop{border:2px dashed #b8bcc6;border-radius:16px;padding:40px 32px;text-align:center;background:#fff;max-width:460px}
@@ -113,12 +123,12 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
   <label class="ctl" title="Grubość linii">Grubość <input type="range" id="cWidth" min="1" max="20" value="3"></label>
   <label class="ctl" title="Rozmiar tekstu">Tekst <input type="number" id="cFont" min="6" max="96" value="14"></label>
   <label class="ctl" title="Czcionka">Czcionka <select id="cFam">
-    <option value="sans">Bezszeryfowa</option><option value="sans-bold">Bezszeryfowa pogrub.</option>
-    <option value="serif">Szeryfowa</option><option value="serif-bold">Szeryfowa pogrub.</option>
-    <option value="sans-italic">Bezszeryfowa kursywa</option><option value="sans-bolditalic">Bezszeryfowa pogr. kursywa</option>
-    <option value="serif-italic">Szeryfowa kursywa</option><option value="serif-bolditalic">Szeryfowa pogr. kursywa</option>
-    <option value="mono">Maszynowa</option><option value="mono-bold">Maszynowa pogrub.</option>
+    <option value="sans">Arial / Helvetica</option><option value="serif">Times New Roman</option><option value="mono">Courier New</option>
+    <option value="calibri">Calibri</option><option value="cambria">Cambria</option>
+    <option value="srcsans">Source Sans (Myriad)</option><option value="srcserif">Source Serif (Minion)</option>
     <option value="orig">Oryginalna (z PDF)</option><option value="local">Ta sama z komputera</option></select></label>
+  <button id="bBold" class="tbtn" title="Pogrubienie (Ctrl+B)"><b>B</b></button><button id="bItal" class="tbtn" title="Kursywa (Ctrl+I)"><i style="font-family:Georgia,serif">I</i></button>
+  <label class="ctl" title="Podkreśla błędy w pisanym tekście (słownik polski, działa w tle)"><input type="checkbox" id="cSpell" checked> Pisownia</label>
   <label class="ctl" title="Gdy edytowany akapit urośnie lub się skróci, treść pod nim przesunie się w dół lub w górę"><input type="checkbox" id="cReflow" checked> Przesuwaj treść</label>
   <label class="ctl" title="Tekst w ramce: gdy się nie mieści, czcionka zmniejsza się automatycznie. Wyłączone – powiększasz ramkę ręcznie, ciągnąc za róg."><input type="checkbox" id="cFit" checked> Dopasuj do ramki</label>
   <label class="ctl" title="Nowy tekst dostaje czcionkę, wielkość i kolor najbliższego tekstu w dokumencie. Wyłączone – używane są ustawienia z paska."><input type="checkbox" id="cMatch" checked> Styl z PDF</label>
@@ -172,19 +182,25 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 <script>
 'use strict';
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-const FONT_BASE = 'https://cdn.jsdelivr.net/npm/dejavu-fonts-ttf@2.37.3/ttf/';
-const FONTS = {
-  'sans':            { file: 'DejaVuSans.ttf',             fb: 'Arial, Helvetica, sans-serif',   std: 'Helvetica' },
-  'sans-bold':       { file: 'DejaVuSans-Bold.ttf',        fb: 'Arial, Helvetica, sans-serif',   std: 'HelveticaBold', bold: true },
-  'sans-italic':     { file: 'DejaVuSans-Oblique.ttf',     fb: 'Arial, Helvetica, sans-serif',   std: 'HelveticaOblique', italic: true },
-  'sans-bolditalic': { file: 'DejaVuSans-BoldOblique.ttf', fb: 'Arial, Helvetica, sans-serif',   std: 'HelveticaBoldOblique', bold: true, italic: true },
-  'serif':           { file: 'DejaVuSerif.ttf',            fb: '"Times New Roman", Times, serif', std: 'TimesRoman' },
-  'serif-bold':      { file: 'DejaVuSerif-Bold.ttf',       fb: '"Times New Roman", Times, serif', std: 'TimesRomanBold', bold: true },
-  'serif-italic':    { file: 'DejaVuSerif-Italic.ttf',     fb: '"Times New Roman", Times, serif', std: 'TimesRomanItalic', italic: true },
-  'serif-bolditalic':{ file: 'DejaVuSerif-BoldItalic.ttf', fb: '"Times New Roman", Times, serif', std: 'TimesRomanBoldItalic', bold: true, italic: true },
-  'mono':            { file: 'DejaVuSansMono.ttf',         fb: '"Courier New", monospace',      std: 'Courier' },
-  'mono-bold':       { file: 'DejaVuSansMono-Bold.ttf',    fb: '"Courier New", monospace',      std: 'CourierBold', bold: true }
+const FONT_BASE = 'fonts/';
+// Rodziny zamienników: każda w 4 wersjach (zwykła, pogrubiona, kursywa, pogrubiona kursywa).
+// Arimo/Tinos/Cousine/Carlito/Caladea mają TE SAME wymiary znaków co Arial/Helvetica, Times, Courier, Calibri i Cambria.
+const FAMS = {
+  sans:     { label: 'Arial / Helvetica', files: ['Arimo-Regular', 'Arimo-Bold', 'Arimo-Italic', 'Arimo-BoldItalic'], fb: 'Arial, Helvetica, sans-serif', std: ['Helvetica', 'HelveticaBold', 'HelveticaOblique', 'HelveticaBoldOblique'] },
+  serif:    { label: 'Times New Roman', files: ['Tinos-Regular', 'Tinos-Bold', 'Tinos-Italic', 'Tinos-BoldItalic'], fb: '"Times New Roman", Times, serif', std: ['TimesRoman', 'TimesRomanBold', 'TimesRomanItalic', 'TimesRomanBoldItalic'] },
+  mono:     { label: 'Courier New', files: ['Cousine-Regular', 'Cousine-Bold', 'Cousine-Italic', 'Cousine-BoldItalic'], fb: '"Courier New", Courier, monospace', std: ['Courier', 'CourierBold', 'CourierOblique', 'CourierBoldOblique'] },
+  calibri:  { label: 'Calibri', files: ['Carlito-Regular', 'Carlito-Bold', 'Carlito-Italic', 'Carlito-BoldItalic'], fb: 'Calibri, Arial, sans-serif', std: ['Helvetica', 'HelveticaBold', 'HelveticaOblique', 'HelveticaBoldOblique'] },
+  cambria:  { label: 'Cambria', files: ['Caladea-Regular', 'Caladea-Bold', 'Caladea-Italic', 'Caladea-BoldItalic'], fb: 'Cambria, Georgia, serif', std: ['TimesRoman', 'TimesRomanBold', 'TimesRomanItalic', 'TimesRomanBoldItalic'] },
+  srcsans:  { label: 'Source Sans (Myriad)', files: ['SourceSans3-Regular', 'SourceSans3-Bold', 'SourceSans3-It', 'SourceSans3-BoldIt'], fb: 'Arial, sans-serif', std: ['Helvetica', 'HelveticaBold', 'HelveticaOblique', 'HelveticaBoldOblique'] },
+  srcserif: { label: 'Source Serif (Minion)', files: ['SourceSerif4-Regular', 'SourceSerif4-Bold', 'SourceSerif4-It', 'SourceSerif4-BoldIt'], fb: 'Georgia, serif', std: ['TimesRoman', 'TimesRomanBold', 'TimesRomanItalic', 'TimesRomanBoldItalic'] }
 };
+const VARS = ['', '-bold', '-italic', '-bolditalic'];
+const FONTS = {};
+for (const [fam, d] of Object.entries(FAMS)) VARS.forEach((v, k) => {
+  FONTS[fam + v] = { file: d.files[k] + '.ttf', fb: d.fb, std: d.std[k], bold: k === 1 || k === 3, italic: k >= 2, fam };
+});
+const keyParts = k => { const F = FONTS[k] || FONTS.sans; return { fam: F.fam, bold: !!F.bold, italic: !!F.italic }; };
+const makeKey = (fam, bold, italic) => fam + (bold && italic ? '-bolditalic' : bold ? '-bold' : italic ? '-italic' : '');
 const dpr = Math.min(window.devicePixelRatio || 1, 2);
 const $ = s => document.querySelector(s);
 const viewer = $('#viewer'), thumbsEl = $('#thumbs');
@@ -782,9 +798,17 @@ const pkey = p => p.src + ':' + p.idx;
 function guessFont(fam, name) {
   const bold = /bold|black|heavy|semibold|demi|,bd|-bd\b/i.test(name);
   const italic = /italic|oblique|,it\b|-it\b|kursywa/i.test(name);
-  if (fam === 'monospace' || /courier|mono|consol/i.test(name)) return bold ? 'mono-bold' : 'mono';
-  const serif = fam === 'serif' || (/times|serif|georgia|garamond|cambria|book|minion|palatino/i.test(name) && !/sans/i.test(name));
-  return (serif ? 'serif' : 'sans') + (bold && italic ? '-bolditalic' : bold ? '-bold' : italic ? '-italic' : '');
+  const n = (name || '').toLowerCase();
+  let f;
+  if (/calibri|carlito/.test(n)) f = 'calibri';
+  else if (/cambria|caladea/.test(n)) f = 'cambria';
+  else if (/myriad|sourcesans|source sans/.test(n)) f = 'srcsans';
+  else if (/minion|sourceserif|source serif/.test(n)) f = 'srcserif';
+  else if (fam === 'monospace' || /courier|mono|consol|cousine/.test(n)) f = 'mono';
+  else if (/arial|helvetica|arimo|liberationsans/.test(n)) f = 'sans';
+  else if (/times|tinos|liberationserif/.test(n)) f = 'serif';
+  else f = fam === 'serif' || (/serif|georgia|garamond|book|palatino|roman/.test(n) && !/sans/.test(n)) ? 'serif' : 'sans';
+  return makeKey(f, bold, italic);
 }
 const baseName = n => (n || '').replace(/^[A-Z]{6}\+/, '');
 function glyphsToRaw(Tl, pp, p) {
@@ -1648,6 +1672,126 @@ function onDbl(e, i) {
   if (hit >= 0 && S.pages[i].annots[hit].type === 'text') openEditor(i, hit);
 }
 
+/* ---------- sprawdzanie pisowni ---------- */
+let spellW = null, spellSeq = 0;
+const spellCb = new Map(), spellOk = new Map(), spellIgnore = new Set();
+try { S.spell = localStorage.getItem('pdfed-spell') !== '0'; } catch (e) { S.spell = true; }
+const loadPersonal = () => { try { return JSON.parse(localStorage.getItem('pdfed-dict') || '[]'); } catch (e) { return []; } };
+function spellCall(msg) {
+  if (S.spellBroken) return Promise.resolve({ error: true });
+  if (!spellW) {
+    try {
+      spellW = new Worker('spell-worker.js');
+      spellW.onmessage = e => { const cb = spellCb.get(e.data.id); if (cb) { spellCb.delete(e.data.id); cb(e.data); } if (e.data.error) S.spellBroken = true; };
+      spellW.onerror = () => { S.spellBroken = true; spellCb.forEach(cb => cb({ error: true })); spellCb.clear(); };
+      const pl = loadPersonal();
+      if (pl.length) spellCall({ type: 'personal', list: pl });
+    } catch (e) { S.spellBroken = true; return Promise.resolve({ error: true }); }
+  }
+  return new Promise(res => { const id = ++spellSeq; spellCb.set(id, res); spellW.postMessage({ ...msg, id }); });
+}
+const WORD_RE = /[\p{L}][\p{L}'’\-]*/gu;
+const checkable = w => w.length > 1 && !(w === w.toUpperCase() && w.length <= 6) && !/^\p{Lu}{2,}/u.test(w);
+function attachSpell(ta) {
+  ta.lang = 'pl';
+  if (!S.spell || S.spellBroken) { ta.spellcheck = true; return; }
+  ta.spellcheck = false;
+  const mir = el('div', 'spellmirror');
+  ta.parentNode.appendChild(mir);
+  const esc = t => t.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const syncStyle = () => {
+    const cs = getComputedStyle(ta);
+    for (const p of ['font', 'lineHeight', 'letterSpacing', 'width', 'height', 'whiteSpace', 'overflowWrap', 'wordBreak', 'transform', 'transformOrigin', 'left', 'top', 'padding', 'textIndent', 'tabSize'])
+      mir.style[p] = cs[p];
+  };
+  const render = () => {
+    syncStyle();
+    let h = '', last = 0;
+    for (const m of ta.value.matchAll(WORD_RE)) {
+      const w = m[0].replace(/[-'’]+$/, '');
+      if (spellOk.get(w) === false && !spellIgnore.has(w)) { h += esc(ta.value.slice(last, m.index)) + '<span class="sp-bad">' + esc(w) + '</span>'; last = m.index + w.length; }
+    }
+    mir.innerHTML = h + esc(ta.value.slice(last)) + '​';
+  };
+  let tmr = 0;
+  const check = () => {
+    clearTimeout(tmr);
+    tmr = setTimeout(async () => {
+      const todo = [...new Set([...ta.value.matchAll(WORD_RE)].map(m => m[0].replace(/[-'’]+$/, '')).filter(w => checkable(w) && !spellOk.has(w)))];
+      if (todo.length) {
+        const r = await spellCall({ type: 'check', words: todo });
+        if (r.error) { ta.spellcheck = true; mir.remove(); return; }
+        const bad = new Set(r.bad);
+        todo.forEach(w => spellOk.set(w, !bad.has(w)));
+      }
+      if (mir.isConnected) render();
+    }, 300);
+  };
+  ta.addEventListener('input', () => { render(); check(); });
+  new ResizeObserver(render).observe(ta);
+  // prawy klik na podkreślonym słowie: podpowiedzi
+  ta.addEventListener('contextmenu', ev => {
+    const pos = ta.selectionStart, v = ta.value;
+    let a = pos, b = ta.selectionEnd;
+    if (a === b) { while (a > 0 && /[\p{L}'’\-]/u.test(v[a - 1])) a--; while (b < v.length && /[\p{L}'’\-]/u.test(v[b])) b++; }
+    const w = v.slice(a, b).replace(/[-'’]+$/, '');
+    if (!w || spellOk.get(w) !== false || spellIgnore.has(w)) return;
+    ev.preventDefault();
+    showSpellMenu(ev.clientX, ev.clientY, ta, a, a + w.length, w, render);
+  });
+  ta._spellMirror = mir;
+  render(); check();
+}
+function detachSpell(ta) { if (ta._spellMirror) ta._spellMirror.remove(); closeSpellMenu(); }
+let spellMenu = null;
+function closeSpellMenu() { if (spellMenu) { spellMenu.remove(); spellMenu = null; } }
+function showSpellMenu(x, y, ta, a, b, w, rerender) {
+  closeSpellMenu();
+  const m = el('div', 'spellmenu');
+  m.style.left = Math.min(x, innerWidth - 220) + 'px'; m.style.top = Math.min(y, innerHeight - 260) + 'px';
+  const item = (label, fn, cls) => {
+    const d = el('div', 'smi' + (cls ? ' ' + cls : '')); d.textContent = label;
+    d.addEventListener('mousedown', ev => { ev.preventDefault(); fn(); closeSpellMenu(); });
+    m.appendChild(d); return d;
+  };
+  const wait = item('Szukam podpowiedzi…', () => {}, 'muted');
+  spellCall({ type: 'suggest', word: w }).then(r => {
+    if (!spellMenu) return;
+    wait.remove();
+    const sug = (r && r.sug) || [];
+    const first = m.firstChild;
+    if (!sug.length) m.insertBefore(Object.assign(el('div', 'smi muted'), { textContent: 'Brak podpowiedzi' }), first);
+    sug.forEach(sg => {
+      const d = el('div', 'smi sug'); d.textContent = sg;
+      d.addEventListener('mousedown', ev => {
+        ev.preventDefault();
+        ta.value = ta.value.slice(0, a) + sg + ta.value.slice(b);
+        ta.setSelectionRange(a + sg.length, a + sg.length);
+        ta.dispatchEvent(new Event('input'));
+        closeSpellMenu();
+      });
+      m.insertBefore(d, first);
+    });
+  });
+  m.appendChild(el('div', 'smsep'));
+  item('Dodaj „' + w + '” do słownika', () => {
+    const pl = loadPersonal(); if (!pl.includes(w)) pl.push(w);
+    try { localStorage.setItem('pdfed-dict', JSON.stringify(pl)); } catch (e) {}
+    spellCall({ type: 'personal', list: [w] }); spellOk.set(w, true); rerender();
+  });
+  item('Ignoruj', () => { spellIgnore.add(w); rerender(); });
+  document.body.appendChild(m);
+  spellMenu = m;
+}
+document.addEventListener('mousedown', e => { if (spellMenu && !spellMenu.contains(e.target)) closeSpellMenu(); }, true);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSpellMenu(); }, true);
+$('#cSpell').checked = S.spell;
+$('#cSpell').addEventListener('change', e => {
+  S.spell = e.target.checked;
+  try { localStorage.setItem('pdfed-spell', S.spell ? '1' : '0'); } catch (err) {}
+  hint(S.spell ? 'Sprawdzanie pisowni włączone (od następnej edycji tekstu)' : 'Sprawdzanie pisowni wyłączone'); setTimeout(() => hint(''), 2500);
+});
+
 /* ---------- edytor tekstu ---------- */
 function openBoxEditor(i, ai, x, y, spec, style) {
   const v = views[i], s = v.scale;
@@ -1678,6 +1822,7 @@ function openBoxEditor(i, ai, x, y, spec, style) {
   ta.addEventListener('blur', () => setTimeout(() => { if (editor && editor.ta === ta) commitEditor(); }, 0));
   v.box.appendChild(ta);
   fit();
+  attachSpell(ta);
   editor = { kind: 'box', ta, i, ai, x, y, spec, size, color, font, fitOn, style: st0 };
   if (a) { a._hidden = true; drawOverlay(i); }
   setTimeout(() => ta.focus(), 0);
@@ -1688,7 +1833,7 @@ function commitBox() {
   const { ta, i, ai, x, y, spec, size, color, font, fitOn, style } = editor;
   editor = null;
   const txt = ta.value.replace(/\s+$/, '');
-  ta.remove(); hint('');
+  detachSpell(ta); ta.remove(); hint('');
   const page = S.pages[i], v = views[i];
   if (!page || !v) return;
   if (ai >= 0) {
@@ -1741,6 +1886,7 @@ function openEditor(i, ai, x, y, preset, style) {
   ta.addEventListener('blur', () => setTimeout(() => { if (editor && editor.ta === ta) commitEditor(); }, 0));
   v.box.appendChild(ta);
   fit();
+  attachSpell(ta);
   editor = { ta, i, ai, x, y, size, color, preset, style: st0 };
   if (a) a._hidden = true;
   if (preset) temp = { pi: i, a: { type: 'text', text: '', pts: preset.pts, size, rot: preset.rot, cover: preset.cover, coverColor: preset.coverColor, patch: preset.patch, _hidden: true } };
@@ -1755,7 +1901,7 @@ function commitEditor() {
   editor = null;
   if (preset) temp = null;
   const txt = ta.value.replace(/\s+$/, '');
-  ta.remove(); hint('');
+  detachSpell(ta); ta.remove(); hint('');
   const page = S.pages[i], v = views[i];
   if (!page || !v) return;
   if (ai >= 0) {
@@ -1817,12 +1963,21 @@ function setSel(s) {
   if (s) drawOverlay(s.pi);
   updSelUI();
 }
+function curKeyOf(a) { if (!a) return S.font; if (FONTS[a.font]) return a.font; return FONTS[a.sub] ? a.sub : 'sans'; }
+function updFontUI() {
+  const a = selA(), t = a && a.type === 'text' ? a : null;
+  const p = keyParts(curKeyOf(t));
+  $('#cFam').value = t && (t.font === 'orig' || t.font === 'local') ? t.font : p.fam;
+  $('#bBold').classList.toggle('on', p.bold && !(t && (t.font === 'orig' || t.font === 'local') && !t.st && false));
+  $('#bItal').classList.toggle('on', p.italic);
+}
 function updSelUI() {
   const a = selA();
+  updFontUI();
   $('#bDel').disabled = !a;
   if (a) {
     if (a.color) $('#cColor').value = a.color;
-    if (a.type === 'text') { $('#cFont').value = a.size; $('#cFam').value = a.font || 'sans'; if (a.cover) $('#cReflow').checked = !!a.reflow; if (a.box) $('#cFit').checked = !!a.fit; }
+    if (a.type === 'text') { $('#cFont').value = a.size; if (a.cover) $('#cReflow').checked = !!a.reflow; if (a.box) $('#cFit').checked = !!a.fit; }
     if (a.width) $('#cWidth').value = a.width;
   }
 }
@@ -1883,27 +2038,40 @@ $('#cReflow').addEventListener('change', e => {
   const a = selA();
   if (a && a.type === 'text' && a.cover) { snap(); a.reflow = S.reflow; afterChange(S.sel.pi); }
 });
+function applyFontKey(a, key) {
+  snap();
+  if (a.font === 'orig' || a.font === 'local') a.hs = a.hsSub || 1;
+  a.font = key; delete a.st; delete a.ws;
+  hint('Czcionka: ' + fontLabel(a)); setTimeout(() => hint(''), 2500);
+  afterChange(S.sel.pi); updFontUI();
+}
 $('#cFam').addEventListener('change', async e => {
-  const val = e.target.value, a = selA();
-  if (FONTS[val]) S.font = val;
-  if (!a || a.type !== 'text') return;
-  if (val === 'orig' || val === 'local') {
-    if (val === 'local' && !a.lfont && a.fname) { try { a.lfont = await localFont(a.fname) || undefined; } catch (err) {} }
-    const k = val === 'orig' ? a.ofont : a.lfont;
-    if (!k || !OF[k] || !ofCan(OF[k], a.text)) {
-      alert(val === 'orig' ? 'Oryginalnej czcionki z PDF nie da się użyć dla tego tekstu (brak czcionki lub niektórych znaków).'
-        : 'Nie znaleziono tej czcionki na komputerze (albo przeglądarka nie pozwala jej odczytać – działa w Chrome i Edge na komputerze).');
-      updSelUI(); return;
-    }
-    snap(); a.font = val; a.hs = 1; delete a.st; delete a.ws;
-  } else {
-    snap();
-    if (a.font === 'orig' || a.font === 'local') a.hs = a.hsSub || 1;
-    a.font = val; delete a.st; delete a.ws;
+  const val = e.target.value, a = selA(), t = a && a.type === 'text' ? a : null;
+  if (FAMS[val]) {
+    const p = keyParts(curKeyOf(t)), key = makeKey(val, p.bold, p.italic);
+    if (t) applyFontKey(t, key); else S.font = key;
+    return;
   }
-  hint('Czcionka: ' + fontLabel(a)); setTimeout(() => hint(''), 3000);
+  if (!t) { updFontUI(); return; }
+  if (val === 'local' && !t.lfont && t.fname) { try { t.lfont = await localFont(t.fname) || undefined; } catch (err) {} }
+  const k = val === 'orig' ? t.ofont : t.lfont;
+  if (!k || !OF[k] || !ofCan(OF[k], t.text)) {
+    alert(val === 'orig' ? 'Oryginalnej czcionki z PDF nie da się użyć dla tego tekstu (brak czcionki lub niektórych znaków).'
+      : 'Nie znaleziono tej czcionki na komputerze (albo przeglądarka nie pozwala jej odczytać – działa w Chrome i Edge na komputerze).');
+    updFontUI(); return;
+  }
+  snap(); t.font = val; t.hs = 1; delete t.st; delete t.ws;
+  hint('Czcionka: ' + fontLabel(t)); setTimeout(() => hint(''), 2500);
   afterChange(S.sel.pi);
 });
+function toggleStyle(which) {
+  const a = selA(), t = a && a.type === 'text' ? a : null;
+  const p = keyParts(curKeyOf(t));
+  const key = makeKey(p.fam, which === 'b' ? !p.bold : p.bold, which === 'i' ? !p.italic : p.italic);
+  if (t) applyFontKey(t, key); else { S.font = key; updFontUI(); }
+}
+$('#bBold').onclick = () => toggleStyle('b');
+$('#bItal').onclick = () => toggleStyle('i');
 
 /* ---------- obrazy i podpis ---------- */
 function startPlace(data, natW, natH, label, tool) {
@@ -2361,6 +2529,8 @@ document.addEventListener('keydown', e => {
   else if (mod && (k === 'y' || (k === 'z' && e.shiftKey))) { e.preventDefault(); redo(); }
   else if (mod && k === 's') { e.preventDefault(); exportPdf(e.shiftKey ? 'saveas' : undefined); }
   else if (mod && k === 'p') { e.preventDefault(); exportPdf('print'); }
+  else if (mod && k === 'b') { e.preventDefault(); toggleStyle('b'); }
+  else if (mod && k === 'i') { e.preventDefault(); toggleStyle('i'); }
   else if (mod && k === 'o') { e.preventDefault(); pickOpen(); }
   else if ((e.key === 'Delete' || e.key === 'Backspace') && S.sel) { e.preventDefault(); delSel(); }
   else if (e.key === 'Escape') { setTool('select'); setSel(null); }
