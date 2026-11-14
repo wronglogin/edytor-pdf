@@ -75,6 +75,11 @@ body.t-place .overlay{cursor:copy}
 .card{background:#fff;border-radius:12px;padding:18px;width:min(560px,100%);box-shadow:0 10px 40px rgba(0,0,0,.3)}
 .card h3{margin:0 0 4px}
 .muted{color:var(--muted);margin:0 0 12px;font-size:13px}
+.paths{display:grid;grid-template-columns:auto 1fr auto;gap:6px 8px;align-items:center;margin:4px 0 12px;font-size:12px}
+.paths .pt{color:var(--muted);white-space:nowrap}
+.paths code{background:#f3f4f6;border-radius:5px;padding:4px 6px;word-break:break-all;font-size:11px}
+.paths button{padding:3px 8px;font-size:12px;border:1px solid var(--line)}
+.fdir{display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin-bottom:6px;font-size:13px}
 .siglist{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
 .sigitem{position:relative;border:1px solid var(--line);border-radius:8px;padding:6px 10px;cursor:pointer;height:66px;display:flex;align-items:center;background:repeating-conic-gradient(#f1f2f4 0 25%,#fff 0 50%) 0 0/12px 12px}
 .sigitem:hover{border-color:var(--acc);box-shadow:0 0 0 2px #fde8e9}
@@ -129,7 +134,8 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
     <option value="narrow">Arial Narrow</option><option value="georgia">Georgia</option><option value="palatino">Palatino / Book Antiqua</option>
     <option value="school">Century Schoolbook</option><option value="bookman">Bookman</option>
     <option value="symbol">Symbol (α β ∑)</option><option value="dingbats">ZapfDingbats (✓ ✗ ☐)</option>
-    <option value="orig">Oryginalna (z PDF)</option><option value="local">Ta sama z komputera</option></select></label>
+    <option value="orig">Oryginalna (z PDF)</option><option value="local">Ta sama z komputera</option>
+    <option value="__fonts">📁 Moje czcionki (Word, Acrobat)…</option></select></label>
   <button id="bBold" class="tbtn" title="Pogrubienie (Ctrl+B)"><b>B</b></button><button id="bItal" class="tbtn" title="Kursywa (Ctrl+I)"><i style="font-family:Georgia,serif">I</i></button>
   <label class="ctl" title="Podkreśla błędy w pisanym tekście (słownik polski, działa w tle)"><input type="checkbox" id="cSpell" checked> Pisownia</label>
   <label class="ctl" title="Gdy edytowany akapit urośnie lub się skróci, treść pod nim przesunie się w dół lub w górę"><input type="checkbox" id="cReflow" checked> Przesuwaj treść</label>
@@ -157,6 +163,26 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 <input type="file" id="fOpen" accept="application/pdf,.pdf" hidden>
 <input type="file" id="fMerge" accept="application/pdf,.pdf" multiple hidden>
 <input type="file" id="fImg" accept="image/*" hidden>
+<input type="file" id="fFontDir" webkitdirectory multiple hidden>
+<div class="modal" id="fontsModal">
+  <div class="card">
+    <h3>Moje czcionki</h3>
+    <p class="muted">Przeglądarka nie może sama przeszukać dysku, więc wskaż raz foldery z czcionkami Worda i Acrobata. Edytor je zapamięta i będzie z nich automatycznie brał brakujące czcionki przy każdej edycji. Czcionki nie są nigdzie wysyłane.</p>
+    <div class="paths">
+      <div class="pt">macOS – Word</div><code>/Applications/Microsoft Word.app/Contents/Resources/DFonts</code><button class="copyPath" data-path="/Applications/Microsoft Word.app/Contents/Resources/DFonts">Kopiuj</button>
+      <div class="pt">macOS – Acrobat</div><code>/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font</code><button class="copyPath" data-path="/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font">Kopiuj</button>
+      <div class="pt">Windows – Acrobat</div><code>C:\Program Files\Adobe\Acrobat DC\Resource\Font</code><button class="copyPath" data-path="C:\Program Files\Adobe\Acrobat DC\Resource\Font">Kopiuj</button>
+    </div>
+    <p class="muted">Na Macu: kliknij „Dodaj folder”, naciśnij <b>Cmd+Shift+G</b>, wklej skopiowaną ścieżkę i zatwierdź. Na Windowsie czcionki Office są już w systemie – tu wystarczy folder Acrobata (jeśli przeglądarka go nie otworzy, skopiuj go np. do Dokumentów i wskaż kopię).</p>
+    <div id="fontDirList"></div>
+    <div class="row" style="margin-top:12px">
+      <button class="primary" id="fmAdd">📁 Dodaj folder…</button>
+      <button id="fmRescan">↻ Odśwież</button>
+      <span class="grow"></span>
+      <button id="fmClose">Zamknij</button>
+    </div>
+  </div>
+</div>
 
 <div id="hint"></div>
 <div id="busy">Przetwarzanie…</div>
@@ -284,26 +310,196 @@ const normFont = n => baseName(n).toLowerCase().replace(/[\s_\-,]/g, '').replace
 const FONT_ALIAS = { helvetica: 'arial', helveticabold: 'arialbold', helveticaoblique: 'arialitalic', helveticaboldoblique: 'arialbolditalic',
   timesroman: 'timesnewroman', timesbold: 'timesnewromanbold', timesitalic: 'timesnewromanitalic', timesbolditalic: 'timesnewromanbolditalic',
   courier: 'couriernew', courierbold: 'couriernewbold', courieroblique: 'couriernewitalic', courierboldoblique: 'couriernewbolditalic' };
+const wantNames = fname => { const w = normFont(fname); return new Set([w, w.replace(/ps(?=bold|italic|$)/, ''), w.replace(/(regular|roman)$/, ''), FONT_ALIAS[w] || w]); };
 async function localFont(fname) {
-  if (!fname || localDenied || !('queryLocalFonts' in window)) return null;
+  if (!fname) return null;
   const key = 'L:' + fname;
   if (key in OF) return OF[key] ? key : null;
-  try { if (!localList) localList = await window.queryLocalFonts(); }
-  catch (e) { localDenied = true; return null; }
   OF[key] = null;
-  const w = normFont(fname), want = new Set([w, w.replace(/ps(?=bold|italic|$)/, ''), w.replace(/(regular|roman)$/, ''), FONT_ALIAS[w] || w]);
-  const fd = localList.find(f => want.has(normFont(f.postscriptName))) || localList.find(f => want.has(normFont(f.fullName)));
-  if (!fd) return null;
+  const want = wantNames(fname);
+  let data = null, label = '';
+  // 1) czcionki z folderów Worda / Acrobata (albo innych) wskazanych w „Moje czcionki”
   try {
-    const data = new Uint8Array(await (await fd.blob()).arrayBuffer());
-    const fk = fontkit.create(data);
-    if (fk.fonts) return null; // kolekcja .ttc – nie da się jej osadzić w PDF
-    const family = 'PL-' + fd.postscriptName.replace(/[^\w-]/g, '');
+    const idx = await userFontIndex();
+    const e = idx.find(f => want.has(normFont(f.ps))) || idx.find(f => want.has(normFont(f.full)));
+    if (e) { data = await loadUserFont(e); label = e.full; }
+  } catch (err) { console.warn('Moje czcionki:', err); }
+  // 2) czcionki zainstalowane w systemie (Chrome/Edge)
+  if (!data && !localDenied && 'queryLocalFonts' in window) {
+    try { if (!localList) localList = await window.queryLocalFonts(); } catch (e) { localDenied = true; }
+    const fd = localList && (localList.find(f => want.has(normFont(f.postscriptName))) || localList.find(f => want.has(normFont(f.fullName))));
+    if (fd) { try { data = new Uint8Array(await (await fd.blob()).arrayBuffer()); label = fd.fullName; } catch (e) {} }
+  }
+  if (!data) return null;
+  try {
+    let fk = fontkit.create(data);
+    if (fk.fonts) { // kolekcja .ttc – wyciągamy z niej właściwą czcionkę
+      const i = fk.fonts.findIndex(f => want.has(normFont(f.postscriptName)) || want.has(normFont(f.fullName)));
+      if (i < 0) return null;
+      data = extractTtc(data, i); fk = fontkit.create(data);
+    }
+    const family = 'PL-' + (fk.postscriptName || fname).replace(/[^\w-]/g, '');
     const ff = new FontFace(family, data); await ff.load(); document.fonts.add(ff);
-    OF[key] = { family, data, map: new Map(), inv: new Map(), fk, local: fd.fullName };
+    OF[key] = { family, data, map: new Map(), inv: new Map(), fk, local: label };
     return key;
   } catch (e) { return null; }
 }
+// jedna czcionka z kolekcji .ttc → samodzielny plik (pdf-lib nie osadza kolekcji)
+function extractTtc(buf, index) {
+  const dv = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
+  const o = dv.getUint32(12 + 4 * index), nt = dv.getUint16(o + 4), tables = [];
+  for (let t = 0; t < nt; t++) { const b = o + 12 + t * 16; tables.push({ tag: dv.getUint32(b), cs: dv.getUint32(b + 4), off: dv.getUint32(b + 8), len: dv.getUint32(b + 12) }); }
+  let size = 12 + 16 * nt; tables.forEach(t => { size += (t.len + 3) & ~3; });
+  const out = new Uint8Array(size), od = new DataView(out.buffer);
+  out.set(buf.subarray(o, o + 12), 0);
+  let pos = 12 + 16 * nt;
+  tables.forEach((t, k) => {
+    const b = 12 + k * 16;
+    od.setUint32(b, t.tag); od.setUint32(b + 4, t.cs); od.setUint32(b + 8, pos); od.setUint32(b + 12, t.len);
+    out.set(buf.subarray(t.off, t.off + t.len), pos); pos += (t.len + 3) & ~3;
+  });
+  return out;
+}
+
+/* ---------- „Moje czcionki”: foldery Worda/Acrobata zapamiętane w przeglądarce ---------- */
+function idb() {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open('pdfed', 1);
+    r.onupgradeneeded = () => { const d = r.result; if (!d.objectStoreNames.contains('kv')) d.createObjectStore('kv'); if (!d.objectStoreNames.contains('fonts')) d.createObjectStore('fonts'); };
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+  });
+}
+async function idbGet(st, k) { const d = await idb(); return new Promise((res, rej) => { const q = d.transaction(st).objectStore(st).get(k); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); }
+async function idbSet(st, k, v) { const d = await idb(); return new Promise((res, rej) => { const t = d.transaction(st, 'readwrite'); t.objectStore(st).put(v, k); t.oncomplete = () => res(); t.onerror = () => rej(t.error); }); }
+async function idbDel(st, k) { const d = await idb(); return new Promise((res, rej) => { const t = d.transaction(st, 'readwrite'); t.objectStore(st).delete(k); t.oncomplete = () => res(); t.onerror = () => rej(t.error); }); }
+let ufIndex = null;
+async function userFontIndex() { if (!ufIndex) { try { ufIndex = (await idbGet('kv', 'fontIndex')) || []; } catch (e) { ufIndex = []; } } return ufIndex; }
+async function saveFontIndex() { await idbSet('kv', 'fontIndex', ufIndex); for (const k in OF) if (k.startsWith('L:') && !OF[k]) delete OF[k]; }
+async function fontDirs() { try { return (await idbGet('kv', 'fontDirs')) || []; } catch (e) { return []; } }
+async function ensureRead(h) {
+  if (!h.queryPermission) return true;
+  if ((await h.queryPermission({ mode: 'read' })) === 'granted') return true;
+  return (await h.requestPermission({ mode: 'read' })) === 'granted';
+}
+async function loadUserFont(e) {
+  if (e.blob) { const b = await idbGet('fonts', e.blob); return b ? new Uint8Array(await b.arrayBuffer()) : null; }
+  const dirs = await fontDirs(), d = dirs.find(x => x.id === e.dir);
+  if (!d || !(await ensureRead(d.handle))) return null;
+  let h = d.handle;
+  for (const part of e.path.slice(0, -1)) h = await h.getDirectoryHandle(part);
+  const f = await (await h.getFileHandle(e.path[e.path.length - 1])).getFile();
+  let data = new Uint8Array(await f.arrayBuffer());
+  if (e.ttc != null) data = extractTtc(data, e.ttc);
+  return data;
+}
+// nazwy czcionki prosto z tabeli „name” – bez wczytywania całego pliku
+async function fontNamesOf(file) {
+  const rd = async (a, b) => new DataView(await file.slice(a, b).arrayBuffer());
+  const h = await rd(0, 12); let offs = [0];
+  if (h.getUint32(0) === 0x74746366) { const n = h.getUint32(8), d = await rd(12, 12 + 4 * n); offs = [...Array(n)].map((_, i) => d.getUint32(i * 4)); }
+  const out = [];
+  for (let fi = 0; fi < offs.length; fi++) {
+    const o = offs[fi], nt = (await rd(o, o + 12)).getUint16(4), dir = await rd(o + 12, o + 12 + 16 * nt);
+    let no = -1, nl = 0;
+    for (let t = 0; t < nt; t++) if (dir.getUint32(t * 16) === 0x6e616d65) { no = dir.getUint32(t * 16 + 8); nl = dir.getUint32(t * 16 + 12); }
+    if (no < 0) continue;
+    const nb = await rd(no, no + nl), cnt = nb.getUint16(2), so = nb.getUint16(4), names = {}, prio = {};
+    for (let r = 0; r < cnt; r++) {
+      const b = 6 + r * 12, pid = nb.getUint16(b), lid = nb.getUint16(b + 4), id = nb.getUint16(b + 6), len = nb.getUint16(b + 8), off = nb.getUint16(b + 10);
+      if (id !== 4 && id !== 6) continue;
+      let str = '', p;
+      if (pid === 3 || pid === 0) { for (let k = 0; k + 1 < len; k += 2) str += String.fromCharCode(nb.getUint16(so + off + k)); p = pid === 3 && lid === 0x409 ? 3 : 2; }
+      else if (pid === 1) { for (let k = 0; k < len; k++) str += String.fromCharCode(nb.getUint8(so + off + k)); p = 1; }
+      else continue;
+      if (!(prio[id] >= p)) { names[id] = str; prio[id] = p; }
+    }
+    if (names[6] || names[4]) out.push({ ps: names[6] || names[4], full: names[4] || names[6], ttc: offs.length > 1 ? fi : undefined });
+  }
+  return out;
+}
+const FONT_FILE = /\.(ttf|otf|ttc)$/i;
+async function scanDir(handle, dirId, path = [], depth = 0, acc = []) {
+  for await (const [name, h] of handle.entries()) {
+    if (h.kind === 'directory') { if (depth < 5) await scanDir(h, dirId, [...path, name], depth + 1, acc); }
+    else if (FONT_FILE.test(name)) {
+      try { for (const n of await fontNamesOf(await h.getFile())) acc.push({ ...n, dir: dirId, path: [...path, name] }); } catch (e) {}
+    }
+  }
+  return acc;
+}
+async function addFontFolder() {
+  if (window.showDirectoryPicker) {
+    let h;
+    try { h = await showDirectoryPicker({ id: 'pdfed-fonts', mode: 'read' }); }
+    catch (e) { if (e.name !== 'AbortError') alert('Przeglądarka nie pozwoliła otworzyć tego folderu (' + e.message + '). Skopiuj folder z czcionkami np. do Dokumentów i wskaż kopię.'); return; }
+    busy('Szukam czcionek w folderze „' + h.name + '”…');
+    try {
+      const dirs = await fontDirs(), id = 'd' + Date.now();
+      const found = await scanDir(h, id);
+      dirs.push({ id, handle: h, name: h.name, count: found.length });
+      await idbSet('kv', 'fontDirs', dirs);
+      ufIndex = (await userFontIndex()).concat(found);
+      await saveFontIndex();
+      busy(false); renderFontsModal();
+      hint('Znaleziono ' + found.length + ' czcionek w „' + h.name + '”'); setTimeout(() => hint(''), 3500);
+    } catch (e) { busy(false); alert('Nie udało się przejrzeć folderu: ' + e.message); }
+  } else $('#fFontDir').click(); // Safari / Firefox: kopiujemy pliki do pamięci przeglądarki
+}
+$('#fFontDir').onchange = async e => {
+  const files = [...e.target.files].filter(f => FONT_FILE.test(f.name)); e.target.value = '';
+  if (!files.length) return alert('W wybranym folderze nie ma plików czcionek (.ttf, .otf, .ttc).');
+  busy('Zapisuję ' + files.length + ' czcionek w przeglądarce…');
+  try {
+    const dirs = await fontDirs(), id = 'c' + Date.now(), found = [];
+    for (const f of files) {
+      const names = await fontNamesOf(f); if (!names.length) continue;
+      const bk = id + ':' + (f.webkitRelativePath || f.name);
+      await idbSet('fonts', bk, f);
+      names.forEach(n => found.push({ ...n, blob: bk, dir: id }));
+    }
+    const root = (files[0].webkitRelativePath || '').split('/')[0] || 'czcionki';
+    dirs.push({ id, name: root, count: found.length, copied: true });
+    await idbSet('kv', 'fontDirs', dirs);
+    ufIndex = (await userFontIndex()).concat(found);
+    await saveFontIndex();
+    busy(false); renderFontsModal();
+  } catch (err) { busy(false); alert('Nie udało się zapisać czcionek: ' + err.message); }
+};
+async function removeFontFolder(id) {
+  const dirs = (await fontDirs()).filter(d => d.id !== id);
+  await idbSet('kv', 'fontDirs', dirs);
+  const idx = await userFontIndex();
+  for (const e of idx) if (e.dir === id && e.blob) { try { await idbDel('fonts', e.blob); } catch (err) {} }
+  ufIndex = idx.filter(e => e.dir !== id);
+  await saveFontIndex(); renderFontsModal();
+}
+async function rescanFolders() {
+  const dirs = await fontDirs(); let idx = (await userFontIndex()).filter(e => e.blob);
+  busy('Odświeżam listę czcionek…');
+  for (const d of dirs) if (d.handle) {
+    try { if (!(await ensureRead(d.handle))) continue; const f = await scanDir(d.handle, d.id); d.count = f.length; idx = idx.concat(f); } catch (e) {}
+  }
+  await idbSet('kv', 'fontDirs', dirs); ufIndex = idx; await saveFontIndex();
+  busy(false); renderFontsModal();
+}
+async function renderFontsModal() {
+  const dirs = await fontDirs(), box = $('#fontDirList');
+  box.innerHTML = dirs.length ? '' : '<p class="muted">Nie dodano jeszcze żadnego folderu.</p>';
+  for (const d of dirs) {
+    const row = el('div', 'fdir');
+    row.innerHTML = `<span>📁 <b></b> · ${d.count || 0} czcionek${d.copied ? ' (kopia w przeglądarce)' : ''}</span>`;
+    row.querySelector('b').textContent = d.name;
+    const x = el('button'); x.textContent = 'Usuń'; x.onclick = () => removeFontFolder(d.id);
+    row.appendChild(x); box.appendChild(row);
+  }
+}
+function openFontsModal() { $('#fontsModal').style.display = 'flex'; renderFontsModal(); }
+$('#fmAdd').onclick = addFontFolder;
+$('#fmRescan').onclick = rescanFolders;
+$('#fmClose').onclick = () => { $('#fontsModal').style.display = 'none'; };
+document.querySelectorAll('.copyPath').forEach(b => b.onclick = async () => {
+  try { await navigator.clipboard.writeText(b.dataset.path); b.textContent = 'Skopiowano ✓'; setTimeout(() => { b.textContent = 'Kopiuj'; }, 1500); } catch (e) {}
+});
 async function resolveLocalFonts(it) {
   for (const x of it.st || [it]) {
     if (!x.fname || x.lfont) continue;
@@ -2066,6 +2262,7 @@ function applyFontKey(a, key) {
 }
 $('#cFam').addEventListener('change', async e => {
   const val = e.target.value, a = selA(), t = a && a.type === 'text' ? a : null;
+  if (val === '__fonts') { updFontUI(); openFontsModal(); return; }
   if (FAMS[val]) {
     const p = keyParts(curKeyOf(t)), key = makeKey(val, p.bold, p.italic);
     if (t) applyFontKey(t, key); else S.font = key;
@@ -2076,7 +2273,7 @@ $('#cFam').addEventListener('change', async e => {
   const k = val === 'orig' ? t.ofont : t.lfont;
   if (!k || !OF[k] || !ofCan(OF[k], t.text)) {
     alert(val === 'orig' ? 'Oryginalnej czcionki z PDF nie da się użyć dla tego tekstu (brak czcionki lub niektórych znaków).'
-      : 'Nie znaleziono tej czcionki na komputerze (albo przeglądarka nie pozwala jej odczytać – działa w Chrome i Edge na komputerze).');
+      : 'Nie znaleziono tej czcionki – ani w systemie, ani w folderach z „Moje czcionki”. Dodaj folder Worda lub Acrobata w „📁 Moje czcionki”.');
     updFontUI(); return;
   }
   snap(); t.font = val; t.hs = 1; delete t.st; delete t.ws;
