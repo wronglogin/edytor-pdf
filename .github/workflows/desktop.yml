@@ -1,9 +1,12 @@
 # Buduje instalatory aplikacji (Windows .exe, macOS .dmg) i publikuje je w GitHub Releases.
-# Uruchamia się po wypchnięciu tagu v* (np. v1.0.0) albo ręcznie: Actions → Desktop → Run workflow.
+# Uruchamia się, gdy zmieni się wersja w desktop/package.json (wydanie v<wersja> tworzy się samo),
+# po wypchnięciu tagu v* albo ręcznie: Actions → Desktop → Run workflow.
 name: Desktop
 
 on:
   push:
+    branches: [main]
+    paths: ['desktop/package.json']
     tags: ['v*']
   workflow_dispatch:
 
@@ -53,7 +56,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
         run: |
-          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+          if [[ "$GITHUB_EVENT_NAME" == push ]]; then
             npx electron-builder --publish always
           else
             npx electron-builder --publish never
