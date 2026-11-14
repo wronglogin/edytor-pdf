@@ -163,6 +163,19 @@ ipcMain.on('pw-set', (e, p, pw) => {
   } catch (err) {}
 });
 
+/* ---------- załączniki PDF: otwarcie w domyślnym programie ---------- */
+const UNSAFE_EXT = /\.(exe|bat|cmd|com|scr|msi|msp|ps1|vbs|vbe|js|jse|wsf|wsh|hta|lnk|jar|reg|cpl|dll|app|command|sh|pkg|dmg|iso|scf|url)$/i;
+ipcMain.handle('open-temp', async (e, name, bytes) => {
+  try {
+    const safe = path.basename(String(name)).replace(/[<>:"/\\|?*\x00-\x1f]/g, '_').slice(0, 150) || 'zalacznik';
+    if (UNSAFE_EXT.test(safe) || !/\.[a-z0-9]{1,8}$/i.test(safe)) return false; // pliki wykonywalne tylko do zapisania
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'edytor-pdf-'));
+    const file = path.join(dir, safe);
+    fs.writeFileSync(file, Buffer.from(bytes));
+    return (await shell.openPath(file)) === '';
+  } catch (err) { return false; }
+});
+
 /* ---------- ostatnio otwierane ---------- */
 const RECENT = () => path.join(USER(), 'recent.json');
 function recentList() { try { return JSON.parse(fs.readFileSync(RECENT(), 'utf8')).filter(r => exists(r.path)); } catch (e) { return []; } }

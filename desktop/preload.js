@@ -14,6 +14,7 @@ contextBridge.exposeInMainWorld('native', {
   relaunch: () => ipcRenderer.send('relaunch'),
   getPassword: p => ipcRenderer.invoke('pw-get', p),
   setPassword: (p, pw) => ipcRenderer.send('pw-set', p, pw),
+  openTemp: (name, bytes) => ipcRenderer.invoke('open-temp', name, bytes),
   recent: () => ipcRenderer.invoke('recent'),
   clearRecent: () => ipcRenderer.invoke('recent-clear'),
   addRecent: p => ipcRenderer.send('recent-add', p),

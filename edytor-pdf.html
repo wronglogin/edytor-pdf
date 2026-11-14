@@ -138,6 +138,14 @@ body.native .webonly{display:none!important}
 .tab button{border:0;background:transparent;border-radius:50%;width:20px;height:20px;font-size:0;cursor:pointer;color:#555;flex:none;padding:0;margin:0;display:grid;place-items:center}
 .tab button::before{content:"";width:10px;height:10px;background:linear-gradient(45deg,transparent 43%,currentColor 43%,currentColor 57%,transparent 57%),linear-gradient(-45deg,transparent 43%,currentColor 43%,currentColor 57%,transparent 57%)}
 .tab button:hover{background:#d5d9e0;color:#000}
+#attModal .card{width:min(680px,100%);max-height:92vh;overflow:auto}
+.att{display:flex;align-items:center;gap:8px;padding:8px 4px;border-top:1px solid #eee}
+.att .nm{flex:1;min-width:0}.att .nm b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}
+.att .nm small{color:var(--muted);font-size:11px}
+.att button{padding:5px 10px;border-radius:6px;border:1px solid #c5cad3;background:#fff;cursor:pointer;font-size:12px;flex:none}
+.att button:hover{background:#f0f1f4}
+#attPrev:empty{display:none}#attPrev{margin-top:10px;border:1px solid #e3e6ea;border-radius:8px;padding:8px;max-height:50vh;overflow:auto;background:#fafbfc}
+#attPrev img{max-width:100%;display:block;margin:auto}#attPrev pre{margin:0;white-space:pre-wrap;word-break:break-word;font-size:12px;user-select:text;-webkit-user-select:text}
 #askModal{z-index:95}#askModal .card{width:min(480px,100%)}
 #askRow{display:flex;align-items:center;margin-top:6px;border:1px solid #ccd;border-radius:8px;overflow:hidden;background:#fff}
 #askRow:focus-within{border-color:#2563eb;box-shadow:0 0 0 2px #2563eb33}
@@ -186,7 +194,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
       <a class="webonly" href="https://github.com/wronglogin/edytor-pdf/releases/latest" target="_blank" rel="noopener">💻 Pobierz pełną wersję na komputer ↗<small style="display:block;color:var(--muted);font-size:11px">instalator Windows (.exe) / Mac (.dmg)</small></a>
       <div class="amsep"></div>
       <a href="https://github.com/wronglogin/edytor-pdf" target="_blank" rel="noopener">ℹ️ O edytorze (GitHub) ↗</a>
-      <div class="amver">Edytor PDF · wersja 40</div>
+      <div class="amver">Edytor PDF · wersja 41</div>
     </div>
   </div>
   <button id="bOpen" title="Otwórz PDF">📂<span class="lbl">Otwórz</span></button>
@@ -202,6 +210,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
   <span id="pageInfo"></span>
   <div class="grow"></div>
   <button id="bHelp" class="webonly" title="Pomoc – jak działa każda opcja (F1)">❓<span class="lbl">Pomoc</span></button>
+  <button id="bAtt" style="display:none" title="Załączniki dołączone do tego PDF">📎<span class="lbl">Załączniki</span></button>
   <button id="bPrint" title="Drukuj (Ctrl+P)">🖨<span class="lbl">Drukuj</span></button>
   <button id="bSaveAs" title="Zapisz jako nowy plik (Ctrl+Shift+S)">📄<span class="lbl">Zapisz jako</span></button>
   <button id="bSave" class="primary" title="Zapisz (Ctrl+S)">💾<span class="lbl">Zapisz</span></button>
@@ -266,6 +275,14 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 <input type="file" id="fMerge" accept="application/pdf,.pdf" multiple hidden>
 <input type="file" id="fImg" accept="image/*" hidden>
 <input type="file" id="fFontDir" webkitdirectory multiple hidden>
+<div class="modal" id="attModal">
+  <div class="card">
+    <h3>📎 Załączniki <small style="font-weight:400;color:var(--muted);font-size:12px">· pliki dołączone do tego PDF</small></h3>
+    <div id="attList"></div>
+    <div id="attPrev"></div>
+    <div style="text-align:right;margin-top:10px"><button id="attClose" class="tbtn">Zamknij</button></div>
+  </div>
+</div>
 <div class="modal" id="askModal">
   <div class="card">
     <h3 id="askTitle"></h3>
@@ -311,6 +328,8 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 <p>Styl dostaje zaznaczone okienko, a jeśli nic nie jest zaznaczone – ostatnio wpisane okienko. Potem jest używany dla każdego nowego tekstu i pola, dopóki nie klikniesz ✕ na etykiecie 💧 obok „Styl z PDF”. Każde okienko możesz zmienić osobno: zaznacz je i użyj 💧 jeszcze raz.</p></details>
 <details><summary>🖍 Zakreśl, ✎ Rysuj, ▭ Prostokąt, ⬜ Zakryj</summary>
 <p><b>Zakreśl</b> <kbd>H</kbd> – półprzezroczysty marker. <b>Rysuj</b> <kbd>P</kbd> – odręczna linia. <b>Prostokąt</b> <kbd>R</kbd> – ramka. <b>Zakryj</b> <kbd>W</kbd> – biały prostokąt zasłaniający treść. Kolor i grubość ustawiasz na pasku; zmiana koloru/grubości działa też na zaznaczony element.</p></details>
+<details><summary>📎 Załączniki</summary>
+<p>Jeśli PDF ma dołączone pliki, na pasku pojawia się przycisk <b>📎 Załączniki (liczba)</b>. Na liście: załącznik PDF otworzysz w nowej karcie, obraz i tekst obejrzysz w podglądzie, a każdy plik zapiszesz na dysk przyciskiem „Zapisz…”. Pełna wersja na komputer otwiera też inne typy (np. Word, Excel) w domyślnym programie – oprócz plików wykonywalnych, które ze względów bezpieczeństwa można tylko zapisać. Załączniki zostają w pliku po zapisaniu zmian.</p></details>
 <details><summary>✂ Kopiuj obszar, kopiuj / wklej</summary>
 <p><b>Kopiuj obszar</b> <kbd>C</kbd> – przeciągnij prostokąt wokół fragmentu strony (np. zaznaczonego kwadracika, pieczątki, logo). Jego kopia pojawi się obok, już zaznaczona – przeciągnij ją w docelowe miejsce (strzałki przesuwają dokładnie). <kbd>Ctrl/Cmd+V</kbd> wkleja kolejną kopię, także na innej stronie.</p>
 <p>Dodane przez Ciebie elementy (tekst, podpis, obraz, rysunek) kopiujesz tak: zaznacz element, <kbd>Ctrl/Cmd+C</kbd>, potem <kbd>Ctrl/Cmd+V</kbd>.</p></details>
@@ -350,7 +369,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 </div>
 <div class="modal" id="fontsModal">
   <div class="card">
-    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v40</small></h3>
+    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v41</small></h3>
     <p class="muted">Przeglądarka nie może sama przeszukać dysku, więc wskaż raz foldery z czcionkami Worda i Acrobata. Edytor je zapamięta i będzie z nich automatycznie brał brakujące czcionki przy każdej edycji. Czcionki nie są nigdzie wysyłane.</p>
     <p class="muted"><b>Mac:</b> przeglądarka nie otworzy folderów wewnątrz aplikacji („pliki systemowe”), więc najpierw skopiuj czcionki do Dokumentów: otwórz <b>Terminal</b>, wklej polecenie poniżej i naciśnij Enter. Potem kliknij „Dodaj folder…” i wybierz <b>Dokumenty → Czcionki</b>.</p>
     <div class="paths"><div class="pt">Terminal (Mac)</div><code>mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki</code><button class="copyPath" data-path="mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki">Kopiuj</button></div>
@@ -1231,6 +1250,65 @@ async function addSource(bytes, name, path) {
   S.sources.push({ bytes, doc, locked, pw });
   S.srcs.push(S.sources.length - 1);
   return S.sources.length - 1;
+}
+/* ---------- załączniki PDF ---------- */
+async function srcAtts(si) {
+  const sc = S.sources[si]; if (!sc) return [];
+  if (sc.atts) return sc.atts;
+  const L = [];
+  try { const a = await sc.doc.getAttachments(); if (a) for (const k of Object.keys(a)) if (a[k] && a[k].content) L.push({ name: a[k].filename || k, data: a[k].content, desc: a[k].description || '' }); } catch (e) {}
+  try { // załączniki przypięte „pinezką” do stron
+    for (let n = 1; n <= Math.min(sc.doc.numPages, 400); n++) {
+      const pg = await sc.doc.getPage(n);
+      for (const an of await pg.getAnnotations()) if (an.file && an.file.content) L.push({ name: an.file.filename || 'załącznik', data: an.file.content, page: n, annot: true });
+    }
+  } catch (e) {}
+  return (sc.atts = L);
+}
+async function docAtts() {
+  const out = [];
+  for (const si of [...new Set(S.pages.map(p => p.src))]) for (const a of await srcAtts(si)) out.push(a);
+  return out;
+}
+let attTok = 0;
+async function updAtt() {
+  const t = ++attTok, L = S.pages.length ? await docAtts() : [];
+  if (t !== attTok) return;
+  const b = $('#bAtt'); b.style.display = L.length ? '' : 'none';
+  b.querySelector('.lbl').textContent = 'Załączniki (' + L.length + ')';
+}
+const fmtSize = n => n < 1024 ? n + ' B' : n < 1048576 ? (n / 1024).toFixed(n < 10240 ? 1 : 0) + ' KB' : (n / 1048576).toFixed(1) + ' MB';
+const ATT_MIME = { pdf: 'application/pdf', png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', webp: 'image/webp', bmp: 'image/bmp', svg: 'image/svg+xml',
+  txt: 'text/plain', csv: 'text/csv', xml: 'text/xml', json: 'application/json', html: 'text/html', htm: 'text/html', md: 'text/plain', log: 'text/plain' };
+const ATT_UNSAFE = /\.(exe|bat|cmd|com|scr|msi|msp|ps1|vbs|vbe|js|jse|wsf|wsh|hta|lnk|jar|reg|cpl|dll|app|command|sh|pkg|dmg|iso|scf|url)$/i;
+function saveBytes(name, data, mime) {
+  const u = URL.createObjectURL(new Blob([data], { type: mime || 'application/octet-stream' })), a = el('a');
+  a.href = u; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 30000);
+}
+async function openAtt(a) {
+  const ext = (a.name.split('.').pop() || '').toLowerCase(), mime = ATT_MIME[ext], prev = $('#attPrev');
+  prev.innerHTML = '';
+  if (ext === 'pdf') { $('#attModal').style.display = 'none'; await openFiles([new File([a.data], a.name, { type: 'application/pdf' })]); return; }
+  if (mime && mime.startsWith('image/') && ext !== 'svg') { const im = el('img'); im.src = URL.createObjectURL(new Blob([a.data], { type: mime })); im.alt = a.name; prev.appendChild(im); prev.scrollIntoView({ block: 'nearest' }); return; }
+  if (mime && !mime.startsWith('image/')) { const pre = el('pre'); pre.textContent = new TextDecoder('utf-8').decode(a.data.slice(0, 500000)) + (a.data.length > 500000 ? '\n… (pokazano początek pliku)' : ''); prev.appendChild(pre); prev.scrollIntoView({ block: 'nearest' }); return; }
+  if (window.native && native.openTemp && !ATT_UNSAFE.test(a.name)) { const ok = await native.openTemp(a.name, a.data); if (ok) return; }
+  saveBytes(a.name, a.data, mime);
+}
+async function openAttModal() {
+  const L = await docAtts(), box = $('#attList');
+  box.innerHTML = ''; $('#attPrev').innerHTML = '';
+  for (const a of L) {
+    const row = el('div', 'att'), nm = el('div', 'nm');
+    nm.innerHTML = '<b></b><small></small>'; nm.querySelector('b').textContent = a.name; nm.title = a.name;
+    nm.querySelector('small').textContent = fmtSize(a.data.length) + (a.page ? ' · przypięty na stronie ' + a.page : '') + (a.desc ? ' · ' + a.desc : '');
+    const ext = (a.name.split('.').pop() || '').toLowerCase(), view = ext === 'pdf' || ATT_MIME[ext] || (window.native && native.openTemp && !ATT_UNSAFE.test(a.name));
+    row.appendChild(nm);
+    if (view) { const o = el('button'); o.textContent = ext === 'pdf' ? 'Otwórz w karcie' : ATT_MIME[ext] ? 'Podgląd' : 'Otwórz'; o.onclick = () => openAtt(a); row.appendChild(o); }
+    const sv = el('button'); sv.textContent = 'Zapisz…'; sv.onclick = () => saveBytes(a.name, a.data, ATT_MIME[ext]); row.appendChild(sv);
+    box.appendChild(row);
+  }
+  if (!L.length) box.textContent = 'Ten dokument nie ma załączników.';
+  $('#attModal').style.display = 'flex';
 }
 /* ---------- okno z pytaniem (hasło, zamykanie) ---------- */
 function askModal({ title, text, input, show, buttons }) {
@@ -3757,6 +3835,8 @@ async function buildPdf(noOrig) {
     }
     for (const t of F.strips) pg.drawRectangle({ x: t.x0, y: F.floor, width: t.x1 - t.x0, height: t.Bd - F.floor, color: hexRgb(t.bg) });
   }
+  // załączniki dokumentu (pliki dołączone do PDF) przechodzą do zapisanej kopii
+  try { const seen = new Set(); for (const a of await docAtts()) if (!a.annot && !seen.has(a.name)) { seen.add(a.name); await out.attach(a.data, a.name, a.desc ? { description: a.desc } : {}); } } catch (e) { console.warn('Załączniki:', e); }
   return { bytes: await out.save(), fallback };
 }
 
@@ -3897,7 +3977,7 @@ $('#bOpen').onclick = $('#bOpen2').onclick = pickOpen;
 $('#bSaveAs').onclick = () => exportPdf('saveas');
 function markSaved() { S.savedState = JSON.stringify(S.pages); updTitle(); }
 function isDirty() { return TABS.some((t, i) => stDirty(tabSt(i))) || (curTab < 0 && stDirty(S)); }
-function updTitle() { document.title = (S.pages.length ? S.name + ' – ' : '') + 'Edytor PDF'; renderTabs(); }
+function updTitle() { document.title = (S.pages.length ? S.name + ' – ' : '') + 'Edytor PDF'; renderTabs(); updAtt(); }
 // PDF otwarty z systemu („Otwórz za pomocą → Edytor PDF”, dwuklik na pliku)
 if ('launchQueue' in window) {
   launchQueue.setConsumer(async params => {
@@ -3946,6 +4026,9 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
 }
 $('#bMerge').onclick = () => S.pages.length ? $('#fMerge').click() : $('#fOpen').click();
 $('#bNew').onclick = $('#tabNew').onclick = newDoc;
+$('#bAtt').onclick = openAttModal;
+$('#attClose').onclick = () => { $('#attModal').style.display = 'none'; };
+$('#attModal').addEventListener('mousedown', e => { if (e.target.id === 'attModal') $('#attModal').style.display = 'none'; });
 $('#tabHome').onclick = () => switchTab(-1);
 renderTabs();
 $('#fOpen').onchange = e => { openFiles(e.target.files, false); e.target.value = ''; };
