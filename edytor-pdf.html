@@ -132,14 +132,14 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 
 <div class="bar">
   <div class="brandwrap">
-    <button class="brand" id="bBrand" title="Menu edytora"><i>PDF</i><span>Edytor PDF <small style="font-weight:400;color:var(--muted)">v22</small> ▾</span></button>
+    <button class="brand" id="bBrand" title="Menu edytora"><i>PDF</i><span>Edytor PDF <small style="font-weight:400;color:var(--muted)">v23</small> ▾</span></button>
     <div class="appmenu" id="appMenu">
       <button data-m="help">❓ Pomoc – jak działa każda opcja<small>narzędzia, skróty, czcionki, zapisywanie</small></button>
       <button data-m="fonts">🔤 Czcionki…<small>foldery Worda/Acrobata, pobieranie, stan</small></button>
       <button data-m="install" id="mInstall" style="display:none">⬇ Zainstaluj jako aplikację</button>
       <div class="amsep"></div>
       <a href="https://github.com/wronglogin/edytor-pdf" target="_blank" rel="noopener">ℹ️ O edytorze (GitHub) ↗</a>
-      <div class="amver">Edytor PDF · wersja 22</div>
+      <div class="amver">Edytor PDF · wersja 23</div>
     </div>
   </div>
   <button id="bOpen" title="Otwórz PDF">📂<span class="lbl">Otwórz</span></button>
@@ -267,7 +267,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 </div>
 <div class="modal" id="fontsModal">
   <div class="card">
-    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v22</small></h3>
+    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v23</small></h3>
     <p class="muted">Przeglądarka nie może sama przeszukać dysku, więc wskaż raz foldery z czcionkami Worda i Acrobata. Edytor je zapamięta i będzie z nich automatycznie brał brakujące czcionki przy każdej edycji. Czcionki nie są nigdzie wysyłane.</p>
     <p class="muted"><b>Mac:</b> przeglądarka nie otworzy folderów wewnątrz aplikacji („pliki systemowe”), więc najpierw skopiuj czcionki do Dokumentów: otwórz <b>Terminal</b>, wklej polecenie poniżej i naciśnij Enter. Potem kliknij „Dodaj folder…” i wybierz <b>Dokumenty → Czcionki</b>.</p>
     <div class="paths"><div class="pt">Terminal (Mac)</div><code>mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki</code><button class="copyPath" data-path="mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki">Kopiuj</button></div>
@@ -1624,7 +1624,7 @@ async function startNewText(i, x, y, spec) {
 async function detectFields(i) {
   const v = views[i], p = S.pages[i];
   if (!v || p.cont) return [];
-  if (p.fields && p.fieldsV === 6) return p.fields;
+  if (p.fields && p.fieldsV === 7) return p.fields;
   if (!p.geo || p.geo.v !== 4) { v.items = null; v.itemsP = null; p.geo = null; }
   await loadItems(i);
   const Tl = await getTextless(p);
@@ -1704,7 +1704,8 @@ async function detectFields(i) {
     const edgeL = vIn.some(L => Math.abs(L.p - ox0) < 3 * K), edgeR = vIn.some(L => Math.abs(L.p - ox1) < 3 * K);
     const ovl = Math.min(A.e, B.e) - Math.max(A.s, B.s);
     const twin = B.p - A.p <= 40 * K && ((Math.abs(A.s - B.s) < 3 * K && Math.abs(A.e - B.e) < 3 * K) ||
-      ((Math.abs(A.s - B.s) < 3 * K || Math.abs(A.e - B.e) < 3 * K) && ovl >= 80 * K && ovl >= 0.6 * Math.min(A.len, B.len)));
+      ((Math.abs(A.s - B.s) < 3 * K || Math.abs(A.e - B.e) < 3 * K) && ovl >= 80 * K && ovl >= 0.6 * Math.min(A.len, B.len)) ||
+      (ovl >= 80 * K && ovl >= Math.min(A.len, B.len) - 4 * K)); // krótsza linia leży w całości nad/pod dłuższą
     if (!(edgeL && edgeR) && !twin) continue;
     const xs = [ox0, ox1, ...vIn.filter(L => L.p > ox0 + 2 * K && L.p < ox1 - 2 * K).map(L => L.p)].sort((a, b) => a - b);
     for (let k = 0; k < xs.length - 1; k++) if (xs[k + 1] - xs[k] >= 15 * K) cells.push({ x0: xs[k], x1: xs[k + 1], y0: A.p, y1: B.p });
@@ -1795,7 +1796,7 @@ async function detectFields(i) {
   }
   // kolejność: z góry na dół, od lewej (dla klawisza Tab)
   res.sort((a, b) => (Math.abs(b.r[3] - a.r[3]) > 4 ? b.r[3] - a.r[3] : a.r[0] - b.r[0]));
-  p.fields = res; p.fieldsV = 6;
+  p.fields = res; p.fieldsV = 7;
   return res;
 }
 const fieldScr = (v, f) => scrRect(v, [[f.r[0], f.r[1]], [f.r[2], f.r[3]]]);
