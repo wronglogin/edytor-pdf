@@ -186,7 +186,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
       <a class="webonly" href="https://github.com/wronglogin/edytor-pdf/releases/latest" target="_blank" rel="noopener">💻 Pobierz pełną wersję na komputer ↗<small style="display:block;color:var(--muted);font-size:11px">instalator Windows (.exe) / Mac (.dmg)</small></a>
       <div class="amsep"></div>
       <a href="https://github.com/wronglogin/edytor-pdf" target="_blank" rel="noopener">ℹ️ O edytorze (GitHub) ↗</a>
-      <div class="amver">Edytor PDF · wersja 39</div>
+      <div class="amver">Edytor PDF · wersja 40</div>
     </div>
   </div>
   <button id="bOpen" title="Otwórz PDF">📂<span class="lbl">Otwórz</span></button>
@@ -203,7 +203,6 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
   <div class="grow"></div>
   <button id="bHelp" class="webonly" title="Pomoc – jak działa każda opcja (F1)">❓<span class="lbl">Pomoc</span></button>
   <button id="bPrint" title="Drukuj (Ctrl+P)">🖨<span class="lbl">Drukuj</span></button>
-  <button id="bInstall" style="display:none" title="Instaluje aplikację przeglądarki (ta strona w osobnym oknie). Pełną wersję na komputer pobierzesz z menu „Edytor PDF ▾”.">⬇<span class="lbl">Aplikacja przeglądarki</span></button>
   <button id="bSaveAs" title="Zapisz jako nowy plik (Ctrl+Shift+S)">📄<span class="lbl">Zapisz jako</span></button>
   <button id="bSave" class="primary" title="Zapisz (Ctrl+S)">💾<span class="lbl">Zapisz</span></button>
 </div>
@@ -329,7 +328,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 <ul><li><kbd>V</kbd> zaznacz · <kbd>E</kbd> edytuj tekst · <kbd>F</kbd> wypełnij · <kbd>T</kbd> dodaj tekst · <kbd>I</kbd> próbnik · <kbd>H</kbd> zakreśl · <kbd>P</kbd> rysuj · <kbd>R</kbd> prostokąt · <kbd>W</kbd> zakryj</li>
 <li><kbd>Esc</kbd> – anuluj / wróć do zaznaczania · <kbd>Delete</kbd> – usuń element · strzałki – przesuń · <kbd>F1</kbd> – ta pomoc</li></ul></details>
 <details><summary>⚖️ Aplikacja przeglądarki a pełna wersja na komputer</summary>
-<p><b>Aplikacja przeglądarki</b> – przycisk „⬇ Aplikacja przeglądarki” na stronie. To ta sama strona otwierana w osobnym oknie Chrome/Edge. <b>Pełna wersja na komputer</b> – instalator .exe (Windows) lub .dmg (Mac) z <a href="https://github.com/wronglogin/edytor-pdf/releases/latest" target="_blank" rel="noopener">GitHub → Releases</a>. Sam edytor (narzędzia, karty, Wypełnij, Kopiuj obszar) jest w obu taki sam.</p>
+<p><b>Aplikacja przeglądarki</b> – menu „Edytor PDF ▾” → „Zainstaluj aplikację przeglądarki” na stronie. To ta sama strona otwierana w osobnym oknie Chrome/Edge. <b>Pełna wersja na komputer</b> – instalator .exe (Windows) lub .dmg (Mac) z <a href="https://github.com/wronglogin/edytor-pdf/releases/latest" target="_blank" rel="noopener">GitHub → Releases</a>. Sam edytor (narzędzia, karty, Wypełnij, Kopiuj obszar) jest w obu taki sam.</p>
 <table class="cmp"><tr><th></th><th>Aplikacja przeglądarki</th><th>Pełna wersja</th></tr>
 <tr><td>Czcionki Worda i Acrobata</td><td>trzeba wskazać foldery</td><td>wykrywa sama</td></tr>
 <tr><td>Zapamiętywanie haseł do plików</td><td>nie</td><td>tak</td></tr>
@@ -351,7 +350,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 </div>
 <div class="modal" id="fontsModal">
   <div class="card">
-    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v39</small></h3>
+    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v40</small></h3>
     <p class="muted">Przeglądarka nie może sama przeszukać dysku, więc wskaż raz foldery z czcionkami Worda i Acrobata. Edytor je zapamięta i będzie z nich automatycznie brał brakujące czcionki przy każdej edycji. Czcionki nie są nigdzie wysyłane.</p>
     <p class="muted"><b>Mac:</b> przeglądarka nie otworzy folderów wewnątrz aplikacji („pliki systemowe”), więc najpierw skopiuj czcionki do Dokumentów: otwórz <b>Terminal</b>, wklej polecenie poniżej i naciśnij Enter. Potem kliknij „Dodaj folder…” i wybierz <b>Dokumenty → Czcionki</b>.</p>
     <div class="paths"><div class="pt">Terminal (Mac)</div><code>mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki</code><button class="copyPath" data-path="mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki">Kopiuj</button></div>
@@ -774,7 +773,7 @@ $('#appMenu').addEventListener('click', e => {
   if (b.dataset.m === 'fonts') openFontsModal();
   if (b.dataset.m === 'help') openHelp();
   if (b.dataset.m === 'pw') setDocPassword();
-  if (b.dataset.m === 'install') $('#bInstall').click();
+  if (b.dataset.m === 'install') installPwa();
 });
 document.addEventListener('mousedown', e => { if (!e.target.closest('.brandwrap')) closeAppMenu(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAppMenu(); });
@@ -3932,9 +3931,9 @@ if (window.native) {
 renderRecent();
 // instalacja jako aplikacja
 let installEvt = null;
-window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; $('#bInstall').style.display = ''; $('#mInstall').style.display = ''; });
-window.addEventListener('appinstalled', () => { $('#bInstall').style.display = 'none'; $('#mInstall').style.display = 'none'; installEvt = null; });
-$('#bInstall').onclick = async () => { if (!installEvt) return; installEvt.prompt(); await installEvt.userChoice; installEvt = null; $('#bInstall').style.display = 'none'; };
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; $('#mInstall').style.display = ''; });
+window.addEventListener('appinstalled', () => { $('#mInstall').style.display = 'none'; installEvt = null; });
+async function installPwa() { if (!installEvt) return; installEvt.prompt(); await installEvt.userChoice; installEvt = null; $('#mInstall').style.display = 'none'; }
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
   navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(r => r.update()).catch(() => {});
   // nowa wersja aplikacji gotowa → przeładuj (jeśli nie ma niezapisanych zmian)
