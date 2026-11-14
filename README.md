@@ -23,6 +23,8 @@ Potem ustaw „Edytor PDF” jako domyślny program dla plików `.pdf`.
 | `fonts/SourceSans3-*`, `SourceSerif4-*` | Source Sans / Source Serif (Adobe) | SIL OFL 1.1 |
 | `fonts/Gelasio-*` | zamiennik o wymiarach Georgii (wersje statyczne wygenerowane z czcionki zmiennej) | SIL OFL 1.1 |
 | `fonts/NimbusSansNarrow-*`, `P052-*`, `C059-*`, `URWBookman-*` | zamienniki Arial Narrow / Helvetica Narrow, Palatino / Book Antiqua, Century Schoolbook, Bookman (URW++) | AGPL-3.0 z wyjątkiem pozwalającym osadzać je w dokumentach PDF |
+| `fonts/Roboto-*`, `OpenSans-*`, `Lato-*`, `Montserrat-*`, `Poppins-*`, `Inter-*`, `NotoSans-*`, `NotoSerif-*` | oryginały popularnych czcionek otwartych (część to wersje statyczne wygenerowane z czcionek zmiennych) | SIL OFL 1.1 |
+| `fonts/DejaVuSans*`, `DejaVuSerif*` | DejaVu | licencja Bitstream Vera / domena publiczna (`fonts/LICENSE-DejaVu.txt`) |
 | `dict/pl.aff`, `dict/pl.dic` | słownik polski (Polish Native Lang Project / sjp.pl) | GPL / LGPL / MPL / CC-SA |
 | `lib/nspell.js` | nspell – sprawdzanie pisowni (Titus Wormer) | MIT |
 

@@ -133,6 +133,10 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
     <option value="srcsans">Source Sans (Myriad)</option><option value="srcserif">Source Serif (Minion)</option>
     <option value="narrow">Arial Narrow</option><option value="georgia">Georgia</option><option value="palatino">Palatino / Book Antiqua</option>
     <option value="school">Century Schoolbook</option><option value="bookman">Bookman</option>
+    <option value="roboto">Roboto</option><option value="opensans">Open Sans</option><option value="lato">Lato</option>
+    <option value="montserrat">Montserrat</option><option value="poppins">Poppins</option><option value="inter">Inter</option>
+    <option value="notosans">Noto Sans</option><option value="notoserif">Noto Serif</option>
+    <option value="dejavusans">DejaVu Sans</option><option value="dejavuserif">DejaVu Serif</option>
     <option value="symbol">Symbol (α β ∑)</option><option value="dingbats">ZapfDingbats (✓ ✗ ☐)</option>
     <option value="orig">Oryginalna (z PDF)</option><option value="local">Ta sama z komputera</option>
     <option value="__fonts">📁 Moje czcionki (Word, Acrobat)…</option></select></label>
@@ -224,6 +228,17 @@ const FAMS = {
   palatino: { label: 'Palatino / Book Antiqua', files: ['P052-Roman', 'P052-Bold', 'P052-Italic', 'P052-BoldItalic'], fb: '"Palatino Linotype", "Book Antiqua", Palatino, serif', std: ['TimesRoman', 'TimesRomanBold', 'TimesRomanItalic', 'TimesRomanBoldItalic'] },
   school:   { label: 'Century Schoolbook', files: ['C059-Roman', 'C059-Bold', 'C059-Italic', 'C059-BdIta'], fb: '"Century Schoolbook", serif', std: ['TimesRoman', 'TimesRomanBold', 'TimesRomanItalic', 'TimesRomanBoldItalic'] },
   bookman:  { label: 'Bookman', files: ['URWBookman-Light', 'URWBookman-Demi', 'URWBookman-LightItalic', 'URWBookman-DemiItalic'], fb: '"Bookman Old Style", Bookman, serif', std: ['TimesRoman', 'TimesRomanBold', 'TimesRomanItalic', 'TimesRomanBoldItalic'] },
+  // oryginały popularnych czcionek otwartych (Google Docs, LibreOffice, systemy firmowe)
+  roboto: { label: 'Roboto', files: ['Roboto-Regular', 'Roboto-Bold', 'Roboto-Italic', 'Roboto-BoldItalic'], fb: "'Roboto', Arial, sans-serif", std: ['Helvetica', 'HelveticaBold', 'HelveticaOblique', 'HelveticaBoldOblique'] },
+  opensans: { label: 'Open Sans', files: ['OpenSans-Regular', 'OpenSans-Bold', 'OpenSans-Italic', 'OpenSans-BoldItalic'], fb: "'Open Sans', Arial, sans-serif", std: ['Helvetica', 'HelveticaBold', 'HelveticaOblique', 'HelveticaBoldOblique'] },
+  lato: { label: 'Lato', files: ['Lato-Regular', 'Lato-Bold', 'Lato-Italic', 'Lato-BoldItalic'], fb: "'Lato', Arial, sans-serif", std: ['Helvetica', 'HelveticaBold', 'HelveticaOblique', 'HelveticaBoldOblique'] },
+  montserrat: { label: 'Montserrat', files: ['Montserrat-Regular', 'Montserrat-Bold', 'Montserrat-Italic', 'Montserrat-BoldItalic'], fb: "'Montserrat', Arial, sans-serif", std: ['Helvetica', 'HelveticaBold', 'HelveticaOblique', 'HelveticaBoldOblique'] },
+  poppins: { label: 'Poppins', files: ['Poppins-Regular', 'Poppins-Bold', 'Poppins-Italic', 'Poppins-BoldItalic'], fb: "'Poppins', Arial, sans-serif", std: ['Helvetica', 'HelveticaBold', 'HelveticaOblique', 'HelveticaBoldOblique'] },
+  inter: { label: 'Inter', files: ['Inter-Regular', 'Inter-Bold', 'Inter-Italic', 'Inter-BoldItalic'], fb: "'Inter', Arial, sans-serif", std: ['Helvetica', 'HelveticaBold', 'HelveticaOblique', 'HelveticaBoldOblique'] },
+  notosans: { label: 'Noto Sans', files: ['NotoSans-Regular', 'NotoSans-Bold', 'NotoSans-Italic', 'NotoSans-BoldItalic'], fb: "'Noto Sans', Arial, sans-serif", std: ['Helvetica', 'HelveticaBold', 'HelveticaOblique', 'HelveticaBoldOblique'] },
+  notoserif: { label: 'Noto Serif', files: ['NotoSerif-Regular', 'NotoSerif-Bold', 'NotoSerif-Italic', 'NotoSerif-BoldItalic'], fb: "'Noto Serif', Georgia, serif", std: ['TimesRoman', 'TimesRomanBold', 'TimesRomanItalic', 'TimesRomanBoldItalic'] },
+  dejavusans: { label: 'DejaVu Sans', files: ['DejaVuSans', 'DejaVuSans-Bold', 'DejaVuSans-Oblique', 'DejaVuSans-BoldOblique'], fb: "'DejaVu Sans', Verdana, sans-serif", std: ['Helvetica', 'HelveticaBold', 'HelveticaOblique', 'HelveticaBoldOblique'] },
+  dejavuserif: { label: 'DejaVu Serif', files: ['DejaVuSerif', 'DejaVuSerif-Bold', 'DejaVuSerif-Italic', 'DejaVuSerif-BoldItalic'], fb: "'DejaVu Serif', Georgia, serif", std: ['TimesRoman', 'TimesRomanBold', 'TimesRomanItalic', 'TimesRomanBoldItalic'] },
   // symbole: wbudowane w każdy czytnik PDF – bez osadzania pliku
   symbol:   { label: 'Symbol', files: [null, null, null, null], fb: 'Symbol, serif', std: ['Symbol', 'Symbol', 'Symbol', 'Symbol'] },
   dingbats: { label: 'ZapfDingbats (symbole)', files: [null, null, null, null], fb: '"Zapf Dingbats", Wingdings, sans-serif', std: ['ZapfDingbats', 'ZapfDingbats', 'ZapfDingbats', 'ZapfDingbats'] }
@@ -1007,7 +1022,11 @@ function guessFont(fam, name) {
   let f;
   if (/dingbat|zapf/.test(n)) return 'dingbats';
   if (/^symbol|standardsymbol|symbolmt/.test(n)) return 'symbol';
-  if (/narrow|condensed|nimbussansnar/.test(n) && /arial|helvetica|nimbus|sans/.test(n)) f = 'narrow';
+  const oss = [['roboto', /roboto/], ['opensans', /opensans|open sans/], ['lato', /\blato|^lato/], ['montserrat', /montserrat/], ['poppins', /poppins/],
+    ['inter', /^inter\b|^inter[-,]|interdisplay|intervariable/], ['notoserif', /notoserif|noto serif/], ['notosans', /notosans|noto sans/],
+    ['dejavuserif', /dejavuserif|dejavu serif/], ['dejavusans', /dejavu/]].find(([, re]) => re.test(n));
+  if (oss) f = oss[0];
+  else if (/narrow|condensed|nimbussansnar/.test(n) && /arial|helvetica|nimbus|sans/.test(n)) f = 'narrow';
   else if (/georgia|gelasio/.test(n)) f = 'georgia';
   else if (/palatino|bookantiqua|book antiqua|pagella|p052/.test(n)) f = 'palatino';
   else if (/schoolbook|schola|c059/.test(n)) f = 'school';
