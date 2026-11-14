@@ -152,6 +152,9 @@ body.native .webonly{display:none!important}
 #helpModal details{border-top:1px solid #eee;padding:7px 0}
 #helpModal summary{cursor:pointer;font-weight:600;font-size:14px}
 #helpModal details p,#helpModal details li{font-size:13px;line-height:1.5;color:#333;margin:5px 0}
+#helpModal table.cmp{border-collapse:collapse;width:100%;font-size:12.5px;margin:6px 0}
+#helpModal table.cmp th,#helpModal table.cmp td{border:1px solid #e3e6ea;padding:5px 8px;text-align:left;vertical-align:top}
+#helpModal table.cmp th{background:#f5f6f8}
 #helpModal kbd{background:#f1f3f6;border:1px solid #d5d9e0;border-radius:4px;padding:0 5px;font-size:12px}
 .fdir{display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin-bottom:6px;font-size:13px}
 .siglist{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
@@ -179,10 +182,11 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
       <div id="recentMenu" class="recent"></div>
       <button data-m="pw">🔐 Zabezpiecz hasłem…<small>zapisz PDF zaszyfrowany (AES-256) albo usuń hasło</small></button>
       <button data-m="fonts">🔤 Czcionki…<small>foldery Worda/Acrobata, pobieranie, stan</small></button>
-      <button data-m="install" id="mInstall" style="display:none">⬇ Zainstaluj jako aplikację</button>
+      <button data-m="install" id="mInstall" style="display:none">⬇ Zainstaluj aplikację przeglądarki<small>ta strona w osobnym oknie</small></button>
+      <a class="webonly" href="https://github.com/wronglogin/edytor-pdf/releases/latest" target="_blank" rel="noopener">💻 Pobierz pełną wersję na komputer ↗<small style="display:block;color:var(--muted);font-size:11px">instalator Windows (.exe) / Mac (.dmg)</small></a>
       <div class="amsep"></div>
       <a href="https://github.com/wronglogin/edytor-pdf" target="_blank" rel="noopener">ℹ️ O edytorze (GitHub) ↗</a>
-      <div class="amver">Edytor PDF · wersja 38</div>
+      <div class="amver">Edytor PDF · wersja 39</div>
     </div>
   </div>
   <button id="bOpen" title="Otwórz PDF">📂<span class="lbl">Otwórz</span></button>
@@ -199,7 +203,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
   <div class="grow"></div>
   <button id="bHelp" class="webonly" title="Pomoc – jak działa każda opcja (F1)">❓<span class="lbl">Pomoc</span></button>
   <button id="bPrint" title="Drukuj (Ctrl+P)">🖨<span class="lbl">Drukuj</span></button>
-  <button id="bInstall" style="display:none" title="Zainstaluj jako aplikację na tym komputerze">⬇<span class="lbl">Zainstaluj</span></button>
+  <button id="bInstall" style="display:none" title="Instaluje aplikację przeglądarki (ta strona w osobnym oknie). Pełną wersję na komputer pobierzesz z menu „Edytor PDF ▾”.">⬇<span class="lbl">Aplikacja przeglądarki</span></button>
   <button id="bSaveAs" title="Zapisz jako nowy plik (Ctrl+Shift+S)">📄<span class="lbl">Zapisz jako</span></button>
   <button id="bSave" class="primary" title="Zapisz (Ctrl+S)">💾<span class="lbl">Zapisz</span></button>
 </div>
@@ -324,6 +328,17 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 <details><summary>⌨️ Skróty klawiszowe</summary>
 <ul><li><kbd>V</kbd> zaznacz · <kbd>E</kbd> edytuj tekst · <kbd>F</kbd> wypełnij · <kbd>T</kbd> dodaj tekst · <kbd>I</kbd> próbnik · <kbd>H</kbd> zakreśl · <kbd>P</kbd> rysuj · <kbd>R</kbd> prostokąt · <kbd>W</kbd> zakryj</li>
 <li><kbd>Esc</kbd> – anuluj / wróć do zaznaczania · <kbd>Delete</kbd> – usuń element · strzałki – przesuń · <kbd>F1</kbd> – ta pomoc</li></ul></details>
+<details><summary>⚖️ Aplikacja przeglądarki a pełna wersja na komputer</summary>
+<p><b>Aplikacja przeglądarki</b> – przycisk „⬇ Aplikacja przeglądarki” na stronie. To ta sama strona otwierana w osobnym oknie Chrome/Edge. <b>Pełna wersja na komputer</b> – instalator .exe (Windows) lub .dmg (Mac) z <a href="https://github.com/wronglogin/edytor-pdf/releases/latest" target="_blank" rel="noopener">GitHub → Releases</a>. Sam edytor (narzędzia, karty, Wypełnij, Kopiuj obszar) jest w obu taki sam.</p>
+<table class="cmp"><tr><th></th><th>Aplikacja przeglądarki</th><th>Pełna wersja</th></tr>
+<tr><td>Czcionki Worda i Acrobata</td><td>trzeba wskazać foldery</td><td>wykrywa sama</td></tr>
+<tr><td>Zapamiętywanie haseł do plików</td><td>nie</td><td>tak</td></tr>
+<tr><td>Zamykanie okna z niezapisanymi zmianami</td><td>ogólne ostrzeżenie przeglądarki</td><td>Zapisz / Zapisz jako / Nie zapisuj / Anuluj</td></tr>
+<tr><td>Zapis do tego samego pliku</td><td>przeglądarka pyta o zgodę</td><td>od razu</td></tr>
+<tr><td>Lista ostatnio otwieranych</td><td>tylko pliki otwarte przyciskiem „Otwórz”</td><td>wszystkie, także w menu Plik</td></tr>
+<tr><td>Prawy przycisk w polach tekstowych</td><td>menu przeglądarki</td><td>Wytnij / Kopiuj / Wklej</td></tr>
+<tr><td>Aktualizacje</td><td>po odświeżeniu strony</td><td>pobiera sama, pokazuje „Uruchom ponownie”</td></tr>
+<tr><td>Wymaga</td><td>Chrome lub Edge</td><td>nic – ma wszystko w sobie</td></tr></table></details>
 <details><summary>💻 Aplikacja na Windows i macOS</summary>
 <p>Instalatory są na stronie <a href="https://github.com/wronglogin/edytor-pdf/releases/latest" target="_blank" rel="noopener">GitHub → Releases</a>: plik <b>.exe</b> dla Windows i <b>.dmg</b> dla Maca. Aplikacja działa bez internetu, otwiera PDF dwuklikiem (po ustawieniu jako domyślna), zapisuje prosto do tego samego pliku i sama znajduje czcionki systemu, Worda/Office i Acrobata.</p>
 <p>Nowe wersje edytora pobiera sama w tle – po pobraniu pokaże „Uruchom ponownie”. Na Windowsie nowa wersja aplikacji instaluje się sama po zamknięciu; na Macu pojawi się przycisk „Pobierz”.</p>
@@ -336,7 +351,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 </div>
 <div class="modal" id="fontsModal">
   <div class="card">
-    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v38</small></h3>
+    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v39</small></h3>
     <p class="muted">Przeglądarka nie może sama przeszukać dysku, więc wskaż raz foldery z czcionkami Worda i Acrobata. Edytor je zapamięta i będzie z nich automatycznie brał brakujące czcionki przy każdej edycji. Czcionki nie są nigdzie wysyłane.</p>
     <p class="muted"><b>Mac:</b> przeglądarka nie otworzy folderów wewnątrz aplikacji („pliki systemowe”), więc najpierw skopiuj czcionki do Dokumentów: otwórz <b>Terminal</b>, wklej polecenie poniżej i naciśnij Enter. Potem kliknij „Dodaj folder…” i wybierz <b>Dokumenty → Czcionki</b>.</p>
     <div class="paths"><div class="pt">Terminal (Mac)</div><code>mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki</code><button class="copyPath" data-path="mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki">Kopiuj</button></div>
