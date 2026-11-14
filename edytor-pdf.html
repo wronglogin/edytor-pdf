@@ -110,6 +110,12 @@ body.t-place .overlay{cursor:copy}
 .fontlinks a{color:#1d4ed8;text-decoration:none;padding:3px 0}
 .fontlinks a:hover{text-decoration:underline}
 #fontsModal .card{max-height:92vh;overflow:auto}
+#helpModal .card{max-height:92vh;overflow:auto;width:min(760px,100%)}
+#helpModal input{width:100%;padding:7px 10px;border:1px solid #ccd;border-radius:8px;margin:4px 0 10px;font:inherit}
+#helpModal details{border-top:1px solid #eee;padding:7px 0}
+#helpModal summary{cursor:pointer;font-weight:600;font-size:14px}
+#helpModal details p,#helpModal details li{font-size:13px;line-height:1.5;color:#333;margin:5px 0}
+#helpModal kbd{background:#f1f3f6;border:1px solid #d5d9e0;border-radius:4px;padding:0 5px;font-size:12px}
 .fdir{display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin-bottom:6px;font-size:13px}
 .siglist{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
 .sigitem{position:relative;border:1px solid var(--line);border-radius:8px;padding:6px 10px;cursor:pointer;height:66px;display:flex;align-items:center;background:repeating-conic-gradient(#f1f2f4 0 25%,#fff 0 50%) 0 0/12px 12px}
@@ -126,13 +132,14 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 
 <div class="bar">
   <div class="brandwrap">
-    <button class="brand" id="bBrand" title="Menu edytora"><i>PDF</i><span>Edytor PDF <small style="font-weight:400;color:var(--muted)">v21</small> ▾</span></button>
+    <button class="brand" id="bBrand" title="Menu edytora"><i>PDF</i><span>Edytor PDF <small style="font-weight:400;color:var(--muted)">v22</small> ▾</span></button>
     <div class="appmenu" id="appMenu">
+      <button data-m="help">❓ Pomoc – jak działa każda opcja<small>narzędzia, skróty, czcionki, zapisywanie</small></button>
       <button data-m="fonts">🔤 Czcionki…<small>foldery Worda/Acrobata, pobieranie, stan</small></button>
       <button data-m="install" id="mInstall" style="display:none">⬇ Zainstaluj jako aplikację</button>
       <div class="amsep"></div>
       <a href="https://github.com/wronglogin/edytor-pdf" target="_blank" rel="noopener">ℹ️ O edytorze (GitHub) ↗</a>
-      <div class="amver">Edytor PDF · wersja 21</div>
+      <div class="amver">Edytor PDF · wersja 22</div>
     </div>
   </div>
   <button id="bOpen" title="Otwórz PDF">📂<span class="lbl">Otwórz</span></button>
@@ -147,6 +154,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
   <button id="bFit" title="Dopasuj do szerokości">↔</button>
   <span id="pageInfo"></span>
   <div class="grow"></div>
+  <button id="bHelp" title="Pomoc – jak działa każda opcja (F1)">❓<span class="lbl">Pomoc</span></button>
   <button id="bPrint" title="Drukuj (Ctrl+P)">🖨<span class="lbl">Drukuj</span></button>
   <button id="bInstall" style="display:none" title="Zainstaluj jako aplikację na tym komputerze">⬇<span class="lbl">Zainstaluj</span></button>
   <button id="bSaveAs" title="Zapisz jako nowy plik (Ctrl+Shift+S)">📄<span class="lbl">Zapisz jako</span></button>
@@ -210,9 +218,56 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 <input type="file" id="fMerge" accept="application/pdf,.pdf" multiple hidden>
 <input type="file" id="fImg" accept="image/*" hidden>
 <input type="file" id="fFontDir" webkitdirectory multiple hidden>
+<div class="modal" id="helpModal">
+  <div class="card">
+    <h3>Pomoc <small style="font-weight:400;color:var(--muted);font-size:12px">· jak działa każda opcja</small></h3>
+    <input id="helpSearch" placeholder="Szukaj, np. podpis, czcionka, kropki, zapisz…">
+    <div id="helpBody">
+<details open><summary>📂 Otwieranie, dołączanie, zapisywanie</summary>
+<p><b>Otwórz</b> – wczytuje PDF (możesz też przeciągnąć plik na okno). Plik nigdy nie jest nigdzie wysyłany – wszystko dzieje się na Twoim komputerze.</p>
+<p><b>Dołącz PDF</b> – dokleja strony innego pliku na końcu dokumentu.</p>
+<p><b>Zapisz</b> <kbd>Ctrl/Cmd+S</kbd> – nadpisuje ten sam plik (w aplikacji zainstalowanej). Za pierwszym razem przeglądarka może zapytać o zgodę. <b>Zapisz jako</b> <kbd>Ctrl/Cmd+Shift+S</kbd> – nowy plik.</p>
+<p><b>Drukuj</b> <kbd>Ctrl/Cmd+P</kbd> – drukuje dokument razem z Twoimi zmianami; w oknie drukowania możesz też wybrać „Zapisz jako PDF”.</p>
+<p><b>↶ ↷</b> – cofnij/ponów (<kbd>Ctrl/Cmd+Z</kbd>, <kbd>Ctrl/Cmd+Y</kbd>). <b>− +</b> – powiększenie, <b>↔</b> – dopasuj do szerokości.</p></details>
+<details><summary>↖ Zaznacz <kbd>V</kbd></summary>
+<p>Kliknij dodany element (tekst, podpis, obraz, rysunek), aby go zaznaczyć. Przeciągnij, aby przesunąć; ciągnij za uchwyty (rogi i boki), aby zmienić rozmiar. Strzałki przesuwają o 1 px, z <kbd>Shift</kbd> o 10 px, z <kbd>Alt</kbd> o ćwierć piksela. <kbd>Delete</kbd> albo „Usuń element” – usuwa. Dwuklik na tekście – edycja.</p></details>
+<details><summary>✏️ Edytuj tekst <kbd>E</kbd></summary>
+<p>Kliknij istniejący tekst w PDF, aby go zmienić. Edytor zakrywa oryginał prawdziwym tłem i pisze tą samą czcionką (z PDF, z komputera albo najbardziej podobnym zamiennikiem – informację widać na dole). Działa także na skanach (rozpoznawanie tekstu OCR).</p>
+<p>Gdy akapit się wydłuży, treść pod nim przesunie się w dół (opcja „Przesuwaj treść”); jeśli zabraknie miejsca, powstanie strona „ciąg dalszy”.</p></details>
+<details><summary>▦ Wypełnij <kbd>F</kbd></summary>
+<p>Wyszukuje na stronie miejsca do wpisania – puste komórki tabel, miejsce za etykietą („Date:”, „www:”), nad podkreśleniami i kropkami („........”), kwadraciki do zaznaczenia oraz prawdziwe pola formularza zapisane w PDF. Wykryte pola mają niebieską ramkę.</p>
+<p>Kliknij pole i pisz – czcionka i wielkość są dobierane z najbliższego tekstu. <kbd>Tab</kbd> przechodzi do następnego pola, <kbd>Enter</kbd> zatwierdza. Kwadracik – kliknięcie wstawia ✓.</p>
+<p>Jeśli jakiegoś pola nie wykryło, użyj „Dodaj tekst” i przeciągnij ramkę w tym miejscu.</p></details>
+<details><summary>Pasek nad wpisywanym tekstem</summary>
+<p><b>A A</b> – zmniejsz/powiększ tekst. <b>🗑</b> – usuń. <b>⟳▾</b> – zamień na symbol ✓ ✗ ●. <b>VA↔</b> – odstępy między literami. <b>💧</b> – skopiuj styl słowa z PDF do tego tekstu.</p></details>
+<details><summary>𝐓 Dodaj tekst <kbd>T</kbd></summary>
+<p>Kliknij, aby pisać w danym miejscu, albo przeciągnij, aby narysować ramkę. Ramkę można rozciągać za 8 uchwytów. Z włączonym „Dopasuj do ramki” tekst, który się nie mieści, sam się zmniejsza; po wyłączeniu powiększasz ramkę ręcznie.</p>
+<p>Z włączonym „Styl z PDF” nowy tekst dostaje czcionkę, wielkość i kolor najbliższego tekstu w dokumencie; wyłączone – ustawienia z paska (Tekst, Czcionka, B, I, Kolor).</p></details>
+<details><summary>💧 Próbnik <kbd>I</kbd></summary>
+<p>Kopiuje czcionkę, wielkość i kolor z tekstu w PDF. Po kliknięciu 💧 najedź na dokument – podświetli się linia, z której zostanie pobrany styl (nie trzeba trafiać w samo słowo).</p>
+<p>Styl dostaje zaznaczone okienko, a jeśli nic nie jest zaznaczone – ostatnio wpisane okienko. Potem jest używany dla każdego nowego tekstu i pola, dopóki nie klikniesz ✕ na etykiecie 💧 obok „Styl z PDF”. Każde okienko możesz zmienić osobno: zaznacz je i użyj 💧 jeszcze raz.</p></details>
+<details><summary>🖍 Zakreśl, ✎ Rysuj, ▭ Prostokąt, ⬜ Zakryj</summary>
+<p><b>Zakreśl</b> <kbd>H</kbd> – półprzezroczysty marker. <b>Rysuj</b> <kbd>P</kbd> – odręczna linia. <b>Prostokąt</b> <kbd>R</kbd> – ramka. <b>Zakryj</b> <kbd>W</kbd> – biały prostokąt zasłaniający treść. Kolor i grubość ustawiasz na pasku; zmiana koloru/grubości działa też na zaznaczony element.</p></details>
+<details><summary>🖼 Obraz, ✍ Podpis</summary>
+<p><b>Obraz</b> – wstawia zdjęcie lub grafikę; potem kliknij miejsce na stronie.</p>
+<p><b>Podpis</b> – narysuj podpis myszką/palcem albo wgraj zdjęcie podpisu (JPG/PNG) – tło zostanie usunięte. Podpisy są zapamiętywane tylko na tym urządzeniu.</p></details>
+<details><summary>Opcje na pasku</summary>
+<p><b>Tekst / Czcionka / B / I</b> – wielkość i krój dla nowego tekstu (gdy „Styl z PDF” jest wyłączony) albo dla zaznaczonego tekstu.</p>
+<p><b>Pisownia</b> – podkreśla błędy (słownik polski). <b>Przesuwaj treść</b> – edytowany akapit rozpycha tekst pod spodem. <b>Dopasuj do ramki</b> – tekst w ramce sam się zmniejsza. <b>Styl z PDF</b> – nowy tekst wygląda jak dokument.</p></details>
+<details><summary>🔤 Czcionki (menu „Edytor PDF ▾”)</summary>
+<p>Wskaż foldery z czcionkami (np. Worda i Acrobata) – edytor będzie z nich korzystał przy edycji. Lista pokazuje, które czcionki działają, i daje linki do bezpłatnego pobrania. Czcionki nie są nigdzie wysyłane.</p></details>
+<details><summary>⌨️ Skróty klawiszowe</summary>
+<ul><li><kbd>V</kbd> zaznacz · <kbd>E</kbd> edytuj tekst · <kbd>F</kbd> wypełnij · <kbd>T</kbd> dodaj tekst · <kbd>I</kbd> próbnik · <kbd>H</kbd> zakreśl · <kbd>P</kbd> rysuj · <kbd>R</kbd> prostokąt · <kbd>W</kbd> zakryj</li>
+<li><kbd>Esc</kbd> – anuluj / wróć do zaznaczania · <kbd>Delete</kbd> – usuń element · strzałki – przesuń · <kbd>F1</kbd> – ta pomoc</li></ul></details>
+<details><summary>🔒 Prywatność i aplikacja</summary>
+<p>Strona jest publiczna, ale Twoje pliki PDF, podpisy i czcionki zostają na Twoim komputerze. Edytor możesz zainstalować jako aplikację (menu „Edytor PDF ▾” → Zainstaluj) i ustawić jako domyślny program do PDF; działa też bez internetu. Nowa wersja ładuje się po odświeżeniu (<kbd>Cmd/Ctrl+Shift+R</kbd>).</p></details>
+    </div>
+    <div style="text-align:right;margin-top:10px"><button id="helpClose" class="tbtn">Zamknij</button></div>
+  </div>
+</div>
 <div class="modal" id="fontsModal">
   <div class="card">
-    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v21</small></h3>
+    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v22</small></h3>
     <p class="muted">Przeglądarka nie może sama przeszukać dysku, więc wskaż raz foldery z czcionkami Worda i Acrobata. Edytor je zapamięta i będzie z nich automatycznie brał brakujące czcionki przy każdej edycji. Czcionki nie są nigdzie wysyłane.</p>
     <p class="muted"><b>Mac:</b> przeglądarka nie otworzy folderów wewnątrz aplikacji („pliki systemowe”), więc najpierw skopiuj czcionki do Dokumentów: otwórz <b>Terminal</b>, wklej polecenie poniżej i naciśnij Enter. Potem kliknij „Dodaj folder…” i wybierz <b>Dokumenty → Czcionki</b>.</p>
     <div class="paths"><div class="pt">Terminal (Mac)</div><code>mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki</code><button class="copyPath" data-path="mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki">Kopiuj</button></div>
@@ -624,12 +679,29 @@ $('#appMenu').addEventListener('click', e => {
   const b = e.target.closest('[data-m]'); if (!b) return;
   closeAppMenu();
   if (b.dataset.m === 'fonts') openFontsModal();
+  if (b.dataset.m === 'help') openHelp();
   if (b.dataset.m === 'install') $('#bInstall').click();
 });
 document.addEventListener('mousedown', e => { if (!e.target.closest('.brandwrap')) closeAppMenu(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAppMenu(); });
 $('#fmRescan').onclick = async () => { await rescanFolders(); renderFontLinks(); };
 $('#fmClose').onclick = () => { $('#fontsModal').style.display = 'none'; };
+function openHelp() { $('#helpModal').style.display = 'flex'; $('#helpSearch').value = ''; filterHelp(); setTimeout(() => $('#helpSearch').focus(), 50); }
+function filterHelp() {
+  const q = $('#helpSearch').value.trim().toLowerCase();
+  document.querySelectorAll('#helpBody details').forEach((d, k) => {
+    const hit = !q || d.textContent.toLowerCase().includes(q);
+    d.style.display = hit ? '' : 'none'; d.open = q ? hit : k === 0;
+  });
+}
+$('#helpSearch').addEventListener('input', filterHelp);
+$('#helpClose').onclick = () => { $('#helpModal').style.display = 'none'; };
+$('#helpModal').addEventListener('mousedown', e => { if (e.target.id === 'helpModal') $('#helpModal').style.display = 'none'; });
+$('#bHelp').onclick = openHelp;
+document.addEventListener('keydown', e => {
+  if (e.key === 'F1') { e.preventDefault(); openHelp(); }
+  else if (e.key === 'Escape' && $('#helpModal').style.display === 'flex') $('#helpModal').style.display = 'none';
+});
 document.querySelectorAll('.copyPath').forEach(b => b.onclick = async () => {
   try { await navigator.clipboard.writeText(b.dataset.path); b.textContent = 'Skopiowano ✓'; setTimeout(() => { b.textContent = 'Kopiuj'; }, 1500); } catch (e) {}
 });
@@ -1552,7 +1624,7 @@ async function startNewText(i, x, y, spec) {
 async function detectFields(i) {
   const v = views[i], p = S.pages[i];
   if (!v || p.cont) return [];
-  if (p.fields && p.fieldsV === 5) return p.fields;
+  if (p.fields && p.fieldsV === 6) return p.fields;
   if (!p.geo || p.geo.v !== 4) { v.items = null; v.itemsP = null; p.geo = null; }
   await loadItems(i);
   const Tl = await getTextless(p);
@@ -1630,7 +1702,9 @@ async function detectFields(i) {
     const vIn = longV.filter(L => spans(L) && L.p > ox0 - 3 * K && L.p < ox1 + 3 * K);
     // to musi być wiersz tabeli: pionowe krawędzie po obu stronach albo dwie jednakowe linie poziome (tabela bez pionowych kresek)
     const edgeL = vIn.some(L => Math.abs(L.p - ox0) < 3 * K), edgeR = vIn.some(L => Math.abs(L.p - ox1) < 3 * K);
-    const twin = Math.abs(A.s - B.s) < 3 * K && Math.abs(A.e - B.e) < 3 * K && B.p - A.p <= 40 * K;
+    const ovl = Math.min(A.e, B.e) - Math.max(A.s, B.s);
+    const twin = B.p - A.p <= 40 * K && ((Math.abs(A.s - B.s) < 3 * K && Math.abs(A.e - B.e) < 3 * K) ||
+      ((Math.abs(A.s - B.s) < 3 * K || Math.abs(A.e - B.e) < 3 * K) && ovl >= 80 * K && ovl >= 0.6 * Math.min(A.len, B.len)));
     if (!(edgeL && edgeR) && !twin) continue;
     const xs = [ox0, ox1, ...vIn.filter(L => L.p > ox0 + 2 * K && L.p < ox1 - 2 * K).map(L => L.p)].sort((a, b) => a - b);
     for (let k = 0; k < xs.length - 1; k++) if (xs[k + 1] - xs[k] >= 15 * K) cells.push({ x0: xs[k], x1: xs[k + 1], y0: A.p, y1: B.p });
@@ -1721,7 +1795,7 @@ async function detectFields(i) {
   }
   // kolejność: z góry na dół, od lewej (dla klawisza Tab)
   res.sort((a, b) => (Math.abs(b.r[3] - a.r[3]) > 4 ? b.r[3] - a.r[3] : a.r[0] - b.r[0]));
-  p.fields = res; p.fieldsV = 5;
+  p.fields = res; p.fieldsV = 6;
   return res;
 }
 const fieldScr = (v, f) => scrRect(v, [[f.r[0], f.r[1]], [f.r[2], f.r[3]]]);
