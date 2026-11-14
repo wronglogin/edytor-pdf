@@ -126,6 +126,9 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
     <option value="sans">Arial / Helvetica</option><option value="serif">Times New Roman</option><option value="mono">Courier New</option>
     <option value="calibri">Calibri</option><option value="cambria">Cambria</option>
     <option value="srcsans">Source Sans (Myriad)</option><option value="srcserif">Source Serif (Minion)</option>
+    <option value="narrow">Arial Narrow</option><option value="georgia">Georgia</option><option value="palatino">Palatino / Book Antiqua</option>
+    <option value="school">Century Schoolbook</option><option value="bookman">Bookman</option>
+    <option value="symbol">Symbol (α β ∑)</option><option value="dingbats">ZapfDingbats (✓ ✗ ☐)</option>
     <option value="orig">Oryginalna (z PDF)</option><option value="local">Ta sama z komputera</option></select></label>
   <button id="bBold" class="tbtn" title="Pogrubienie (Ctrl+B)"><b>B</b></button><button id="bItal" class="tbtn" title="Kursywa (Ctrl+I)"><i style="font-family:Georgia,serif">I</i></button>
   <label class="ctl" title="Podkreśla błędy w pisanym tekście (słownik polski, działa w tle)"><input type="checkbox" id="cSpell" checked> Pisownia</label>
@@ -192,12 +195,20 @@ const FAMS = {
   calibri:  { label: 'Calibri', files: ['Carlito-Regular', 'Carlito-Bold', 'Carlito-Italic', 'Carlito-BoldItalic'], fb: 'Calibri, Arial, sans-serif', std: ['Helvetica', 'HelveticaBold', 'HelveticaOblique', 'HelveticaBoldOblique'] },
   cambria:  { label: 'Cambria', files: ['Caladea-Regular', 'Caladea-Bold', 'Caladea-Italic', 'Caladea-BoldItalic'], fb: 'Cambria, Georgia, serif', std: ['TimesRoman', 'TimesRomanBold', 'TimesRomanItalic', 'TimesRomanBoldItalic'] },
   srcsans:  { label: 'Source Sans (Myriad)', files: ['SourceSans3-Regular', 'SourceSans3-Bold', 'SourceSans3-It', 'SourceSans3-BoldIt'], fb: 'Arial, sans-serif', std: ['Helvetica', 'HelveticaBold', 'HelveticaOblique', 'HelveticaBoldOblique'] },
-  srcserif: { label: 'Source Serif (Minion)', files: ['SourceSerif4-Regular', 'SourceSerif4-Bold', 'SourceSerif4-It', 'SourceSerif4-BoldIt'], fb: 'Georgia, serif', std: ['TimesRoman', 'TimesRomanBold', 'TimesRomanItalic', 'TimesRomanBoldItalic'] }
+  srcserif: { label: 'Source Serif (Minion)', files: ['SourceSerif4-Regular', 'SourceSerif4-Bold', 'SourceSerif4-It', 'SourceSerif4-BoldIt'], fb: 'Georgia, serif', std: ['TimesRoman', 'TimesRomanBold', 'TimesRomanItalic', 'TimesRomanBoldItalic'] },
+  narrow:   { label: 'Arial Narrow', files: ['NimbusSansNarrow-Regular', 'NimbusSansNarrow-Bold', 'NimbusSansNarrow-Oblique', 'NimbusSansNarrow-BoldOblique'], fb: '"Arial Narrow", "Helvetica Narrow", Arial, sans-serif', std: ['Helvetica', 'HelveticaBold', 'HelveticaOblique', 'HelveticaBoldOblique'] },
+  georgia:  { label: 'Georgia', files: ['Gelasio-Regular', 'Gelasio-Bold', 'Gelasio-Italic', 'Gelasio-BoldItalic'], fb: 'Georgia, serif', std: ['TimesRoman', 'TimesRomanBold', 'TimesRomanItalic', 'TimesRomanBoldItalic'] },
+  palatino: { label: 'Palatino / Book Antiqua', files: ['P052-Roman', 'P052-Bold', 'P052-Italic', 'P052-BoldItalic'], fb: '"Palatino Linotype", "Book Antiqua", Palatino, serif', std: ['TimesRoman', 'TimesRomanBold', 'TimesRomanItalic', 'TimesRomanBoldItalic'] },
+  school:   { label: 'Century Schoolbook', files: ['C059-Roman', 'C059-Bold', 'C059-Italic', 'C059-BdIta'], fb: '"Century Schoolbook", serif', std: ['TimesRoman', 'TimesRomanBold', 'TimesRomanItalic', 'TimesRomanBoldItalic'] },
+  bookman:  { label: 'Bookman', files: ['URWBookman-Light', 'URWBookman-Demi', 'URWBookman-LightItalic', 'URWBookman-DemiItalic'], fb: '"Bookman Old Style", Bookman, serif', std: ['TimesRoman', 'TimesRomanBold', 'TimesRomanItalic', 'TimesRomanBoldItalic'] },
+  // symbole: wbudowane w każdy czytnik PDF – bez osadzania pliku
+  symbol:   { label: 'Symbol', files: [null, null, null, null], fb: 'Symbol, serif', std: ['Symbol', 'Symbol', 'Symbol', 'Symbol'] },
+  dingbats: { label: 'ZapfDingbats (symbole)', files: [null, null, null, null], fb: '"Zapf Dingbats", Wingdings, sans-serif', std: ['ZapfDingbats', 'ZapfDingbats', 'ZapfDingbats', 'ZapfDingbats'] }
 };
 const VARS = ['', '-bold', '-italic', '-bolditalic'];
 const FONTS = {};
 for (const [fam, d] of Object.entries(FAMS)) VARS.forEach((v, k) => {
-  FONTS[fam + v] = { file: d.files[k] + '.ttf', fb: d.fb, std: d.std[k], bold: k === 1 || k === 3, italic: k >= 2, fam };
+  FONTS[fam + v] = { file: d.files[k] ? d.files[k] + '.ttf' : null, fb: d.fb, std: d.std[k], bold: k === 1 || k === 3, italic: k >= 2, fam };
 });
 const keyParts = k => { const F = FONTS[k] || FONTS.sans; return { fam: F.fam, bold: !!F.bold, italic: !!F.italic }; };
 const makeKey = (fam, bold, italic) => fam + (bold && italic ? '-bolditalic' : bold ? '-bold' : italic ? '-italic' : '');
@@ -219,6 +230,7 @@ const measure = document.createElement('canvas').getContext('2d');
 const facePromise = {}, fontLoaded = {};
 function loadFace(key) {
   if (!FONTS[key]) key = 'sans';
+  if (!FONTS[key].file) { fontLoaded[key] = false; return Promise.resolve(false); }
   if (!facePromise[key]) {
     fontLoaded[key] = false;
     facePromise[key] = (async () => {
@@ -800,7 +812,14 @@ function guessFont(fam, name) {
   const italic = /italic|oblique|,it\b|-it\b|kursywa/i.test(name);
   const n = (name || '').toLowerCase();
   let f;
-  if (/calibri|carlito/.test(n)) f = 'calibri';
+  if (/dingbat|zapf/.test(n)) return 'dingbats';
+  if (/^symbol|standardsymbol|symbolmt/.test(n)) return 'symbol';
+  if (/narrow|condensed|nimbussansnar/.test(n) && /arial|helvetica|nimbus|sans/.test(n)) f = 'narrow';
+  else if (/georgia|gelasio/.test(n)) f = 'georgia';
+  else if (/palatino|bookantiqua|book antiqua|pagella|p052/.test(n)) f = 'palatino';
+  else if (/schoolbook|schola|c059/.test(n)) f = 'school';
+  else if (/bookman|bonum/.test(n)) f = 'bookman';
+  else if (/calibri|carlito/.test(n)) f = 'calibri';
   else if (/cambria|caladea/.test(n)) f = 'cambria';
   else if (/myriad|sourcesans|source sans/.test(n)) f = 'srcsans';
   else if (/minion|sourceserif|source serif/.test(n)) f = 'srcserif';
@@ -2301,6 +2320,12 @@ async function buildPdf(noOrig) {
   const getFont = async key => {
     if (!FONTS[key]) key = 'sans';
     if (!fontsEmb[key]) {
+      if (!FONTS[key].file) {
+        // Symbol / ZapfDingbats: czcionki wbudowane w czytniki PDF; nieobsługiwany znak → zwykły zamiennik
+        const f = await out.embedFont(StandardFonts[FONTS[key].std]);
+        fontsEmb[key] = { f, ok: true, std: true };
+        return fontsEmb[key];
+      }
       try { fontsEmb[key] = { f: await out.embedFont(await getFontBytes(key), { subset: false }), ok: true }; }
       catch (e) { fontsEmb[key] = { f: await out.embedFont(StandardFonts[FONTS[key].std]), ok: false }; fallback = true; }
     }
@@ -2344,14 +2369,18 @@ async function buildPdf(noOrig) {
       for (const r of L.runs) {
         if (opts && opts.minK != null && r.k < opts.minK) continue;
         const E = effW(a, r.wi, noOrig);
-        let font, str = t => t;
+        let font, str = t => t, isStd = false;
         if (E.of) { font = await getOrig(E.ofKey); const o = E.of; str = t => ofStr(o, t); }
-        else { const fr = await getFont(E.key); font = fr.f; if (!fr.ok) str = toAscii; }
+        else { const fr = await getFont(E.key); font = fr.f; isStd = !!fr.std; if (!fr.ok) str = toAscii; }
         const tz = Math.round(E.hs * 1000) / 10;
         if (tz !== curTz) { pg.pushOperators(PDFOperator.of('Tz', [PDFNumber.of(tz)])); curTz = tz; }
-        pg.drawText(str(r.t), {
-          x: a.pts[0][0] + r.dx * ux + r.k * lh * dx, y: a.pts[0][1] + r.dx * uy + r.k * lh * dy,
-          size: a.size, font, color: hexRgb(a.color), rotate: degrees(a.rot) });
+        const pos = { x: a.pts[0][0] + r.dx * ux + r.k * lh * dx, y: a.pts[0][1] + r.dx * uy + r.k * lh * dy, size: a.size, color: hexRgb(a.color), rotate: degrees(a.rot) };
+        try { pg.drawText(str(r.t), { ...pos, font }); }
+        catch (e) {
+          if (!isStd) throw e;
+          // znak spoza czcionki symboli – rysujemy go zwykłym zamiennikiem
+          const fr = await getFont('sans'); pg.drawText(fr.ok ? r.t : toAscii(r.t), { ...pos, font: fr.f });
+        }
       }
       if (curTz !== 100) pg.pushOperators(PDFOperator.of('Tz', [PDFNumber.of(100)]));
     } else if (a.type === 'image') {
