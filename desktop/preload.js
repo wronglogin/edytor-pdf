@@ -12,6 +12,8 @@ contextBridge.exposeInMainWorld('native', {
   fontStatus: () => ipcRenderer.invoke('font-status'),
   setDoc: name => ipcRenderer.send('set-doc', name),
   relaunch: () => ipcRenderer.send('relaunch'),
+  getPassword: p => ipcRenderer.invoke('pw-get', p),
+  setPassword: (p, pw) => ipcRenderer.send('pw-set', p, pw),
   recent: () => ipcRenderer.invoke('recent'),
   clearRecent: () => ipcRenderer.invoke('recent-clear'),
   addRecent: p => ipcRenderer.send('recent-add', p),

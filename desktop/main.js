@@ -1,7 +1,7 @@
 // Edytor PDF – aplikacja na Windows i macOS (Electron)
 // Edytor to ta sama strona co na GitHub Pages, spakowana do aplikacji. Nowe wersje edytora
 // pobierają się same w tle; nowe wersje samej aplikacji – na Windowsie instalują się same.
-const { app, BrowserWindow, protocol, net, ipcMain, dialog, shell, Menu } = require('electron');
+const { app, BrowserWindow, protocol, net, ipcMain, dialog, shell, Menu, safeStorage } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
@@ -146,6 +146,23 @@ ipcMain.handle('find-font', async (e, want) => {
 });
 ipcMain.handle('font-status', async () => { const idx = await loadFontIndex(); return { count: idx.length, dirs: fontDirs().map(d => d.dir) }; });
 
+/* ---------- zapamiętane hasła do plików (szyfrowane przez system: DPAPI / pęk kluczy) ---------- */
+const PWFILE = () => path.join(USER(), 'passwords.json');
+const pwAll = () => { try { return JSON.parse(fs.readFileSync(PWFILE(), 'utf8')); } catch (e) { return {}; } };
+const pwKey = p => (process.platform === 'win32' ? p.toLowerCase() : p);
+ipcMain.handle('pw-get', (e, p) => {
+  try { const v = pwAll()[pwKey(p)]; return v && safeStorage.isEncryptionAvailable() ? safeStorage.decryptString(Buffer.from(v, 'base64')) : null; } catch (err) { return null; }
+});
+ipcMain.on('pw-set', (e, p, pw) => {
+  try {
+    const all = pwAll();
+    if (!pw) delete all[pwKey(p)];
+    else if (safeStorage.isEncryptionAvailable()) all[pwKey(p)] = safeStorage.encryptString(pw).toString('base64');
+    else return; // bez szyfrowania systemowego nie zapisujemy haseł
+    fs.writeFileSync(PWFILE(), JSON.stringify(all));
+  } catch (err) {}
+});
+
 /* ---------- ostatnio otwierane ---------- */
 const RECENT = () => path.join(USER(), 'recent.json');
 function recentList() { try { return JSON.parse(fs.readFileSync(RECENT(), 'utf8')).filter(r => exists(r.path)); } catch (e) { return []; } }
@@ -264,6 +281,8 @@ function buildMenu() {
       { label: 'Zapisz', accelerator: 'CmdOrCtrl+S', click: send('save') },
       { label: 'Zapisz jako…', accelerator: 'CmdOrCtrl+Shift+S', click: send('saveas') },
       { label: 'Drukuj…', accelerator: 'CmdOrCtrl+P', click: send('print') },
+      { type: 'separator' },
+      { label: 'Zapomnij zapamiętane hasła', click: () => { try { fs.rmSync(PWFILE(), { force: true }); } catch (e) {} dialog.showMessageBox({ type: 'info', title: 'Edytor PDF', message: 'Zapamiętane hasła do plików zostały usunięte.' }); } },
       { type: 'separator' },
       mac ? { role: 'close', label: 'Zamknij okno' } : { role: 'quit', label: 'Zakończ' }
     ] },

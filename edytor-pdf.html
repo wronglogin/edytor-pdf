@@ -178,7 +178,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
       <button data-m="install" id="mInstall" style="display:none">⬇ Zainstaluj jako aplikację</button>
       <div class="amsep"></div>
       <a href="https://github.com/wronglogin/edytor-pdf" target="_blank" rel="noopener">ℹ️ O edytorze (GitHub) ↗</a>
-      <div class="amver">Edytor PDF · wersja 35</div>
+      <div class="amver">Edytor PDF · wersja 36</div>
     </div>
   </div>
   <button id="bOpen" title="Otwórz PDF">📂<span class="lbl">Otwórz</span></button>
@@ -273,7 +273,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
     <div id="helpBody">
 <details open><summary>🗂 Karty dokumentów</summary>
 <p>Każdy otwarty plik ma swoją kartę na samej górze – klikaj karty, aby przełączać się między dokumentami. <b>＋ Utwórz</b> otwiera pusty dokument. <b>✕</b> na karcie zamyka dokument (przy niezapisanych zmianach zapyta: Zapisz / Zapisz jako / Nie zapisuj / Anuluj) i wraca do ekranu startowego z ostatnio otwieranymi plikami. <b>🏠</b> pokazuje ekran startowy bez zamykania dokumentów. Kropka ● przy nazwie oznacza niezapisane zmiany.</p>
-<p><b>Pliki z hasłem</b> – edytor zapyta o hasło, a przy zapisie zabezpieczy plik tym samym hasłem. Pliki z samą blokadą edycji (bez hasła do otwarcia) zapisują się bez blokady. Własne hasło ustawisz w menu „Edytor PDF ▾” → <b>🔐 Zabezpiecz hasłem…</b> (tam też je zmienisz albo usuniesz). Na karcie dokumentu widać wtedy znaczek: 🔑 – plik ma hasło do otwarcia, 🔒 – plik ma hasło właściciela (blokadę edycji); najedź na znaczek, aby zobaczyć opis.</p></details>
+<p><b>Pliki z hasłem</b> – edytor zapyta o hasło, a przy zapisie zabezpieczy plik tym samym hasłem. Pliki z samą blokadą edycji (bez hasła do otwarcia) zapisują się bez blokady. Aplikacja na komputerze zapamiętuje hasło do danego pliku (zaszyfrowane w pęku kluczy systemu) i następnym razem otwiera go bez pytania; zapamiętane hasła usuniesz w menu Plik → „Zapomnij zapamiętane hasła”. Własne hasło ustawisz w menu „Edytor PDF ▾” → <b>🔐 Zabezpiecz hasłem…</b> (tam też je zmienisz albo usuniesz). Na karcie dokumentu widać wtedy znaczek: 🔑 – plik ma hasło do otwarcia, 🔒 – plik ma hasło właściciela (blokadę edycji); najedź na znaczek, aby zobaczyć opis.</p></details>
 <details><summary>📂 Otwieranie, dołączanie, zapisywanie</summary>
 <p><b>Otwórz</b> – wczytuje PDF (możesz też przeciągnąć plik na okno). Plik nigdy nie jest nigdzie wysyłany – wszystko dzieje się na Twoim komputerze.</p>
 <p><b>Dołącz PDF</b> – dokleja strony innego pliku na końcu dokumentu.</p>
@@ -324,7 +324,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 </div>
 <div class="modal" id="fontsModal">
   <div class="card">
-    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v35</small></h3>
+    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v36</small></h3>
     <p class="muted">Przeglądarka nie może sama przeszukać dysku, więc wskaż raz foldery z czcionkami Worda i Acrobata. Edytor je zapamięta i będzie z nich automatycznie brał brakujące czcionki przy każdej edycji. Czcionki nie są nigdzie wysyłane.</p>
     <p class="muted"><b>Mac:</b> przeglądarka nie otworzy folderów wewnątrz aplikacji („pliki systemowe”), więc najpierw skopiuj czcionki do Dokumentów: otwórz <b>Terminal</b>, wklej polecenie poniżej i naciśnij Enter. Potem kliknij „Dodaj folder…” i wybierz <b>Dokumenty → Czcionki</b>.</p>
     <div class="paths"><div class="pt">Terminal (Mac)</div><code>mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki</code><button class="copyPath" data-path="mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki">Kopiuj</button></div>
@@ -1175,26 +1175,33 @@ function hasEncrypt(b) { // szuka „/Encrypt” w pliku
   return false;
 }
 // Plik zaszyfrowany (hasło do otwarcia albo tylko blokada edycji) → odszyfrowana kopia w pamięci
-async function decryptPdf(bytes, name) {
+const canKeepPw = () => !!(window.native && native.getPassword);
+async function decryptPdf(bytes, name, path) {
   await loadDecrypt();
-  let pw = '', first = true;
+  let pw = '', first = true, saved = null;
+  if (path && canKeepPw()) { try { saved = await native.getPassword(path); } catch (e) {} }
   for (;;) {
-    try { const d = await PDFLibX.PDFDocument.load(bytes, { password: pw }); return { bytes: await d.save(), pw }; }
+    try {
+      const d = await PDFLibX.PDFDocument.load(bytes, { password: pw });
+      if (pw && path && canKeepPw() && pw !== saved) native.setPassword(path, pw); // aplikacja zapamiętuje hasło do tego pliku
+      return { bytes: await d.save(), pw };
+    }
     catch (e) { if (!/password/i.test(e.message || '')) throw e; }
+    if (saved && pw !== saved && first) { pw = saved; continue; } // najpierw zapamiętane hasło
     const was = $('#busy').style.display === 'flex' ? $('#busy').textContent : ''; busy(false);
     const r = await askModal({ title: 'Plik jest chroniony hasłem', text: (first ? '' : 'Nieprawidłowe hasło. ') + 'Podaj hasło, aby otworzyć „' + (name || 'dokument') + '”.', input: true, buttons: [['ok', 'Otwórz', 1], ['cancel', 'Anuluj']] });
     if (r.id !== 'ok') { const e = new Error('Anulowano'); e.cancel = true; throw e; }
     pw = r.value; first = false; if (was) busy(was);
   }
 }
-async function addSource(bytes, name) {
+async function addSource(bytes, name, path) {
   let locked = false;
   const open = () => pdfjsLib.getDocument({ data: bytes.slice(), fontExtraProperties: true }).promise;
   let pw = '';
-  if (hasEncrypt(bytes)) { const r = await decryptPdf(bytes, name); bytes = r.bytes; pw = r.pw; locked = true; }
+  if (hasEncrypt(bytes)) { const r = await decryptPdf(bytes, name, path); bytes = r.bytes; pw = r.pw; locked = true; }
   let doc;
   try { doc = await open(); }
-  catch (e) { if (e.name !== 'PasswordException' || locked) throw e; const r = await decryptPdf(bytes, name); bytes = r.bytes; pw = r.pw; locked = true; doc = await open(); }
+  catch (e) { if (e.name !== 'PasswordException' || locked) throw e; const r = await decryptPdf(bytes, name, path); bytes = r.bytes; pw = r.pw; locked = true; doc = await open(); }
   S.sources.push({ bytes, doc, locked, pw });
   S.srcs.push(S.sources.length - 1);
   return S.sources.length - 1;
@@ -1343,7 +1350,7 @@ async function openFiles(files, append, handle) {
     }
     else snap();
     for (const f of files) {
-      const si = await addSource(new Uint8Array(await f.arrayBuffer()), f.name);
+      const si = await addSource(new Uint8Array(await f.arrayBuffer()), f.name, window.native ? (S.pwPath || native.pathFor(f)) : null);
       locked = locked || S.sources[si].locked;
       if (!append && S.sources[si].pw) S.docPw = S.sources[si].pw; // hasło wraca do pliku przy zapisie
       if (!append && S.sources[si].locked) S.docLock = S.sources[si].pw ? 'user' : 'owner';
@@ -3700,7 +3707,8 @@ async function exportPdf(mode) {
       if (p) {
         try {
           await native.writeFile(p, res.bytes);
-          S.nativePath = p; S.fileHandle = null; native.addRecent(p); setTimeout(renderRecent, 300); S.name = p.split(/[\\/]/).pop().replace(/\.pdf$/i, ''); markSaved();
+          S.nativePath = p; S.fileHandle = null; native.addRecent(p); setTimeout(renderRecent, 300);
+          if (canKeepPw()) native.setPassword(p, S.docPw || ''); S.name = p.split(/[\\/]/).pop().replace(/\.pdf$/i, ''); markSaved();
           hint('Zapisano: ' + p.split(/[\\/]/).pop()); setTimeout(() => hint(''), 2500);
           if (res.fallback) alert('Nie udało się pobrać czcionki z polskimi znakami, więc w tekście zastąpiono je zwykłymi literami.');
           busy(false); return;
@@ -3746,7 +3754,8 @@ async function openNativePaths(paths, append) {
   for (let k = 0; k < paths.length; k++) {
     if (!append) { const ex = TABS.findIndex((t, i) => tabSt(i).nativePath === paths[k]); if (ex >= 0) { await switchTab(ex); continue; } }
     const r = await native.readFile(paths[k]);
-    await openFiles([new File([r.data], r.name, { type: 'application/pdf' })], append);
+    S.pwPath = r.path;
+    try { await openFiles([new File([r.data], r.name, { type: 'application/pdf' })], append); } finally { S.pwPath = null; }
     if (!append && curTab >= 0 && S.pages.length) { S.nativePath = r.path; renderTabs(); }
   }
 }
