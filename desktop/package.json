@@ -1,0 +1,52 @@
+{
+  "name": "edytor-pdf",
+  "productName": "Edytor PDF",
+  "version": "1.0.0",
+  "description": "Edytor PDF – aplikacja na Windows i macOS",
+  "author": "wronglogin",
+  "license": "MIT",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --publish never"
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.9"
+  },
+  "devDependencies": {
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "io.github.wronglogin.edytorpdf",
+    "productName": "Edytor PDF",
+    "artifactName": "Edytor-PDF-${version}-${os}-${arch}.${ext}",
+    "directories": { "output": "dist", "buildResources": "build" },
+    "files": ["main.js", "preload.js", "fontnames.js", "app/**/*"],
+    "fileAssociations": [
+      { "ext": "pdf", "name": "Dokument PDF", "description": "Dokument PDF", "mimeType": "application/pdf", "role": "Editor", "rank": "Alternate" }
+    ],
+    "mac": {
+      "target": [{ "target": "dmg", "arch": ["universal"] }],
+      "category": "public.app-category.productivity",
+      "icon": "build/icon.png",
+      "identity": "-",
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false
+    },
+    "dmg": { "title": "Edytor PDF" },
+    "win": {
+      "target": [{ "target": "nsis", "arch": ["x64"] }],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Edytor PDF"
+    },
+    "publish": [{ "provider": "github", "owner": "wronglogin", "repo": "edytor-pdf", "releaseType": "release" }]
+  }
+}

@@ -1,0 +1,69 @@
+# Buduje instalatory aplikacji (Windows .exe, macOS .dmg) i publikuje je w GitHub Releases.
+# Uruchamia się po wypchnięciu tagu v* (np. v1.0.0) albo ręcznie: Actions → Desktop → Run workflow.
+name: Desktop
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Pliki edytora do aplikacji
+        shell: bash
+        run: |
+          mkdir -p desktop/app desktop/build
+          cp edytor-pdf.html spell-worker.js manifest.webmanifest icon-192.png icon-512.png desktop/app/
+          cp -R fonts dict lib desktop/app/
+          cp icon-512.png desktop/build/icon.png
+          # biblioteki z CDN – lokalnie, żeby aplikacja działała bez internetu
+          dl() { mkdir -p "$(dirname "desktop/app/vendor/$2")"; curl -fsSL --retry 3 -o "desktop/app/vendor/$2" "$1"; }
+          dl https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js cdnjs/pdf.js/3.11.174/pdf.min.js
+          dl https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js cdnjs/pdf.js/3.11.174/pdf.worker.min.js
+          dl https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js unpkg/pdf-lib@1.17.1/pdf-lib.min.js
+          dl https://unpkg.com/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js unpkg/@pdf-lib/fontkit@1.1.1/fontkit.umd.min.js
+          # wersja aplikacji z tagu (v1.2.3 → 1.2.3)
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            cd desktop && npm pkg set version="${GITHUB_REF#refs/tags/v}"
+          fi
+
+      - name: Instalacja zależności
+        working-directory: desktop
+        run: npm install --no-audit --no-fund
+
+      - name: Budowanie i publikacja
+        working-directory: desktop
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            npx electron-builder --publish always
+          else
+            npx electron-builder --publish never
+          fi
+
+      - name: Instalatory jako artefakt (do pobrania z zakładki Actions)
+        uses: actions/upload-artifact@v4
+        with:
+          name: instalator-${{ matrix.os }}
+          path: |
+            desktop/dist/*.exe
+            desktop/dist/*.dmg
+          if-no-files-found: ignore

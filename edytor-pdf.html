@@ -110,6 +110,10 @@ body.t-place .overlay{cursor:copy}
 .fontlinks a{color:#1d4ed8;text-decoration:none;padding:3px 0}
 .fontlinks a:hover{text-decoration:underline}
 #fontsModal .card{max-height:92vh;overflow:auto}
+#appBanner{position:fixed;right:16px;bottom:16px;z-index:80;background:#1f2328;color:#fff;border-radius:10px;padding:10px 12px;font-size:13px;box-shadow:0 6px 24px rgba(0,0,0,.3);display:flex;gap:8px;align-items:center}
+#appBanner button{background:#fff;color:#1f2328;border-radius:6px;padding:4px 10px;font-weight:600}
+#appBanner button.x{background:transparent;color:#fff;padding:4px 6px}
+body.native .webonly{display:none!important}
 #helpModal .card{max-height:92vh;overflow:auto;width:min(760px,100%)}
 #helpModal input{width:100%;padding:7px 10px;border:1px solid #ccd;border-radius:8px;margin:4px 0 10px;font:inherit}
 #helpModal details{border-top:1px solid #eee;padding:7px 0}
@@ -132,14 +136,14 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 
 <div class="bar">
   <div class="brandwrap">
-    <button class="brand" id="bBrand" title="Menu edytora"><i>PDF</i><span>Edytor PDF <small style="font-weight:400;color:var(--muted)">v23</small> ▾</span></button>
+    <button class="brand" id="bBrand" title="Menu edytora"><i>PDF</i><span>Edytor PDF <small style="font-weight:400;color:var(--muted)">v24</small> ▾</span></button>
     <div class="appmenu" id="appMenu">
       <button data-m="help">❓ Pomoc – jak działa każda opcja<small>narzędzia, skróty, czcionki, zapisywanie</small></button>
       <button data-m="fonts">🔤 Czcionki…<small>foldery Worda/Acrobata, pobieranie, stan</small></button>
       <button data-m="install" id="mInstall" style="display:none">⬇ Zainstaluj jako aplikację</button>
       <div class="amsep"></div>
       <a href="https://github.com/wronglogin/edytor-pdf" target="_blank" rel="noopener">ℹ️ O edytorze (GitHub) ↗</a>
-      <div class="amver">Edytor PDF · wersja 23</div>
+      <div class="amver">Edytor PDF · wersja 24</div>
     </div>
   </div>
   <button id="bOpen" title="Otwórz PDF">📂<span class="lbl">Otwórz</span></button>
@@ -259,6 +263,10 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 <details><summary>⌨️ Skróty klawiszowe</summary>
 <ul><li><kbd>V</kbd> zaznacz · <kbd>E</kbd> edytuj tekst · <kbd>F</kbd> wypełnij · <kbd>T</kbd> dodaj tekst · <kbd>I</kbd> próbnik · <kbd>H</kbd> zakreśl · <kbd>P</kbd> rysuj · <kbd>R</kbd> prostokąt · <kbd>W</kbd> zakryj</li>
 <li><kbd>Esc</kbd> – anuluj / wróć do zaznaczania · <kbd>Delete</kbd> – usuń element · strzałki – przesuń · <kbd>F1</kbd> – ta pomoc</li></ul></details>
+<details><summary>💻 Aplikacja na Windows i macOS</summary>
+<p>Instalatory są na stronie <a href="https://github.com/wronglogin/edytor-pdf/releases/latest" target="_blank" rel="noopener">GitHub → Releases</a>: plik <b>.exe</b> dla Windows i <b>.dmg</b> dla Maca. Aplikacja działa bez internetu, otwiera PDF dwuklikiem (po ustawieniu jako domyślna), zapisuje prosto do tego samego pliku i sama znajduje czcionki systemu, Worda/Office i Acrobata.</p>
+<p>Nowe wersje edytora pobiera sama w tle – po pobraniu pokaże „Uruchom ponownie”. Na Windowsie nowa wersja aplikacji instaluje się sama po zamknięciu; na Macu pojawi się przycisk „Pobierz”.</p>
+<p><b>Ustaw jako domyślną:</b> Windows – prawy klik na PDF → Otwórz za pomocą → Wybierz inną aplikację → Edytor PDF → Zawsze. Mac – prawy klik na PDF → Pokaż informacje → Otwórz za pomocą: Edytor PDF → Zmień wszystko.</p></details>
 <details><summary>🔒 Prywatność i aplikacja</summary>
 <p>Strona jest publiczna, ale Twoje pliki PDF, podpisy i czcionki zostają na Twoim komputerze. Edytor możesz zainstalować jako aplikację (menu „Edytor PDF ▾” → Zainstaluj) i ustawić jako domyślny program do PDF; działa też bez internetu. Nowa wersja ładuje się po odświeżeniu (<kbd>Cmd/Ctrl+Shift+R</kbd>).</p></details>
     </div>
@@ -267,7 +275,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 </div>
 <div class="modal" id="fontsModal">
   <div class="card">
-    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v23</small></h3>
+    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v24</small></h3>
     <p class="muted">Przeglądarka nie może sama przeszukać dysku, więc wskaż raz foldery z czcionkami Worda i Acrobata. Edytor je zapamięta i będzie z nich automatycznie brał brakujące czcionki przy każdej edycji. Czcionki nie są nigdzie wysyłane.</p>
     <p class="muted"><b>Mac:</b> przeglądarka nie otworzy folderów wewnątrz aplikacji („pliki systemowe”), więc najpierw skopiuj czcionki do Dokumentów: otwórz <b>Terminal</b>, wklej polecenie poniżej i naciśnij Enter. Potem kliknij „Dodaj folder…” i wybierz <b>Dokumenty → Czcionki</b>.</p>
     <div class="paths"><div class="pt">Terminal (Mac)</div><code>mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki</code><button class="copyPath" data-path="mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki">Kopiuj</button></div>
@@ -432,8 +440,12 @@ async function localFont(fname) {
   OF[key] = null;
   const want = wantNames(fname);
   let data = null, label = '';
+  // 0) aplikacja na Windows/macOS: czcionki systemu, Worda/Office i Acrobata są czytane prosto z dysku
+  if (window.native) {
+    try { const r = await native.findFont([...want]); if (r && r.data) { data = new Uint8Array(r.data); label = r.label; } } catch (err) { console.warn('Czcionki z komputera:', err); }
+  }
   // 1) czcionki z folderów Worda / Acrobata (albo innych) wskazanych w „Moje czcionki”
-  try {
+  if (!data) try {
     const idx = await userFontIndex();
     const e = idx.find(f => want.has(normFont(f.ps))) || idx.find(f => want.has(normFont(f.full)));
     if (e) { data = await loadUserFont(e); label = e.full; }
@@ -597,6 +609,11 @@ async function rescanFolders() {
   busy(false); renderFontsModal();
 }
 async function renderFontsModal() {
+  if (window.native && !$('#nativeFonts')) {
+    const n = el('p', 'muted'); n.id = 'nativeFonts';
+    $('#fontDirList').before(n);
+    native.fontStatus().then(st => { n.innerHTML = '<b>Aplikacja:</b> czcionki systemu, Worda/Office (także chmurowe, np. Aptos) i Acrobata są wykrywane automatycznie – nic nie trzeba wskazywać. Znaleziono <b>' + st.count + '</b> czcionek.'; }).catch(() => {});
+  }
   const dirs = await fontDirs(), box = $('#fontDirList');
   box.innerHTML = dirs.length ? '' : '<p class="muted">Nie dodano jeszcze żadnego folderu.</p>';
   for (const d of dirs) {
@@ -1117,7 +1134,7 @@ function resetDoc(name) {
 async function openFiles(files, append, handle) {
   files = [...files].filter(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
   if (!files.length) return;
-  if (!append) { S.fileHandle = handle || null; S.savedState = null; }
+  if (!append) { S.fileHandle = handle || null; S.savedState = null; S.nativePath = window.native ? native.pathFor(files[0]) : null; if (window.native) native.setDoc(files[0].name); }
   commitEditor();
   busy('Wczytywanie…');
   try {
@@ -3310,6 +3327,21 @@ async function exportPdf(mode) {
       res = await buildPdf(true);
     }
     const blob = new Blob([res.bytes], { type: 'application/pdf' });
+    // aplikacja na Windows/macOS: zapis wprost do pliku na dysku
+    if (mode !== 'print' && window.native) {
+      let p = mode === 'saveas' ? null : S.nativePath;
+      if (!p && S.fileHandle && mode !== 'saveas') p = null; // plik otwarty przez okno wyboru przeglądarki – zapis niżej
+      else if (!p) { p = await native.saveDialog(S.name + (S.nativePath ? '-kopia' : '') + '.pdf'); if (!p) { busy(false); return; } }
+      if (p) {
+        try {
+          await native.writeFile(p, res.bytes);
+          S.nativePath = p; S.fileHandle = null; S.name = p.split(/[\\/]/).pop().replace(/\.pdf$/i, ''); markSaved();
+          hint('Zapisano: ' + p.split(/[\\/]/).pop()); setTimeout(() => hint(''), 2500);
+          if (res.fallback) alert('Nie udało się pobrać czcionki z polskimi znakami, więc w tekście zastąpiono je zwykłymi literami.');
+          busy(false); return;
+        } catch (e) { alert('Nie udało się zapisać pliku: ' + e.message); busy(false); return; }
+      }
+    }
     // zapis prosto do pliku na dysku (aplikacja zainstalowana / Chrome, Edge)
     if (mode !== 'print' && window.showSaveFilePicker) {
       let h = mode === 'saveas' ? null : S.fileHandle;
@@ -3345,7 +3377,15 @@ async function exportPdf(mode) {
 
 /* ---------- przyciski, skróty, przeciąganie plików ---------- */
 // otwieranie: w Chrome/Edge z dostępem do pliku (żeby „Zapisz” nadpisywało ten sam plik)
+async function openNativePaths(paths, append) {
+  for (let k = 0; k < paths.length; k++) {
+    const r = await native.readFile(paths[k]);
+    await openFiles([new File([r.data], r.name, { type: 'application/pdf' })], append || k > 0);
+    if (!append && k === 0) S.nativePath = r.path;
+  }
+}
 async function pickOpen() {
+  if (window.native) { const ps = await native.openDialog(); if (ps.length) await openNativePaths(ps); return; }
   if (!window.showOpenFilePicker) return $('#fOpen').click();
   try {
     const [h] = await showOpenFilePicker({ types: [{ description: 'Dokument PDF', accept: { 'application/pdf': ['.pdf'] } }] });
@@ -3366,6 +3406,26 @@ if ('launchQueue' in window) {
     await openFiles(files.slice(0, 1), false, h);
     if (files.length > 1) await openFiles(files.slice(1), true);
   });
+}
+// aplikacja na Windows/macOS
+if (window.native) {
+  document.body.classList.add('native');
+  native.on('open-path', p => openNativePaths([p]));
+  native.on('menu', m => {
+    if (m === 'open') pickOpen();
+    else if (m === 'help') openHelp();
+    else if (S.pages.length) exportPdf(m === 'save' ? undefined : m);
+  });
+  const banner = (html, btn, fn) => {
+    let b = $('#appBanner');
+    if (!b) { b = el('div'); b.id = 'appBanner'; document.body.appendChild(b); }
+    b.innerHTML = html + (btn ? ' <button>' + btn + '</button>' : '') + ' <button class="x">✕</button>';
+    if (btn) b.querySelector('button').onclick = fn;
+    b.querySelector('.x').onclick = () => b.remove();
+  };
+  native.on('editor-updated', v => banner('Pobrano nową wersję edytora (v' + v + ').', 'Uruchom ponownie', () => { if (!isDirty() || confirm('Masz niezapisane zmiany. Uruchomić ponownie bez zapisywania?')) native.relaunch(); }));
+  native.on('app-updated', v => banner('Nowa wersja aplikacji ' + v + ' zainstaluje się po jej zamknięciu.'));
+  native.on('app-available', v => banner('Jest nowa wersja aplikacji ' + v + '.', 'Pobierz', () => window.open('https://github.com/wronglogin/edytor-pdf/releases/latest')));
 }
 // instalacja jako aplikacja
 let installEvt = null;

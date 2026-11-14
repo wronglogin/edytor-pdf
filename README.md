@@ -11,7 +11,13 @@ Edytor PDF działający w całości w przeglądarce. Pliki nie są nigdzie wysy�
 - obracanie, przestawianie, usuwanie i łączenie stron, drukowanie
 - instalacja jako aplikacja (Chrome/Edge) i otwieranie plików PDF z systemu
 
-## Instalacja jako aplikacja
+## Aplikacja na Windows i macOS
+Instalatory: **[Releases → najnowsza wersja](https://github.com/wronglogin/edytor-pdf/releases/latest)** – `Edytor-PDF-…-win-x64.exe` (Windows) i `Edytor-PDF-…-mac-universal.dmg` (Mac, Intel i Apple Silicon).
+Aplikacja działa bez internetu, zapisuje do tego samego pliku i sama znajduje czcionki systemu, Worda/Office i Acrobata (czytane tylko lokalnie).
+Nowe wersje edytora pobiera sama; na Windowsie sama się też aktualizuje.
+Kod aplikacji: `desktop/` (Electron), budowanie: `.github/workflows/desktop.yml` (uruchamia się po wypchnięciu tagu `v*`).
+
+## Instalacja jako aplikacja z przeglądarki
 Otwórz adres w Chrome lub Edge → „Zainstaluj” na pasku edytora (albo ikona instalacji w pasku adresu).
 Potem ustaw „Edytor PDF” jako domyślny program dla plików `.pdf`.
 
