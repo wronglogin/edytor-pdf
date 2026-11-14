@@ -147,7 +147,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 
 <div class="bar">
   <div class="brandwrap">
-    <button class="brand" id="bBrand" title="Menu edytora"><i>PDF</i><span>Edytor PDF <small style="font-weight:400;color:var(--muted)">v26</small> ▾</span></button>
+    <button class="brand" id="bBrand" title="Menu edytora"><i>PDF</i><span>Edytor PDF <small style="font-weight:400;color:var(--muted)">v27</small> ▾</span></button>
     <div class="appmenu" id="appMenu">
       <div id="recentMenu" class="recent"></div>
       <button data-m="help">❓ Pomoc – jak działa każda opcja<small>narzędzia, skróty, czcionki, zapisywanie</small></button>
@@ -155,7 +155,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
       <button data-m="install" id="mInstall" style="display:none">⬇ Zainstaluj jako aplikację</button>
       <div class="amsep"></div>
       <a href="https://github.com/wronglogin/edytor-pdf" target="_blank" rel="noopener">ℹ️ O edytorze (GitHub) ↗</a>
-      <div class="amver">Edytor PDF · wersja 26</div>
+      <div class="amver">Edytor PDF · wersja 27</div>
     </div>
   </div>
   <button id="bOpen" title="Otwórz PDF">📂<span class="lbl">Otwórz</span></button>
@@ -248,7 +248,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 <p><b>Drukuj</b> <kbd>Ctrl/Cmd+P</kbd> – drukuje dokument razem z Twoimi zmianami; w oknie drukowania możesz też wybrać „Zapisz jako PDF”.</p>
 <p><b>↶ ↷</b> – cofnij/ponów (<kbd>Ctrl/Cmd+Z</kbd>, <kbd>Ctrl/Cmd+Y</kbd>). <b>− +</b> – powiększenie, <b>↔</b> – dopasuj do szerokości.</p></details>
 <details><summary>↖ Zaznacz <kbd>V</kbd></summary>
-<p>Kliknij dodany element (tekst, podpis, obraz, rysunek), aby go zaznaczyć. Przeciągnij, aby przesunąć; ciągnij za uchwyty (rogi i boki), aby zmienić rozmiar. Strzałki przesuwają o 1 px, z <kbd>Shift</kbd> o 10 px, z <kbd>Alt</kbd> o ćwierć piksela. <kbd>Delete</kbd> albo „Usuń element” – usuwa. Dwuklik na tekście – edycja.</p></details>
+<p>Kliknięcie włączonego narzędzia jeszcze raz (albo <kbd>Esc</kbd>) wyłącza je i wraca do zwykłego przeglądania. Kliknij dodany element (tekst, podpis, obraz, rysunek), aby go zaznaczyć. Przeciągnij, aby przesunąć; ciągnij za uchwyty (rogi i boki), aby zmienić rozmiar. Strzałki przesuwają o 1 px, z <kbd>Shift</kbd> o 10 px, z <kbd>Alt</kbd> o ćwierć piksela. <kbd>Delete</kbd> albo „Usuń element” – usuwa. Dwuklik na tekście – edycja.</p></details>
 <details><summary>✏️ Edytuj tekst <kbd>E</kbd></summary>
 <p>Kliknij istniejący tekst w PDF, aby go zmienić. Edytor zakrywa oryginał prawdziwym tłem i pisze tą samą czcionką (z PDF, z komputera albo najbardziej podobnym zamiennikiem – informację widać na dole). Działa także na skanach (rozpoznawanie tekstu OCR).</p>
 <p>Gdy akapit się wydłuży, treść pod nim przesunie się w dół (opcja „Przesuwaj treść”); jeśli zabraknie miejsca, powstanie strona „ciąg dalszy”.</p></details>
@@ -291,7 +291,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 </div>
 <div class="modal" id="fontsModal">
   <div class="card">
-    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v26</small></h3>
+    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v27</small></h3>
     <p class="muted">Przeglądarka nie może sama przeszukać dysku, więc wskaż raz foldery z czcionkami Worda i Acrobata. Edytor je zapamięta i będzie z nich automatycznie brał brakujące czcionki przy każdej edycji. Czcionki nie są nigdzie wysyłane.</p>
     <p class="muted"><b>Mac:</b> przeglądarka nie otworzy folderów wewnątrz aplikacji („pliki systemowe”), więc najpierw skopiuj czcionki do Dokumentów: otwórz <b>Terminal</b>, wklej polecenie poniżej i naciśnij Enter. Potem kliknij „Dodaj folder…” i wybierz <b>Dokumenty → Czcionki</b>.</p>
     <div class="paths"><div class="pt">Terminal (Mac)</div><code>mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki</code><button class="copyPath" data-path="mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki">Kopiuj</button></div>
@@ -3017,6 +3017,8 @@ document.querySelectorAll('.tool').forEach(b => b.onclick = () => {
   const t = b.dataset.tool;
   if (t === 'sign') return openSig(); // podpisy można dodawać i zapisywać bez otwartego dokumentu
   if (!S.pages.length) return alert('Najpierw otwórz dokument PDF.');
+  // ponowne kliknięcie włączonego narzędzia wyłącza je – powrót do zwykłego przeglądania
+  if (t !== 'select' && (S.tool === t || (S.tool === 'place' && S.placeTool === t))) return setTool('select');
   if (t === 'image') $('#fImg').click();
   else if (t === 'pick') startPick();
   else if (t === 'sign') openSig();
