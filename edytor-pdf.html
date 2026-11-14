@@ -123,13 +123,13 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 
 <div class="bar">
   <div class="brandwrap">
-    <button class="brand" id="bBrand" title="Menu edytora"><i>PDF</i><span>Edytor PDF <small style="font-weight:400;color:var(--muted)">v16</small> ▾</span></button>
+    <button class="brand" id="bBrand" title="Menu edytora"><i>PDF</i><span>Edytor PDF <small style="font-weight:400;color:var(--muted)">v17</small> ▾</span></button>
     <div class="appmenu" id="appMenu">
       <button data-m="fonts">🔤 Czcionki…<small>foldery Worda/Acrobata, pobieranie, stan</small></button>
       <button data-m="install" id="mInstall" style="display:none">⬇ Zainstaluj jako aplikację</button>
       <div class="amsep"></div>
       <a href="https://github.com/wronglogin/edytor-pdf" target="_blank" rel="noopener">ℹ️ O edytorze (GitHub) ↗</a>
-      <div class="amver">Edytor PDF · wersja 16</div>
+      <div class="amver">Edytor PDF · wersja 17</div>
     </div>
   </div>
   <button id="bOpen" title="Otwórz PDF">📂<span class="lbl">Otwórz</span></button>
@@ -207,7 +207,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 <input type="file" id="fFontDir" webkitdirectory multiple hidden>
 <div class="modal" id="fontsModal">
   <div class="card">
-    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v16</small></h3>
+    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v17</small></h3>
     <p class="muted">Przeglądarka nie może sama przeszukać dysku, więc wskaż raz foldery z czcionkami Worda i Acrobata. Edytor je zapamięta i będzie z nich automatycznie brał brakujące czcionki przy każdej edycji. Czcionki nie są nigdzie wysyłane.</p>
     <p class="muted"><b>Mac:</b> przeglądarka nie otworzy folderów wewnątrz aplikacji („pliki systemowe”), więc najpierw skopiuj czcionki do Dokumentów: otwórz <b>Terminal</b>, wklej polecenie poniżej i naciśnij Enter. Potem kliknij „Dodaj folder…” i wybierz <b>Dokumenty → Czcionki</b>.</p>
     <div class="paths"><div class="pt">Terminal (Mac)</div><code>mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki</code><button class="copyPath" data-path="mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki">Kopiuj</button></div>
@@ -797,15 +797,28 @@ function shiftCells(sh, view, floor) {
 }
 // geometria oryginalnej strony: linie tekstu, stopka, marginesy
 function buildGeo(lines, view) {
-  const L = lines.filter(l => l.str.trim()).map(l => {
+  const leaders = [];
+  const L = lines.filter(l => l.str.trim()).flatMap(l => {
     const rad = l.rot * Math.PI / 180, ux = Math.cos(rad), uy = Math.sin(rad);
+    const spans = [];
+    if (l.rot === 0) for (const g of l.segs || []) {
+      const t = g.rs || g.str; if (g.x == null || !t) continue;
+      for (const m of t.matchAll(/[.·_…]{6,}/g)) spans.push([g.x + g.w * m.index / t.length, g.x + g.w * (m.index + m[0].length) / t.length]);
+    }
+    if (spans.length) {
+      spans.forEach(([a, b]) => leaders.push([a, l.y - 0.3 * l.size, b, l.y + 0.35 * l.size, l.size]));
+      const parts = []; let cur = l.x;
+      for (const [a, b] of spans.sort((p, q) => p[0] - q[0])) { if (a - cur > 1) parts.push([cur, a]); cur = Math.max(cur, b); }
+      if (l.x + l.w - cur > 1) parts.push([cur, l.x + l.w]);
+      return parts.map(([a, b]) => [a - 0.5, l.y - 0.28 * l.size, b + 0.5, l.y + 0.98 * l.size, l.size]);
+    }
     const pts = [[-0.5, -0.28 * l.size], [l.w + 0.5, -0.28 * l.size], [-0.5, 0.98 * l.size], [l.w + 0.5, 0.98 * l.size]]
       .map(([lx, ly]) => [l.x + lx * ux - ly * uy, l.y + lx * uy + ly * ux]);
     const xs = pts.map(q => q[0]), ys = pts.map(q => q[1]);
-    return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys), l.size];
+    return [[Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys), l.size]];
   });
   const r2 = n => Math.round(n * 100) / 100;
-  const g = { view: [...view], lines: L.map(b => b.slice(0, 4).map(r2)), floor: view[1], T: view[3] - 54, M: view[1] + 54 };
+  const g = { view: [...view], lines: L.map(b => b.slice(0, 4).map(r2)), leaders: leaders.map(b => b.map(r2)), floor: view[1], T: view[3] - 54, M: view[1] + 54 };
   if (!L.length) return g;
   const H = view[3] - view[1];
   let body = L;
@@ -1261,7 +1274,7 @@ async function loadItemsInner(i) {
   // 1) fragmenty → linie
   const lines = [];
   for (const r of raw) {
-    const seg = { str: r.str, w: r.w, font: r.font, ofont: r.ofont, fname: r.fname };
+    const seg = { str: r.str, w: r.w, font: r.font, ofont: r.ofont, fname: r.fname, x: r.x, rs: r.str };
     const q = lines[lines.length - 1];
     if (q && q.rot === r.rot && Math.abs(q.size - r.size) < q.size * 0.15) {
       const rad = q.rot * Math.PI / 180, ux = Math.cos(rad), uy = Math.sin(rad);
@@ -1520,7 +1533,8 @@ async function startNewText(i, x, y, spec) {
 async function detectFields(i) {
   const v = views[i], p = S.pages[i];
   if (!v || p.cont) return [];
-  if (p.fields) return p.fields;
+  if (p.fields && p.fieldsV === 2) return p.fields;
+  if (!p.geo || !p.geo.leaders) { v.items = null; v.itemsP = null; p.geo = null; }
   await loadItems(i);
   const Tl = await getTextless(p);
   if (!Tl || views[i] !== v) return [];
@@ -1551,10 +1565,34 @@ async function detectFields(i) {
     return lines.filter(L => L.a1 - L.a0 + 1 <= 3.2 * K).map(L => ({ p: (L.a0 + L.a1) / 2, s: L.b, e: L.e, len: L.e - L.b }));
   };
   const HL = runs(true, 6 * K), VL = runs(false, 6 * K);
+  // linie z kropek / kresek narysowane jako grafika („.............”)
+  const dotsRaw = [];
+  for (let y = 0; y < H; y++) {
+    let ch = null, x = 0;
+    const flush = () => { if (ch && ch.n >= 6 && ch.e - ch.s >= 30 * K) dotsRaw.push({ y, s: ch.s, e: ch.e }); ch = null; };
+    while (x < W) {
+      if (!dark[y * W + x]) { x++; continue; }
+      let e = x; while (e < W && dark[y * W + e]) e++;
+      if (e - x > 4 * K) flush();
+      else if (ch && x - ch.e <= 4 * K) { ch.e = e; ch.n++; }
+      else { flush(); ch = { s: x, e, n: 1 }; }
+      x = e;
+    }
+    flush();
+  }
+  const DOTG = [];
+  for (const d of dotsRaw) {
+    const o = DOTG.find(o => d.y - o.y1 <= 2 && Math.abs(o.s - d.s) < 4 * K && Math.abs(o.e - d.e) < 4 * K);
+    if (o) o.y1 = d.y; else DOTG.push({ y0: d.y, y1: d.y, s: d.s, e: d.e });
+  }
   const view = p.geo ? p.geo.view : v.pp.view;
   const toPx = (x, y) => [(x - view[0]) * K, (view[3] - y) * K];
   const texts = (p.geo ? p.geo.lines : []).map(l => { const [a, b] = toPx(l[0], l[3]), [c, d] = toPx(l[2], l[1]); return { x0: a, y0: b, x1: c, y1: d }; });
   const textIn = (x0, y0, x1, y1) => texts.filter(t => t.x1 > x0 && t.x0 < x1 && t.y1 > y0 && t.y0 < y1);
+  // wykropkowane linie: z grafiki i z tekstu („......” zapisane znakami)
+  const DOTS = DOTG.filter(o => o.y1 - o.y0 <= 3 * K).map(o => ({ p: o.y1 + 1 * K, s: o.s, e: o.e, len: o.e - o.s, dot: true }))
+    .concat(((p.geo && p.geo.leaders) || []).map(b => { const [a] = toPx(b[0], b[3]), [c, bot] = toPx(b[2], b[1]); return { p: bot + 1 * K, s: a, e: c, len: c - a, dot: true }; }))
+    .filter(L => L.len >= 25 * K);
   const F = [], cells = [];
   const add = (x0, y0, x1, y1, kind) => { if (x1 - x0 >= (kind === 'check' ? 5 : 20) * K && y1 - y0 >= (kind === 'check' ? 5 : 8) * K) F.push({ x0, y0, x1, y1, kind }); };
   // 1) komórki tabel
@@ -1580,6 +1618,7 @@ async function detectFields(i) {
   const pad = 2.5 * K;
   for (const c of cells) {
     const x0 = c.x0 + pad, x1 = c.x1 - pad, y0 = c.y0 + pad, y1 = c.y1 - pad;
+    if (DOTS.some(L => L.p > c.y0 && L.p < c.y1 + 2 * K && L.s >= c.x0 - 2 * K && L.e <= c.x1 + 2 * K)) continue; // tu pole wyznaczy linia z kropek
     const T = textIn(x0, y0, x1, y1);
     if (!T.length) { add(x0, y0, x1, y1, 'text'); continue; }
     const R = Math.max(...T.map(t => t.x1)), Bt = Math.max(...T.map(t => t.y1)), Tp = Math.min(...T.map(t => t.y0));
@@ -1589,13 +1628,18 @@ async function detectFields(i) {
   }
   // 2) podkreślenia („Imię: ________”)
   const inCells = (x0, y0, x1, y1) => cells.some(c => Math.min(x1, c.x1) - Math.max(x0, c.x0) > 4 * K && Math.min(y1, c.y1) - Math.max(y0, c.y0) > 4 * K);
-  for (const L of HL.filter(L => L.len >= 30 * K)) {
-    const y1 = L.p - 1.5 * K, y0 = L.p - 16 * K;
-    if (inCells(L.s, y0, L.e, y1)) continue;
-    // krawędź tabeli to nie podkreślenie
-    if (cells.some(c => (Math.abs(c.y0 - L.p) < 3 * K || Math.abs(c.y1 - L.p) < 3 * K) && Math.min(c.x1, L.e) - Math.max(c.x0, L.s) > 10 * K)) continue;
+  for (const L of [...HL.filter(L => L.len >= 30 * K), ...DOTS]) {
+    const y1 = L.p - 1.5 * K;
+    let y0 = L.p - 16 * K;
+    if (!L.dot) {
+      if (inCells(L.s, y0, L.e, y1)) continue;
+      // krawędź tabeli to nie podkreślenie
+      if (cells.some(c => (Math.abs(c.y0 - L.p) < 3 * K || Math.abs(c.y1 - L.p) < 3 * K) && Math.min(c.x1, L.e) - Math.max(c.x0, L.s) > 10 * K)) continue;
+    }
     if (HL.some(M => M !== L && M.p < y1 && M.p > y0 && Math.min(M.e, L.e) - Math.max(M.s, L.s) > 10 * K)) continue;
-    const T = textIn(L.s, y0, L.e, y1);
+    // tekst wiersza powyżej nie może „wchodzić” w pole – obniżamy górną krawędź
+    for (const t of texts) if (t.x1 > L.s && t.x0 < L.e && t.y0 < y0 && t.y1 > y0) y0 = t.y1 + 1 * K;
+    const T = texts.filter(t => t.x1 > L.s && t.x0 < L.e && Math.min(t.y1, y1) - Math.max(t.y0, y0) > 0.5 * (t.y1 - t.y0));
     if (!T.length) add(L.s, y0, L.e, y1, 'text');
     else { const R = Math.max(...T.map(t => t.x1)); if (L.e - R >= 30 * K) add(R + 5 * K, y0, L.e, y1, 'text'); }
   }
@@ -1632,7 +1676,7 @@ async function detectFields(i) {
   }
   // kolejność: z góry na dół, od lewej (dla klawisza Tab)
   res.sort((a, b) => (Math.abs(b.r[3] - a.r[3]) > 4 ? b.r[3] - a.r[3] : a.r[0] - b.r[0]));
-  p.fields = res;
+  p.fields = res; p.fieldsV = 2;
   return res;
 }
 const fieldScr = (v, f) => scrRect(v, [[f.r[0], f.r[1]], [f.r[2], f.r[3]]]);
