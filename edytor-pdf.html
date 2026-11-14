@@ -104,7 +104,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 <body>
 
 <div class="bar">
-  <div class="brand"><i>PDF</i><span>Edytor PDF</span></div>
+  <div class="brand" title="Edytor PDF – wersja 12"><i>PDF</i><span>Edytor PDF <small style="font-weight:400;color:var(--muted)">v12</small></span></div>
   <button id="bOpen" title="Otwórz PDF">📂<span class="lbl">Otwórz</span></button>
   <button id="bMerge" title="Dołącz kolejny PDF na końcu">➕<span class="lbl">Dołącz PDF</span></button>
   <div class="sep"></div>
@@ -180,7 +180,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 <input type="file" id="fFontDir" webkitdirectory multiple hidden>
 <div class="modal" id="fontsModal">
   <div class="card">
-    <h3>Moje czcionki</h3>
+    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v12</small></h3>
     <p class="muted">Przeglądarka nie może sama przeszukać dysku, więc wskaż raz foldery z czcionkami Worda i Acrobata. Edytor je zapamięta i będzie z nich automatycznie brał brakujące czcionki przy każdej edycji. Czcionki nie są nigdzie wysyłane.</p>
     <p class="muted"><b>Mac:</b> przeglądarka nie otworzy folderów wewnątrz aplikacji („pliki systemowe”), więc najpierw skopiuj czcionki do Dokumentów: otwórz <b>Terminal</b>, wklej polecenie poniżej i naciśnij Enter. Potem kliknij „Dodaj folder…” i wybierz <b>Dokumenty → Czcionki</b>.</p>
     <div class="paths"><div class="pt">Terminal (Mac)</div><code>mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki</code><button class="copyPath" data-path="mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki">Kopiuj</button></div>
@@ -2818,7 +2818,16 @@ let installEvt = null;
 window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; $('#bInstall').style.display = ''; });
 window.addEventListener('appinstalled', () => { $('#bInstall').style.display = 'none'; installEvt = null; });
 $('#bInstall').onclick = async () => { if (!installEvt) return; installEvt.prompt(); await installEvt.userChoice; installEvt = null; $('#bInstall').style.display = 'none'; };
-if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(r => r.update()).catch(() => {});
+  // nowa wersja aplikacji gotowa → przeładuj (jeśli nie ma niezapisanych zmian)
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (reloaded) return;
+    if (isDirty()) { hint('Jest nowa wersja edytora – zapisz pracę i uruchom aplikację ponownie'); return; }
+    reloaded = true; location.reload();
+  });
+}
 $('#bMerge').onclick = () => S.pages.length ? $('#fMerge').click() : $('#fOpen').click();
 $('#bNew').onclick = newDoc;
 $('#fOpen').onchange = e => { openFiles(e.target.files, false); e.target.value = ''; };
