@@ -139,7 +139,11 @@ body.native .webonly{display:none!important}
 .tab button::before{content:"";width:10px;height:10px;background:linear-gradient(45deg,transparent 43%,currentColor 43%,currentColor 57%,transparent 57%),linear-gradient(-45deg,transparent 43%,currentColor 43%,currentColor 57%,transparent 57%)}
 .tab button:hover{background:#d5d9e0;color:#000}
 #askModal{z-index:95}#askModal .card{width:min(480px,100%)}
-#askInput{width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid #ccd;border-radius:8px;font:inherit;margin-top:6px;caret-color:auto}
+#askRow{display:flex;align-items:center;margin-top:6px;border:1px solid #ccd;border-radius:8px;overflow:hidden;background:#fff}
+#askRow:focus-within{border-color:#2563eb;box-shadow:0 0 0 2px #2563eb33}
+#askInput{flex:1;min-width:0;box-sizing:border-box;padding:8px 10px;border:0;outline:none;font:inherit;caret-color:auto;user-select:text;-webkit-user-select:text;background:transparent}
+#askRow button{border:0;background:transparent;padding:6px 9px;cursor:pointer;font-size:15px;line-height:1;opacity:.65}
+#askRow button:hover{opacity:1;background:#f0f1f4}#askEye.on{opacity:1;background:#e6ecfb}
 #askBtns{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:16px}
 #askBtns button{padding:8px 14px;border-radius:8px;border:1px solid #c5cad3;background:#fff;cursor:pointer;font:inherit}
 #askBtns button.pri{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
@@ -178,7 +182,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
       <button data-m="install" id="mInstall" style="display:none">⬇ Zainstaluj jako aplikację</button>
       <div class="amsep"></div>
       <a href="https://github.com/wronglogin/edytor-pdf" target="_blank" rel="noopener">ℹ️ O edytorze (GitHub) ↗</a>
-      <div class="amver">Edytor PDF · wersja 36</div>
+      <div class="amver">Edytor PDF · wersja 37</div>
     </div>
   </div>
   <button id="bOpen" title="Otwórz PDF">📂<span class="lbl">Otwórz</span></button>
@@ -262,7 +266,11 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
   <div class="card">
     <h3 id="askTitle"></h3>
     <p id="askText" class="muted"></p>
-    <input id="askInput" type="password" autocomplete="off" placeholder="Hasło">
+    <div id="askRow">
+      <input id="askInput" type="password" autocomplete="off" placeholder="Hasło">
+      <button type="button" id="askPaste" title="Wklej ze schowka">📋</button>
+      <button type="button" id="askEye" title="Pokaż / ukryj hasło">👁</button>
+    </div>
     <div id="askBtns"></div>
   </div>
 </div>
@@ -324,7 +332,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 </div>
 <div class="modal" id="fontsModal">
   <div class="card">
-    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v36</small></h3>
+    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v37</small></h3>
     <p class="muted">Przeglądarka nie może sama przeszukać dysku, więc wskaż raz foldery z czcionkami Worda i Acrobata. Edytor je zapamięta i będzie z nich automatycznie brał brakujące czcionki przy każdej edycji. Czcionki nie są nigdzie wysyłane.</p>
     <p class="muted"><b>Mac:</b> przeglądarka nie otworzy folderów wewnątrz aplikacji („pliki systemowe”), więc najpierw skopiuj czcionki do Dokumentów: otwórz <b>Terminal</b>, wklej polecenie poniżej i naciśnij Enter. Potem kliknij „Dodaj folder…” i wybierz <b>Dokumenty → Czcionki</b>.</p>
     <div class="paths"><div class="pt">Terminal (Mac)</div><code>mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki</code><button class="copyPath" data-path="mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki">Kopiuj</button></div>
@@ -1211,13 +1219,14 @@ function askModal({ title, text, input, show, buttons }) {
   return new Promise(res => {
     const m = $('#askModal'), inp = $('#askInput'), box = $('#askBtns');
     $('#askTitle').textContent = title; $('#askText').textContent = text || '';
-    inp.style.display = input ? '' : 'none'; inp.value = ''; inp.type = show ? 'text' : 'password';
+    $('#askRow').style.display = input ? 'flex' : 'none'; inp.value = ''; inp.type = show ? 'text' : 'password';
+    $('#askEye').classList.toggle('on', !!show);
     box.innerHTML = '';
     const done = id => { m.style.display = 'none'; document.removeEventListener('keydown', onKey, true); res(input ? { id, value: inp.value } : id); };
     const onKey = e => {
       if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); done(buttons[buttons.length - 1][0]); }
       else if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); done(buttons[0][0]); }
-      else e.stopPropagation();
+      else e.stopPropagation(); // reszta klawiszy (także Ctrl+V) trafia tylko do pola, nie do skrótów edytora
     };
     for (const [id, label, pri] of buttons) { const b = el('button', pri ? 'pri' : ''); b.textContent = label; b.onclick = () => done(id); box.appendChild(b); }
     document.addEventListener('keydown', onKey, true);
@@ -1241,6 +1250,13 @@ async function setDocPassword() {
   renderTabs();
   await exportPdf(S.nativePath || S.fileHandle ? undefined : 'saveas');
 }
+$('#askEye').onclick = () => { const i = $('#askInput'), on = i.type === 'password'; i.type = on ? 'text' : 'password'; $('#askEye').classList.toggle('on', on); i.focus(); };
+$('#askPaste').onclick = async () => {
+  const i = $('#askInput');
+  try { const t = (await navigator.clipboard.readText()).replace(/[\r\n]+$/, ''); if (t) i.value = t; }
+  catch (e) { hint('Nie mam dostępu do schowka – kliknij w pole i naciśnij Ctrl+V (Cmd+V).'); setTimeout(() => hint(''), 4000); }
+  i.focus();
+};
 /* ---------- karty dokumentów ---------- */
 const DOCKEYS = ['pages', 'undo', 'redo', 'name', 'fileHandle', 'nativePath', 'savedState', 'sel', 'cur', 'zoom', 'blankSrc', 'mark', 'lastText', 'formNav', 'srcs', 'docPw', 'docLock'];
 const TABS = []; let curTab = -1;

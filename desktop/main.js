@@ -226,6 +226,11 @@ function createWindow() {
   // linki (pobieranie czcionek, GitHub) – w zwykłej przeglądarce
   w.webContents.setWindowOpenHandler(({ url }) => { if (/^https?:/.test(url)) shell.openExternal(url); return { action: 'deny' }; });
   w.webContents.on('will-navigate', (e, url) => { if (!url.startsWith('app://')) { e.preventDefault(); shell.openExternal(url); } });
+  // prawy przycisk myszy w polach tekstowych: Wytnij / Kopiuj / Wklej
+  w.webContents.on('context-menu', (e, params) => {
+    if (!params.isEditable) return;
+    Menu.buildFromTemplate([{ role: 'cut', label: 'Wytnij' }, { role: 'copy', label: 'Kopiuj' }, { role: 'paste', label: 'Wklej' }, { type: 'separator' }, { role: 'selectAll', label: 'Zaznacz wszystko' }]).popup({ window: w });
+  });
   // niezapisane zmiany przy zamykaniu: Zapisz / Nie zapisuj / Anuluj
   w.on('close', async e => {
     if (w.forceClose) return;
