@@ -126,13 +126,13 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 
 <div class="bar">
   <div class="brandwrap">
-    <button class="brand" id="bBrand" title="Menu edytora"><i>PDF</i><span>Edytor PDF <small style="font-weight:400;color:var(--muted)">v19</small> ▾</span></button>
+    <button class="brand" id="bBrand" title="Menu edytora"><i>PDF</i><span>Edytor PDF <small style="font-weight:400;color:var(--muted)">v20</small> ▾</span></button>
     <div class="appmenu" id="appMenu">
       <button data-m="fonts">🔤 Czcionki…<small>foldery Worda/Acrobata, pobieranie, stan</small></button>
       <button data-m="install" id="mInstall" style="display:none">⬇ Zainstaluj jako aplikację</button>
       <div class="amsep"></div>
       <a href="https://github.com/wronglogin/edytor-pdf" target="_blank" rel="noopener">ℹ️ O edytorze (GitHub) ↗</a>
-      <div class="amver">Edytor PDF · wersja 19</div>
+      <div class="amver">Edytor PDF · wersja 20</div>
     </div>
   </div>
   <button id="bOpen" title="Otwórz PDF">📂<span class="lbl">Otwórz</span></button>
@@ -212,7 +212,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 <input type="file" id="fFontDir" webkitdirectory multiple hidden>
 <div class="modal" id="fontsModal">
   <div class="card">
-    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v19</small></h3>
+    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v20</small></h3>
     <p class="muted">Przeglądarka nie może sama przeszukać dysku, więc wskaż raz foldery z czcionkami Worda i Acrobata. Edytor je zapamięta i będzie z nich automatycznie brał brakujące czcionki przy każdej edycji. Czcionki nie są nigdzie wysyłane.</p>
     <p class="muted"><b>Mac:</b> przeglądarka nie otworzy folderów wewnątrz aplikacji („pliki systemowe”), więc najpierw skopiuj czcionki do Dokumentów: otwórz <b>Terminal</b>, wklej polecenie poniżej i naciśnij Enter. Potem kliknij „Dodaj folder…” i wybierz <b>Dokumenty → Czcionki</b>.</p>
     <div class="paths"><div class="pt">Terminal (Mac)</div><code>mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki</code><button class="copyPath" data-path="mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki">Kopiuj</button></div>
@@ -1995,7 +1995,7 @@ function drawOverlay(i) {
     }
     ctx.restore();
   }
-  if (S.tool === 'edittext' && v.items) {
+  if ((S.tool === 'edittext' || S.tool === 'pick') && v.items) {
     ctx.save();
     for (const it of v.items) {
       const di = dispA(F.sh, it);
@@ -2213,6 +2213,11 @@ function onMove(e, i) {
     v.overlay.style.cursor = h ? h.cur : (hit >= 0 ? 'move' : '');
     const hov = hit != null && hit >= 0 ? hit : null;
     if (hov !== v.hoverAnn) { v.hoverAnn = hov; drawOverlay(i); }
+    return;
+  }
+  if (!act && S.tool === 'pick') {
+    const v = views[i], it = pickItem(i, ...loc(e, v));
+    if (it !== v.hover) { v.hover = it; drawOverlay(i); }
     return;
   }
   if (!act && S.tool === 'edittext' && e.pointerType === 'mouse') {
@@ -2546,14 +2551,14 @@ function commitBox() {
     const a = page.annots[ai]; if (!a) return;
     delete a._hidden;
     if (!txt) { snap(); page.annots.splice(ai, 1); S.sel = null; updSelUI(); }
-    else if (txt !== a.text || a.size !== size || (a.ls || 0) !== (ls || 0)) { snap(); a.text = txt; a.size = size; a.ls = ls || undefined; }
+    else { S.lastText = { pi: i, a }; if (txt !== a.text || a.size !== size || (a.ls || 0) !== (ls || 0)) { snap(); a.text = txt; a.size = size; a.ls = ls || undefined; } }
   } else if (txt) {
     snap();
     const na = { type: 'text', box: true, pts: [toPdf(v, x, y)], bw: spec.bw, bh: spec.bh, size, ls: ls || undefined, fit: fitOn, text: txt, color, font, rot: v.rot };
     if (spec.field) na.formField = spec.field;
     if (style) { for (const k of STYLE_KEYS) if (style[k] !== undefined) na[k] = style[k]; fixFont(na); }
     attach(i, na);
-    page.annots.push(na);
+    page.annots.push(na); S.lastText = { pi: i, a: na };
     S.sel = { pi: i, ai: page.annots.length - 1 }; updSelUI();
   }
   if (ai < 0) backToSelect(i, txt ? page.annots.length - 1 : -1);
@@ -2626,6 +2631,7 @@ function commitEditor() {
       if (a.size !== size) { if (a.lh) a.lh *= size / a.size; a.size = size; }
       a.ls = ls || undefined; fixFont(a);
     }
+    if (a && a.type === 'text') S.lastText = { pi: i, a };
   } else if (preset) {
     // edycja istniejącego tekstu: zakrycie oryginału (prawdziwym tłem) + nowy tekst w tym samym miejscu
     if (txt !== preset.text || size !== preset.size || ls) {
@@ -2634,7 +2640,7 @@ function commitEditor() {
       if (na.lh && size !== preset.size) na.lh *= size / preset.size;
       if (na.st) { na.st = na.st.map(x => ({ ...x })); na.ws = restyle(preset.text, preset.ws, txt); }
       fixFont(na);
-      page.annots.push(na);
+      page.annots.push(na); S.lastText = { pi: i, a: na };
     }
   } else if (txt) {
     snap();
@@ -2642,7 +2648,7 @@ function commitEditor() {
     const na = { type: 'text', pts: [pt], text: txt, size, ls: ls || undefined, color, font: FONTS[S.font] ? S.font : 'sans', rot: v.rot };
     if (style) { for (const k of STYLE_KEYS) if (style[k] !== undefined) na[k] = style[k]; fixFont(na); }
     attach(i, na);
-    page.annots.push(na);
+    page.annots.push(na); S.lastText = { pi: i, a: na };
   }
   if (ai < 0 && !preset) backToSelect(i, txt ? page.annots.length - 1 : -1);
   afterChange(i);
@@ -2725,8 +2731,15 @@ function startPick(target) {
   if (target === undefined) { const a = selA(); target = a && a.type === 'text' ? { ...S.sel } : null; }
   setTool('pick');
   S.pickPrev = prev; S.pickTarget = target;
-  views.forEach((v, i) => { v.overlay.style.cursor = 'crosshair'; if (v.painted) loadItems(i); });
-  hint(target ? 'Kliknij słowo, którego styl ma dostać zaznaczony tekst' : 'Kliknij słowo w dokumencie – jego czcionka, wielkość i kolor będą używane dla nowego tekstu');
+  views.forEach((v, i) => { v.overlay.style.cursor = 'crosshair'; if (v.painted) loadItems(i).then(() => drawOverlay(i)).catch(() => {}); });
+  hint('Najedź na tekst w PDF (podświetli się linia) i kliknij – ' + (target ? 'styl dostanie zaznaczone okienko' : 'styl dostanie ostatnie okienko i kolejne'));
+}
+// najbliższa linia tekstu w promieniu ~100 px – nie trzeba trafiać w samo słowo
+function pickItem(i, x, y) {
+  const v = views[i]; if (!v || !v.items) return null;
+  const it = nearestItem(i, x, y); if (!it) return null;
+  const b = scrRect(v, dispA(v.shifts, it).cover);
+  return Math.hypot(Math.max(b.x - x, 0, x - b.x - b.w), Math.max(b.y - y, 0, y - b.y - b.h)) < 100 ? it : null;
 }
 async function pickAt(i, x, y) {
   const v = views[i];
@@ -2734,19 +2747,16 @@ async function pickAt(i, x, y) {
   let st = null;
   try {
     await loadItems(i);
-    const it = nearestItem(i, x, y);
-    if (it) {
-      const b = scrRect(v, dispA(v.shifts, it).cover);
-      if (Math.hypot(Math.max(b.x - x, 0, x - b.x - b.w), Math.max(b.y - y, 0, y - b.y - b.h)) < 40) {
-        try { await resolveLocalFonts(it); } catch (e) {}
-        st = styleFromItem(v, it);
-      }
-    }
+    const it = pickItem(i, x, y);
+    if (it) { try { await resolveLocalFonts(it); } catch (e) {} st = styleFromItem(v, it); }
   } catch (e) { console.warn(e); }
   clearTimeout(t); busy(false);
-  if (!st) { hint('Tu nie ma tekstu z PDF – kliknij bliżej słowa.'); return; }
+  if (!st) { hint('W pobliżu nie ma tekstu z PDF – kliknij bliżej (podświetlona linia to ta, z której pobiorę styl).'); return; }
   S.picked = st; updPickChip();
-  const tg = S.pickTarget, a = tg && S.pages[tg.pi] && S.pages[tg.pi].annots[tg.ai];
+  let tg = S.pickTarget;
+  // bez zaznaczenia: styl dostaje ostatnio wpisane okienko
+  if (!tg && S.lastText) { const L = S.lastText, ai = S.pages[L.pi] ? S.pages[L.pi].annots.indexOf(L.a) : -1; if (ai >= 0) tg = { pi: L.pi, ai }; }
+  const a = tg && S.pages[tg.pi] && S.pages[tg.pi].annots[tg.ai];
   if (a && a.type === 'text') {
     snap();
     for (const k of STYLE_KEYS) delete a[k];
@@ -2759,7 +2769,7 @@ async function pickAt(i, x, y) {
   S.pickTarget = null;
   setTool(back);
   if (a && back === 'select') setSel(tg);
-  hint('Próbnik: ' + fontLabel(st) + (a ? ' – zastosowano do zaznaczonego tekstu' : ' – będzie używany dla nowego tekstu i pól'));
+  hint('Próbnik: ' + fontLabel(st) + (a ? ' – zmieniono w okienku „' + a.text.slice(0, 20) + (a.text.length > 20 ? '…' : '') + '” i w kolejnych' : ' – będzie używany dla nowego tekstu i pól'));
   setTimeout(() => { if (!editor) hint(''); }, 3500);
 }
 function updPickChip() {
