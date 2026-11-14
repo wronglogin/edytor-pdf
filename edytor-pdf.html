@@ -1910,7 +1910,7 @@ function onDown(e, i) {
   const p = toPdf(v, x, y);
   temp = { pi: i, a: t === 'pen'
     ? { type: 'pen', pts: [p], color: S.color, width: S.width }
-    : { type: t, pts: [p, p], color: S.color, width: S.width } };
+    : { type: t, pts: [p, p], color: t === 'highlight' && S.color === '#000000' ? '#ffd60a' : S.color, width: S.width } };
   act = { kind: 'draw', i, lx: x, ly: y };
   v.overlay.setPointerCapture(e.pointerId);
   e.preventDefault();
