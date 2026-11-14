@@ -168,7 +168,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 </div>
 <div class="bar">
   <div class="brandwrap">
-    <button class="brand" id="bBrand" title="Menu edytora"><i>PDF</i><span>Edytor PDF <small style="font-weight:400;color:var(--muted)">v29</small> ▾</span></button>
+    <button class="brand" id="bBrand" title="Menu edytora"><i>PDF</i><span>Edytor PDF <small style="font-weight:400;color:var(--muted)">v30</small> ▾</span></button>
     <div class="appmenu" id="appMenu">
       <div id="recentMenu" class="recent"></div>
       <button data-m="help">❓ Pomoc – jak działa każda opcja<small>narzędzia, skróty, czcionki, zapisywanie</small></button>
@@ -176,7 +176,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
       <button data-m="install" id="mInstall" style="display:none">⬇ Zainstaluj jako aplikację</button>
       <div class="amsep"></div>
       <a href="https://github.com/wronglogin/edytor-pdf" target="_blank" rel="noopener">ℹ️ O edytorze (GitHub) ↗</a>
-      <div class="amver">Edytor PDF · wersja 29</div>
+      <div class="amver">Edytor PDF · wersja 30</div>
     </div>
   </div>
   <button id="bOpen" title="Otwórz PDF">📂<span class="lbl">Otwórz</span></button>
@@ -271,7 +271,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
     <div id="helpBody">
 <details open><summary>🗂 Karty dokumentów</summary>
 <p>Każdy otwarty plik ma swoją kartę na samej górze – klikaj karty, aby przełączać się między dokumentami. <b>＋ Utwórz</b> otwiera pusty dokument. <b>✕</b> na karcie zamyka dokument (przy niezapisanych zmianach zapyta: Zapisz / Zapisz jako / Nie zapisuj / Anuluj) i wraca do ekranu startowego z ostatnio otwieranymi plikami. <b>🏠</b> pokazuje ekran startowy bez zamykania dokumentów. Kropka ● przy nazwie oznacza niezapisane zmiany.</p>
-<p><b>Pliki z hasłem</b> – edytor zapyta o hasło. Zapisana kopia nie ma już hasła ani blokady edycji.</p></details>
+<p><b>Pliki z hasłem</b> – edytor zapyta o hasło, a przy zapisie zabezpieczy plik tym samym hasłem. Pliki z samą blokadą edycji (bez hasła do otwarcia) zapisują się bez blokady.</p></details>
 <details><summary>📂 Otwieranie, dołączanie, zapisywanie</summary>
 <p><b>Otwórz</b> – wczytuje PDF (możesz też przeciągnąć plik na okno). Plik nigdy nie jest nigdzie wysyłany – wszystko dzieje się na Twoim komputerze.</p>
 <p><b>Dołącz PDF</b> – dokleja strony innego pliku na końcu dokumentu.</p>
@@ -322,7 +322,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 </div>
 <div class="modal" id="fontsModal">
   <div class="card">
-    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v29</small></h3>
+    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v30</small></h3>
     <p class="muted">Przeglądarka nie może sama przeszukać dysku, więc wskaż raz foldery z czcionkami Worda i Acrobata. Edytor je zapamięta i będzie z nich automatycznie brał brakujące czcionki przy każdej edycji. Czcionki nie są nigdzie wysyłane.</p>
     <p class="muted"><b>Mac:</b> przeglądarka nie otworzy folderów wewnątrz aplikacji („pliki systemowe”), więc najpierw skopiuj czcionki do Dokumentów: otwórz <b>Terminal</b>, wklej polecenie poniżej i naciśnij Enter. Potem kliknij „Dodaj folder…” i wybierz <b>Dokumenty → Czcionki</b>.</p>
     <div class="paths"><div class="pt">Terminal (Mac)</div><code>mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki</code><button class="copyPath" data-path="mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki">Kopiuj</button></div>
@@ -1176,7 +1176,7 @@ async function decryptPdf(bytes, name) {
   await loadDecrypt();
   let pw = '', first = true;
   for (;;) {
-    try { const d = await PDFLibX.PDFDocument.load(bytes, { password: pw }); return { bytes: await d.save(), asked: !first }; }
+    try { const d = await PDFLibX.PDFDocument.load(bytes, { password: pw }); return { bytes: await d.save(), pw }; }
     catch (e) { if (!/password/i.test(e.message || '')) throw e; }
     const was = $('#busy').style.display === 'flex' ? $('#busy').textContent : ''; busy(false);
     const r = await askModal({ title: 'Plik jest chroniony hasłem', text: (first ? '' : 'Nieprawidłowe hasło. ') + 'Podaj hasło, aby otworzyć „' + (name || 'dokument') + '”.', input: true, buttons: [['ok', 'Otwórz', 1], ['cancel', 'Anuluj']] });
@@ -1187,11 +1187,12 @@ async function decryptPdf(bytes, name) {
 async function addSource(bytes, name) {
   let locked = false;
   const open = () => pdfjsLib.getDocument({ data: bytes.slice(), fontExtraProperties: true }).promise;
-  if (hasEncrypt(bytes)) { const r = await decryptPdf(bytes, name); bytes = r.bytes; locked = true; }
+  let pw = '';
+  if (hasEncrypt(bytes)) { const r = await decryptPdf(bytes, name); bytes = r.bytes; pw = r.pw; locked = true; }
   let doc;
   try { doc = await open(); }
-  catch (e) { if (e.name !== 'PasswordException' || locked) throw e; bytes = (await decryptPdf(bytes, name)).bytes; locked = true; doc = await open(); }
-  S.sources.push({ bytes, doc, locked });
+  catch (e) { if (e.name !== 'PasswordException' || locked) throw e; const r = await decryptPdf(bytes, name); bytes = r.bytes; pw = r.pw; locked = true; doc = await open(); }
+  S.sources.push({ bytes, doc, locked, pw });
   S.srcs.push(S.sources.length - 1);
   return S.sources.length - 1;
 }
@@ -1215,9 +1216,9 @@ function askModal({ title, text, input, buttons }) {
   });
 }
 /* ---------- karty dokumentów ---------- */
-const DOCKEYS = ['pages', 'undo', 'redo', 'name', 'fileHandle', 'nativePath', 'savedState', 'sel', 'cur', 'zoom', 'blankSrc', 'mark', 'lastText', 'formNav', 'srcs'];
+const DOCKEYS = ['pages', 'undo', 'redo', 'name', 'fileHandle', 'nativePath', 'savedState', 'sel', 'cur', 'zoom', 'blankSrc', 'mark', 'lastText', 'formNav', 'srcs', 'docPw'];
 const TABS = []; let curTab = -1;
-const freshDoc = name => ({ pages: [], undo: [], redo: [], name, fileHandle: null, nativePath: null, savedState: null, sel: null, cur: 0, zoom: S.zoom, blankSrc: -1, mark: null, lastText: null, formNav: null, srcs: [] });
+const freshDoc = name => ({ pages: [], undo: [], redo: [], name, fileHandle: null, nativePath: null, savedState: null, sel: null, cur: 0, zoom: S.zoom, blankSrc: -1, mark: null, lastText: null, formNav: null, srcs: [], docPw: '' });
 const stDirty = st => !!(st.pages.length && st.undo.length > 0 && JSON.stringify(st.pages) !== st.savedState);
 const tabSt = i => (i === curTab ? S : TABS[i].st);
 function stashTab() {
@@ -1319,6 +1320,7 @@ async function openFiles(files, append, handle) {
     for (const f of files) {
       const si = await addSource(new Uint8Array(await f.arrayBuffer()), f.name);
       locked = locked || S.sources[si].locked;
+      if (!append && S.sources[si].pw) S.docPw = S.sources[si].pw; // hasło wraca do pliku przy zapisie
       const n = S.sources[si].doc.numPages;
       for (let k = 0; k < n; k++) S.pages.push({ src: si, idx: k, rot: 0, annots: [] });
     }
@@ -1330,7 +1332,7 @@ async function openFiles(files, append, handle) {
   busy(false);
   if (!append && !S.pages.length && curTab >= 0) dropTab(curTab); // nie udało się – bez pustej karty
   await renderAll(); renderTabs();
-  if (locked) { hint('Plik był zabezpieczony – po zapisaniu kopia nie będzie już miała hasła ani blokad.'); setTimeout(() => hint(''), 6000); }
+  if (locked) { hint(S.docPw ? 'Plik ma hasło – przy zapisie zostanie zabezpieczony tym samym hasłem.' : 'Plik miał blokadę edycji – zapisana kopia nie będzie jej miała.'); setTimeout(() => hint(''), 6000); }
 }
 async function newDoc() {
   resetDoc('nowy-dokument');
@@ -3641,6 +3643,12 @@ async function exportPdf(mode) {
       if (!Object.values(OF).some(Boolean)) throw e;
       console.warn('Ponowna próba bez oryginalnych czcionek', e);
       res = await buildPdf(true);
+    }
+    if (mode !== 'print' && S.docPw) { // plik był na hasło → zapisujemy z tym samym hasłem (AES-256)
+      await loadDecrypt();
+      const d = await PDFLibX.PDFDocument.load(res.bytes);
+      d.encrypt({ userPassword: S.docPw, ownerPassword: S.docPw });
+      res.bytes = await d.save();
     }
     const blob = new Blob([res.bytes], { type: 'application/pdf' });
     // aplikacja na Windows/macOS: zapis wprost do pliku na dysku
