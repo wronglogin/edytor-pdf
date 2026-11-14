@@ -2193,6 +2193,18 @@ function updSelUI() {
     if (a.width) $('#cWidth').value = a.width;
   }
 }
+function nudge(dx, dy) {
+  const i = S.sel.pi, a = selA(), v = views[i];
+  if (!a || !v) return;
+  const now = Date.now();
+  if (!S.lastNudge || now - S.lastNudge > 800) snap(); // seria naciśnięć = jeden krok „Cofnij”
+  S.lastNudge = now;
+  a.pts = a.pts.map(p => { const [sx, sy] = toScr(v, p); return toPdf(v, sx + dx, sy + dy); });
+  if (!a.cover && v.flow && v.flow.sh.length) { const da = dispA(v.flow.sh, a); a.pts = da.pts; delete a.ax; delete a.ay; attach(i, a); }
+  drawOverlay(i);
+  clearTimeout(S.nudgeT);
+  S.nudgeT = setTimeout(() => afterChange(i), 400);
+}
 function delSel() {
   if (!S.sel || !selA()) return;
   snap();
@@ -2756,6 +2768,12 @@ document.addEventListener('keydown', e => {
   else if (mod && k === 'i') { e.preventDefault(); toggleStyle('i'); }
   else if (mod && k === 'o') { e.preventDefault(); pickOpen(); }
   else if ((e.key === 'Delete' || e.key === 'Backspace') && S.sel) { e.preventDefault(); delSel(); }
+  else if (e.key.startsWith('Arrow') && S.sel && selA()) {
+    // strzałki: przesuń zaznaczony element o 1 px (z Shift o 10 px, z Alt o ćwierć piksela)
+    e.preventDefault();
+    const st = e.shiftKey ? 10 : e.altKey ? 0.25 : 1;
+    nudge(e.key === 'ArrowLeft' ? -st : e.key === 'ArrowRight' ? st : 0, e.key === 'ArrowUp' ? -st : e.key === 'ArrowDown' ? st : 0);
+  }
   else if (e.key === 'Escape') { setTool('select'); setSel(null); }
   else if (!mod && S.pages.length) {
     const map = { v: 'select', e: 'edittext', t: 'text', h: 'highlight', p: 'pen', r: 'rect', w: 'whiteout' };
