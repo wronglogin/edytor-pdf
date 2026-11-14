@@ -136,14 +136,14 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 
 <div class="bar">
   <div class="brandwrap">
-    <button class="brand" id="bBrand" title="Menu edytora"><i>PDF</i><span>Edytor PDF <small style="font-weight:400;color:var(--muted)">v24</small> ▾</span></button>
+    <button class="brand" id="bBrand" title="Menu edytora"><i>PDF</i><span>Edytor PDF <small style="font-weight:400;color:var(--muted)">v25</small> ▾</span></button>
     <div class="appmenu" id="appMenu">
       <button data-m="help">❓ Pomoc – jak działa każda opcja<small>narzędzia, skróty, czcionki, zapisywanie</small></button>
       <button data-m="fonts">🔤 Czcionki…<small>foldery Worda/Acrobata, pobieranie, stan</small></button>
       <button data-m="install" id="mInstall" style="display:none">⬇ Zainstaluj jako aplikację</button>
       <div class="amsep"></div>
       <a href="https://github.com/wronglogin/edytor-pdf" target="_blank" rel="noopener">ℹ️ O edytorze (GitHub) ↗</a>
-      <div class="amver">Edytor PDF · wersja 24</div>
+      <div class="amver">Edytor PDF · wersja 25</div>
     </div>
   </div>
   <button id="bOpen" title="Otwórz PDF">📂<span class="lbl">Otwórz</span></button>
@@ -240,7 +240,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 <p>Gdy akapit się wydłuży, treść pod nim przesunie się w dół (opcja „Przesuwaj treść”); jeśli zabraknie miejsca, powstanie strona „ciąg dalszy”.</p></details>
 <details><summary>▦ Wypełnij <kbd>F</kbd></summary>
 <p>Wyszukuje na stronie miejsca do wpisania – puste komórki tabel, miejsce za etykietą („Date:”, „www:”), nad podkreśleniami i kropkami („........”), kwadraciki do zaznaczenia oraz prawdziwe pola formularza zapisane w PDF. Wykryte pola mają niebieską ramkę.</p>
-<p>Kliknij pole i pisz – czcionka i wielkość są dobierane z najbliższego tekstu. <kbd>Tab</kbd> przechodzi do następnego pola, <kbd>Enter</kbd> zatwierdza. Kwadracik – kliknięcie wstawia ✓.</p>
+<p>Kliknij pole i pisz – czcionka i wielkość są dobierane z najbliższego tekstu. <kbd>Tab</kbd> przechodzi do następnego pola, <kbd>Enter</kbd> zatwierdza. Kwadracik – kliknięcie wstawia taki sam znak, jakiego używa dokument (krzyżyk ☒ albo ptaszek ✓); kliknięcie kwadracika zaznaczonego już w PDF go odznacza, ponowne – przywraca.</p>
 <p>Jeśli jakiegoś pola nie wykryło, użyj „Dodaj tekst” i przeciągnij ramkę w tym miejscu.</p></details>
 <details><summary>Pasek nad wpisywanym tekstem</summary>
 <p><b>A A</b> – zmniejsz/powiększ tekst. <b>🗑</b> – usuń. <b>⟳▾</b> – zamień na symbol ✓ ✗ ●. <b>VA↔</b> – odstępy między literami. <b>💧</b> – skopiuj styl słowa z PDF do tego tekstu.</p></details>
@@ -275,7 +275,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 </div>
 <div class="modal" id="fontsModal">
   <div class="card">
-    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v24</small></h3>
+    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v25</small></h3>
     <p class="muted">Przeglądarka nie może sama przeszukać dysku, więc wskaż raz foldery z czcionkami Worda i Acrobata. Edytor je zapamięta i będzie z nich automatycznie brał brakujące czcionki przy każdej edycji. Czcionki nie są nigdzie wysyłane.</p>
     <p class="muted"><b>Mac:</b> przeglądarka nie otworzy folderów wewnątrz aplikacji („pliki systemowe”), więc najpierw skopiuj czcionki do Dokumentów: otwórz <b>Terminal</b>, wklej polecenie poniżej i naciśnij Enter. Potem kliknij „Dodaj folder…” i wybierz <b>Dokumenty → Czcionki</b>.</p>
     <div class="paths"><div class="pt">Terminal (Mac)</div><code>mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki</code><button class="copyPath" data-path="mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki">Kopiuj</button></div>
@@ -1641,7 +1641,7 @@ async function startNewText(i, x, y, spec) {
 async function detectFields(i) {
   const v = views[i], p = S.pages[i];
   if (!v || p.cont) return [];
-  if (p.fields && p.fieldsV === 7) return p.fields;
+  if (p.fields && p.fieldsV === 8) return p.fields;
   if (!p.geo || p.geo.v !== 4) { v.items = null; v.itemsP = null; p.geo = null; }
   await loadItems(i);
   const Tl = await getTextless(p);
@@ -1780,18 +1780,84 @@ async function detectFields(i) {
     if (!T.length) add(L.s, y0, L.e, y1, 'text');
     else { const R = Math.max(...T.map(t => t.x1)); if (L.e - R >= 30 * K) add(R + 5 * K, y0, L.e, y1, 'text'); }
   }
-  // 3) kwadraciki do zaznaczenia
+  // 3) kwadraciki do zaznaczenia: puste, z krzyżykiem albo z ptaszkiem (styl znaku bierzemy z dokumentu)
+  const classify = (mask, src, x0, y0, x1, y1) => {
+    const w = x1 - x0, h = y1 - y0; if (w < 3 || h < 3) return null;
+    const m = Math.min(w, h), tol = Math.max(1.5, 0.13 * m);
+    let n = 0, nd = 0, d1 = 0, d2 = 0, bx0 = 1e9, by0 = 1e9, bx1 = -1, by1 = -1, cr = 0, cg = 0, cb = 0;
+    for (let y = Math.ceil(y0); y < y1; y++) for (let x = Math.ceil(x0); x < x1; x++) {
+      const j = y * W + x; if (!mask(j)) continue; n++;
+      const u = (x + 0.5 - x0) / w, t = (y + 0.5 - y0) / h, a = Math.abs(u - t) * m, b = Math.abs(u + t - 1) * m;
+      if (a <= tol) d1++; if (b <= tol) d2++; if (a <= tol || b <= tol) nd++;
+      if (x < bx0) bx0 = x; if (x > bx1) bx1 = x; if (y < by0) by0 = y; if (y > by1) by1 = y;
+      cr += src[j * 4]; cg += src[j * 4 + 1]; cb += src[j * 4 + 2];
+    }
+    if (n < w * h * 0.03) return { pre: null };
+    if (n > w * h * 0.6) return { pre: 'fill' };
+    const cross = nd >= n * 0.75 && d1 >= n * 0.2 && d2 >= n * 0.2;
+    return { pre: cross ? 'cross' : 'check', box: [bx0, by0, bx1 + 1, by1 + 1], mw: cross ? n / (2 * Math.hypot(bx1 - bx0 + 1, by1 - by0 + 1)) / K : 0, mc: toHex(cr / n, cg / n, cb / n) };
+  };
+  const pushCheck = (fr, c) => {
+    const [x0, y0, x1, y1] = fr, w = x1 - x0, h = y1 - y0;
+    if (w < 4 * K || h < 4 * K || F.some(f => f.kind === 'check' && Math.abs(f.x0 - x0) < 2 * K && Math.abs(f.y0 - y0) < 2 * K)) return;
+    const f = { x0, y0, x1, y1, kind: 'check', pre: c ? c.pre : null };
+    if (c && c.box) { f.ink = [(c.box[0] - x0) / w, (c.box[1] - y0) / h, (c.box[2] - x0) / w, (c.box[3] - y0) / h]; f.mw = c.mw; f.mc = c.mc; }
+    F.push(f);
+  };
   const shortH = HL.filter(L => L.len >= 5 * K && L.len <= 24 * K), shortV = VL.filter(L => L.len >= 5 * K && L.len <= 24 * K);
   for (const T of shortH) for (const B of shortH) {
     if (B.p <= T.p + 4 * K || Math.abs(B.s - T.s) > 2 * K || Math.abs(B.e - T.e) > 2 * K) continue;
     const w = T.e - T.s, h = B.p - T.p;
     if (h < w * 0.7 || h > w * 1.3) continue;
     const hasL = shortV.some(V => Math.abs(V.p - T.s) < 2 * K && Math.abs(V.s - T.p) < 2 * K), hasR = shortV.some(V => Math.abs(V.p - T.e) < 2 * K && Math.abs(V.s - T.p) < 2 * K);
-    if (hasL && hasR && !textIn(T.s + K, T.p + K, T.e - K, B.p - K).length) add(T.s + K, T.p + K, T.e - K, B.p - K, 'check');
+    if (!hasL || !hasR || textIn(T.s + K, T.p + K, T.e - K, B.p - K).length) continue;
+    const fr = [T.s + K, T.p + K, T.e - K, B.p - K], c = classify(j => dark[j], px, T.s + 2 * K, T.p + 2 * K, T.e - 2 * K, B.p - 2 * K);
+    pushCheck(fr, c);
   }
+  // kwadraciki napisane czcionką (☐ ☒ z Worda) – tusz, którego nie ma na stronie bez tekstu
+  try {
+    const fc = el('canvas'); fc.width = W; fc.height = H;
+    const fx = fc.getContext('2d', { willReadFrequently: true }); fx.fillStyle = '#fff'; fx.fillRect(0, 0, W, H);
+    await Tl.pp.render({ canvasContext: fx, viewport: Tl.vp }).promise;
+    const fp = fx.getImageData(0, 0, W, H).data, ink = new Uint8Array(W * H);
+    for (let j = 0, k = 0; j < W * H; j++, k += 4) ink[j] = !dark[j] && fp[k] * 299 + fp[k + 1] * 587 + fp[k + 2] * 114 < 150000 ? 1 : 0;
+    const seen = new Uint8Array(W * H), stack = new Int32Array(W * H);
+    for (let j0 = 0; j0 < W * H; j0++) {
+      if (!ink[j0] || seen[j0]) continue;
+      let sp = 0, x0 = W, y0 = H, x1 = 0, y1 = 0, n = 0; stack[sp++] = j0; seen[j0] = 1;
+      while (sp) {
+        const j = stack[--sp], x = j % W, y = (j - x) / W; n++;
+        if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+        for (const q of [j - 1, j + 1, j - W, j + W, j - W - 1, j - W + 1, j + W - 1, j + W + 1])
+          if (q >= 0 && q < W * H && ink[q] && !seen[q] && Math.abs((q % W) - x) <= 1) { seen[q] = 1; stack[sp++] = q; }
+      }
+      const w = x1 - x0 + 1, h = y1 - y0 + 1;
+      if (w < 5 * K || w > 24 * K || h < 5 * K || h > 24 * K || h < w * 0.8 || h > w * 1.25) continue;
+      // wszystkie cztery boki muszą być prostymi kreskami (odrzuca O, D, 0…)
+      const tb = Math.max(1, Math.round(0.14 * Math.min(w, h)));
+      const side = (horiz, from) => {
+        let ok = 0; const len = horiz ? w : h;
+        for (let a = 0; a < len; a++) {
+          let hit = 0;
+          for (let b = 0; b < tb && !hit; b++) {
+            const x = horiz ? x0 + a : (from ? x0 + b : x1 - b), y = horiz ? (from ? y0 + b : y1 - b) : y0 + a;
+            hit = ink[y * W + x];
+          }
+          ok += hit;
+        }
+        return ok / len;
+      };
+      if (side(true, 1) < 0.85 || side(true, 0) < 0.85 || side(false, 1) < 0.85 || side(false, 0) < 0.85) continue;
+      let th = 0; const my = Math.round((y0 + y1) / 2); while (th < w / 3 && ink[my * W + x0 + th]) th++;
+      th = Math.max(th, 1);
+      const c = classify(j => ink[j], fp, x0 + th + 1, y0 + th + 1, x1 - th, y1 - th);
+      if (!c || c.pre === 'fill') continue;
+      pushCheck([x0 + th, y0 + th, x1 + 1 - th, y1 + 1 - th], c);
+    }
+  } catch (e) { console.warn('Kwadraciki z czcionki:', e); }
   // 4) prawdziwe pola formularza zapisane w PDF (AcroForm)
   const toPdfR = (x0, y0, x1, y1) => { const a = Tl.vp.convertToPdfPoint(x0, y0), b = Tl.vp.convertToPdfPoint(x1, y1); return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; };
-  let out = F.map(f => { const r = toPdfR(f.x0, f.y0, f.x1, f.y1); return { r, kind: f.kind }; });
+  let out = F.map(f => { const r = toPdfR(f.x0, f.y0, f.x1, f.y1); return { r, kind: f.kind, pre: f.pre, ink: f.ink, mw: f.mw, mc: f.mc }; });
   try {
     const anns = await v.pp.getAnnotations();
     for (const a of anns) {
@@ -1807,20 +1873,27 @@ async function detectFields(i) {
   out.sort((a, b) => (b.r[2] - b.r[0]) * (b.r[3] - b.r[1]) - (a.r[2] - a.r[0]) * (a.r[3] - a.r[1]));
   const res = [];
   for (const f of out) {
-    const ov = res.some(g => { const ix = Math.min(f.r[2], g.r[2]) - Math.max(f.r[0], g.r[0]), iy = Math.min(f.r[3], g.r[3]) - Math.max(f.r[1], g.r[1]); return ix > 0 && iy > 0 && ix * iy > 0.4 * (f.r[2] - f.r[0]) * (f.r[3] - f.r[1]); });
+    const ov = res.some(g => g.kind === f.kind && (() => { const ix = Math.min(f.r[2], g.r[2]) - Math.max(f.r[0], g.r[0]), iy = Math.min(f.r[3], g.r[3]) - Math.max(f.r[1], g.r[1]); return ix > 0 && iy > 0 && ix * iy > 0.4 * (f.r[2] - f.r[0]) * (f.r[3] - f.r[1]); })());
     if (!ov) res.push(f);
     if (res.length >= 400) break;
   }
   // kolejność: z góry na dół, od lewej (dla klawisza Tab)
   res.sort((a, b) => (Math.abs(b.r[3] - a.r[3]) > 4 ? b.r[3] - a.r[3] : a.r[0] - b.r[0]));
-  p.fields = res; p.fieldsV = 7;
+  // jaki znak stawia ten dokument: krzyżyk ☒ czy ptaszek ✓ – i jak wygląda
+  const marked = res.filter(f => f.pre === 'cross' || f.pre === 'check');
+  if (marked.length) {
+    const kind = marked.filter(f => f.pre === 'cross').length * 2 >= marked.length ? 'cross' : 'check', ref = marked.find(f => f.pre === kind);
+    p.mark = { kind, ink: ref.ink, width: ref.mw, color: ref.mc }; S.mark = p.mark;
+  }
+  p.fields = res; p.fieldsV = 8;
   return res;
 }
 const fieldScr = (v, f) => scrRect(v, [[f.r[0], f.r[1]], [f.r[2], f.r[3]]]);
 function fieldAt(i, x, y) {
   const v = views[i], fs = S.pages[i].fields || [];
-  for (let k = 0; k < fs.length; k++) { const b = fieldScr(v, fs[k]); if (x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h) return k; }
-  return -1;
+  let hit = -1;
+  for (let k = 0; k < fs.length; k++) { const b = fieldScr(v, fs[k]); if (x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h) { if (fs[k].kind === 'check') return k; if (hit < 0) hit = k; } }
+  return hit;
 }
 const fieldFilled = (p, f) => p.annots.some(a => a.formField && a.formField[0] === f.r[0] && a.formField[1] === f.r[1]);
 async function openField(i, k) {
@@ -1830,10 +1903,23 @@ async function openField(i, k) {
   const ai = p.annots.findIndex(a => a.formField && a.formField[0] === f.r[0] && a.formField[1] === f.r[1]);
   if (f.kind === 'check') {
     snap();
-    if (ai >= 0) p.annots.splice(ai, 1);
-    else {
-      const b = fieldScr(v, f), pt = (fx, fy) => toPdf(v, b.x + fx * b.w, b.y + fy * b.h);
-      p.annots.push({ type: 'pen', pts: [pt(0.18, 0.55), pt(0.42, 0.8), pt(0.84, 0.2)], color: '#000000', width: Math.max(0.8, (f.r[3] - f.r[1]) * 0.12), formField: [f.r[0], f.r[1]] });
+    const ff = [f.r[0], f.r[1]], mine = a => a.formField && a.formField[0] === ff[0] && a.formField[1] === ff[1];
+    if (ai >= 0) { for (let q = p.annots.length - 1; q >= 0; q--) if (mine(p.annots[q])) p.annots.splice(q, 1); }
+    else if (f.pre) {
+      // już zaznaczony w PDF → odznaczenie (białe wnętrze kwadracika)
+      const m = (f.r[2] - f.r[0]) * 0.03;
+      p.annots.push({ type: 'whiteout', pts: [[f.r[0] + m, f.r[1] + m], [f.r[2] - m, f.r[3] - m]], formField: ff });
+    } else {
+      const M = p.mark || S.mark || { kind: 'check' }, [x0, y0, x1, y1] = f.r, Wd = x1 - x0, Ht = y1 - y0;
+      const P = (u, t) => [x0 + u * Wd, y1 - t * Ht]; // u – od lewej, t – od góry
+      const color = M.color || '#000000';
+      if (M.kind === 'cross') {
+        const [a, b, c, d] = M.ink || [0.12, 0.12, 0.88, 0.88], w = M.width || Math.max(0.5, Ht * 0.1);
+        p.annots.push({ type: 'pen', pts: [P(a, b), P(c, d)], color, width: w, formField: ff }, { type: 'pen', pts: [P(c, b), P(a, d)], color, width: w, formField: ff });
+      } else {
+        const b = fieldScr(v, f), pt = (fx, fy) => toPdf(v, b.x + fx * b.w, b.y + fy * b.h);
+        p.annots.push({ type: 'pen', pts: [pt(0.18, 0.55), pt(0.42, 0.8), pt(0.84, 0.2)], color, width: M.width || Math.max(0.8, Ht * 0.12), formField: ff });
+      }
     }
     afterChange(i); return;
   }
