@@ -35,3 +35,8 @@ Potem ustaw „Edytor PDF” jako domyślny program dla plików `.pdf`.
 | `lib/nspell.js` | nspell – sprawdzanie pisowni (Titus Wormer) | MIT |
 
 Pełne teksty licencji: `fonts/LICENSE-*`, `dict/LICENSE.txt`, nagłówek `lib/nspell.js`.
+
+## Pliki z hasłem
+`lib/pdf-decrypt.js` – moduł odszyfrowujący zabezpieczone PDF-y (wczytywany tylko dla takich plików). Zbudowany z
+[@cantoo/pdf-lib](https://github.com/cantoo-scribe/pdf-lib) (MIT; kod szyfrowania pochodzi z pdf.js, Apache-2.0),
+[fflate](https://github.com/101arrowz/fflate) (MIT) i [culori](https://github.com/Evercoder/culori) (MIT).

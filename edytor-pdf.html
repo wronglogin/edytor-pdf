@@ -126,6 +126,21 @@ body.native .webonly{display:none!important}
 .recent .rclear{font-size:11px;color:var(--muted);background:none;border:0;padding:4px 10px;cursor:pointer;text-decoration:underline}
 #appMenu .recent{border-bottom:1px solid #eee;margin-bottom:4px;padding-bottom:4px;max-height:50vh;overflow:auto}
 #appMenu .recent h4{margin:4px 10px}
+#tabs{display:flex;align-items:stretch;gap:2px;background:#dfe2e8;padding:4px 8px 0;min-height:32px;overflow-x:auto;flex:none}
+#tabs>button{background:transparent;border:0;border-radius:8px 8px 0 0;padding:4px 10px;font-size:13px;cursor:pointer;white-space:nowrap;color:#333}
+#tabs>button:hover{background:#eceef2}#tabHome.active{background:#fff}
+#tabNew{border:1px solid #b9bfca!important;border-radius:6px!important;margin:0 0 4px 6px;align-self:center;padding:3px 10px!important}
+#tabList{display:flex;gap:2px;min-width:0}
+.tab{display:flex;align-items:center;gap:6px;max-width:220px;min-width:60px;padding:4px 6px 4px 12px;border-radius:8px 8px 0 0;background:#eceef2;cursor:pointer;font-size:13px;color:#333}
+.tab.active{background:#fff;font-weight:600}
+.tab span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tab button{border:0;background:transparent;border-radius:50%;width:20px;height:20px;line-height:1;font-size:11px;cursor:pointer;color:#555;flex:none;padding:0}
+.tab button:hover{background:#d5d9e0;color:#000}
+#askModal{z-index:95}#askModal .card{width:min(480px,100%)}
+#askInput{width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid #ccd;border-radius:8px;font:inherit;margin-top:6px;caret-color:auto}
+#askBtns{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:16px}
+#askBtns button{padding:8px 14px;border-radius:8px;border:1px solid #c5cad3;background:#fff;cursor:pointer;font:inherit}
+#askBtns button.pri{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
 #helpModal .card{max-height:92vh;overflow:auto;width:min(760px,100%)}
 #helpModal input{width:100%;padding:7px 10px;border:1px solid #ccd;border-radius:8px;margin:4px 0 10px;font:inherit}
 #helpModal details{border-top:1px solid #eee;padding:7px 0}
@@ -146,9 +161,14 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 </head>
 <body>
 
+<div id="tabs">
+  <button id="tabHome" title="Ekran startowy – ostatnio otwierane pliki">🏠</button>
+  <div id="tabList"></div>
+  <button id="tabNew" title="Utwórz pusty dokument PDF">＋ Utwórz</button>
+</div>
 <div class="bar">
   <div class="brandwrap">
-    <button class="brand" id="bBrand" title="Menu edytora"><i>PDF</i><span>Edytor PDF <small style="font-weight:400;color:var(--muted)">v28</small> ▾</span></button>
+    <button class="brand" id="bBrand" title="Menu edytora"><i>PDF</i><span>Edytor PDF <small style="font-weight:400;color:var(--muted)">v29</small> ▾</span></button>
     <div class="appmenu" id="appMenu">
       <div id="recentMenu" class="recent"></div>
       <button data-m="help">❓ Pomoc – jak działa każda opcja<small>narzędzia, skróty, czcionki, zapisywanie</small></button>
@@ -156,7 +176,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
       <button data-m="install" id="mInstall" style="display:none">⬇ Zainstaluj jako aplikację</button>
       <div class="amsep"></div>
       <a href="https://github.com/wronglogin/edytor-pdf" target="_blank" rel="noopener">ℹ️ O edytorze (GitHub) ↗</a>
-      <div class="amver">Edytor PDF · wersja 28</div>
+      <div class="amver">Edytor PDF · wersja 29</div>
     </div>
   </div>
   <button id="bOpen" title="Otwórz PDF">📂<span class="lbl">Otwórz</span></button>
@@ -236,12 +256,23 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 <input type="file" id="fMerge" accept="application/pdf,.pdf" multiple hidden>
 <input type="file" id="fImg" accept="image/*" hidden>
 <input type="file" id="fFontDir" webkitdirectory multiple hidden>
+<div class="modal" id="askModal">
+  <div class="card">
+    <h3 id="askTitle"></h3>
+    <p id="askText" class="muted"></p>
+    <input id="askInput" type="password" autocomplete="off" placeholder="Hasło">
+    <div id="askBtns"></div>
+  </div>
+</div>
 <div class="modal" id="helpModal">
   <div class="card">
     <h3>Pomoc <small style="font-weight:400;color:var(--muted);font-size:12px">· jak działa każda opcja</small></h3>
     <input id="helpSearch" placeholder="Szukaj, np. podpis, czcionka, kropki, zapisz…">
     <div id="helpBody">
-<details open><summary>📂 Otwieranie, dołączanie, zapisywanie</summary>
+<details open><summary>🗂 Karty dokumentów</summary>
+<p>Każdy otwarty plik ma swoją kartę na samej górze – klikaj karty, aby przełączać się między dokumentami. <b>＋ Utwórz</b> otwiera pusty dokument. <b>✕</b> na karcie zamyka dokument (przy niezapisanych zmianach zapyta: Zapisz / Zapisz jako / Nie zapisuj / Anuluj) i wraca do ekranu startowego z ostatnio otwieranymi plikami. <b>🏠</b> pokazuje ekran startowy bez zamykania dokumentów. Kropka ● przy nazwie oznacza niezapisane zmiany.</p>
+<p><b>Pliki z hasłem</b> – edytor zapyta o hasło. Zapisana kopia nie ma już hasła ani blokady edycji.</p></details>
+<details><summary>📂 Otwieranie, dołączanie, zapisywanie</summary>
 <p><b>Otwórz</b> – wczytuje PDF (możesz też przeciągnąć plik na okno). Plik nigdy nie jest nigdzie wysyłany – wszystko dzieje się na Twoim komputerze.</p>
 <p><b>Dołącz PDF</b> – dokleja strony innego pliku na końcu dokumentu.</p>
 <p><b>Zapisz</b> <kbd>Ctrl/Cmd+S</kbd> – nadpisuje ten sam plik (w aplikacji zainstalowanej). Za pierwszym razem przeglądarka może zapytać o zgodę. <b>Zapisz jako</b> <kbd>Ctrl/Cmd+Shift+S</kbd> – nowy plik.</p>
@@ -291,7 +322,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 </div>
 <div class="modal" id="fontsModal">
   <div class="card">
-    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v28</small></h3>
+    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v29</small></h3>
     <p class="muted">Przeglądarka nie może sama przeszukać dysku, więc wskaż raz foldery z czcionkami Worda i Acrobata. Edytor je zapamięta i będzie z nich automatycznie brał brakujące czcionki przy każdej edycji. Czcionki nie są nigdzie wysyłane.</p>
     <p class="muted"><b>Mac:</b> przeglądarka nie otworzy folderów wewnątrz aplikacji („pliki systemowe”), więc najpierw skopiuj czcionki do Dokumentów: otwórz <b>Terminal</b>, wklej polecenie poniżej i naciśnij Enter. Potem kliknij „Dodaj folder…” i wybierz <b>Dokumenty → Czcionki</b>.</p>
     <div class="paths"><div class="pt">Terminal (Mac)</div><code>mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki</code><button class="copyPath" data-path="mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki">Kopiuj</button></div>
@@ -384,7 +415,7 @@ const S = {
   sources: [],   // {bytes, doc}
   pages: [],     // {src, idx, rot, annots:[]}
   zoom: 1.25, tool: 'select', color: '#000000', width: 3, fontSize: 14, font: 'sans', reflow: true, fit: true, matchPdf: true,
-  sel: null, undo: [], redo: [], name: 'dokument', pending: null, blankSrc: -1, cur: 0
+  sel: null, undo: [], redo: [], name: 'dokument', pending: null, blankSrc: -1, cur: 0, srcs: []
 };
 let views = [], renderToken = 0, temp = null, act = null, editor = null;
 const imgCache = new Map();
@@ -1124,13 +1155,138 @@ function totalRot(pp, p) { return norm(pp.rotate + p.rot); }
 function snap() { S.undo.push(JSON.stringify(S.pages)); if (S.undo.length > 60) S.undo.shift(); S.redo = []; updUndo(); }
 function undo() { if (!S.undo.length) return; commitEditor(); S.redo.push(JSON.stringify(S.pages)); S.pages = JSON.parse(S.undo.pop()); S.sel = null; renderAll(); updUndo(); }
 function redo() { if (!S.redo.length) return; commitEditor(); S.undo.push(JSON.stringify(S.pages)); S.pages = JSON.parse(S.redo.pop()); S.sel = null; renderAll(); updUndo(); }
-function updUndo() { $('#bUndo').disabled = !S.undo.length; $('#bRedo').disabled = !S.redo.length; }
+function updUndo() { $('#bUndo').disabled = !S.undo.length; $('#bRedo').disabled = !S.redo.length; if (typeof renderTabs === 'function' && curTab >= 0 && TABS[curTab]) { const d = stDirty(S); if (d !== TABS[curTab].shown) { TABS[curTab].shown = d; renderTabs(); } } }
 
 /* ---------- wczytywanie ---------- */
-async function addSource(bytes) {
-  const doc = await pdfjsLib.getDocument({ data: bytes.slice(), fontExtraProperties: true }).promise;
-  S.sources.push({ bytes, doc });
+let decLib = null;
+function loadDecrypt() {
+  return decLib || (decLib = new Promise((res, rej) => {
+    const sc = el('script'); sc.src = 'lib/pdf-decrypt.js'; sc.onload = res;
+    sc.onerror = () => { decLib = null; rej(new Error('nie udało się wczytać modułu do plików z hasłem (sprawdź internet)')); };
+    document.head.appendChild(sc);
+  }));
+}
+function hasEncrypt(b) { // szuka „/Encrypt” w pliku
+  const pat = [47, 69, 110, 99, 114, 121, 112, 116];
+  outer: for (let i = b.indexOf(47); i >= 0 && i < b.length - 8; i = b.indexOf(47, i + 1)) { for (let k = 1; k < 8; k++) if (b[i + k] !== pat[k]) continue outer; return true; }
+  return false;
+}
+// Plik zaszyfrowany (hasło do otwarcia albo tylko blokada edycji) → odszyfrowana kopia w pamięci
+async function decryptPdf(bytes, name) {
+  await loadDecrypt();
+  let pw = '', first = true;
+  for (;;) {
+    try { const d = await PDFLibX.PDFDocument.load(bytes, { password: pw }); return { bytes: await d.save(), asked: !first }; }
+    catch (e) { if (!/password/i.test(e.message || '')) throw e; }
+    const was = $('#busy').style.display === 'flex' ? $('#busy').textContent : ''; busy(false);
+    const r = await askModal({ title: 'Plik jest chroniony hasłem', text: (first ? '' : 'Nieprawidłowe hasło. ') + 'Podaj hasło, aby otworzyć „' + (name || 'dokument') + '”.', input: true, buttons: [['ok', 'Otwórz', 1], ['cancel', 'Anuluj']] });
+    if (r.id !== 'ok') { const e = new Error('Anulowano'); e.cancel = true; throw e; }
+    pw = r.value; first = false; if (was) busy(was);
+  }
+}
+async function addSource(bytes, name) {
+  let locked = false;
+  const open = () => pdfjsLib.getDocument({ data: bytes.slice(), fontExtraProperties: true }).promise;
+  if (hasEncrypt(bytes)) { const r = await decryptPdf(bytes, name); bytes = r.bytes; locked = true; }
+  let doc;
+  try { doc = await open(); }
+  catch (e) { if (e.name !== 'PasswordException' || locked) throw e; bytes = (await decryptPdf(bytes, name)).bytes; locked = true; doc = await open(); }
+  S.sources.push({ bytes, doc, locked });
+  S.srcs.push(S.sources.length - 1);
   return S.sources.length - 1;
+}
+/* ---------- okno z pytaniem (hasło, zamykanie) ---------- */
+function askModal({ title, text, input, buttons }) {
+  return new Promise(res => {
+    const m = $('#askModal'), inp = $('#askInput'), box = $('#askBtns');
+    $('#askTitle').textContent = title; $('#askText').textContent = text || '';
+    inp.style.display = input ? '' : 'none'; inp.value = '';
+    box.innerHTML = '';
+    const done = id => { m.style.display = 'none'; document.removeEventListener('keydown', onKey, true); res(input ? { id, value: inp.value } : id); };
+    const onKey = e => {
+      if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); done(buttons[buttons.length - 1][0]); }
+      else if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); done(buttons[0][0]); }
+      else e.stopPropagation();
+    };
+    for (const [id, label, pri] of buttons) { const b = el('button', pri ? 'pri' : ''); b.textContent = label; b.onclick = () => done(id); box.appendChild(b); }
+    document.addEventListener('keydown', onKey, true);
+    m.style.display = 'flex';
+    setTimeout(() => (input ? inp : box.firstChild).focus(), 30);
+  });
+}
+/* ---------- karty dokumentów ---------- */
+const DOCKEYS = ['pages', 'undo', 'redo', 'name', 'fileHandle', 'nativePath', 'savedState', 'sel', 'cur', 'zoom', 'blankSrc', 'mark', 'lastText', 'formNav', 'srcs'];
+const TABS = []; let curTab = -1;
+const freshDoc = name => ({ pages: [], undo: [], redo: [], name, fileHandle: null, nativePath: null, savedState: null, sel: null, cur: 0, zoom: S.zoom, blankSrc: -1, mark: null, lastText: null, formNav: null, srcs: [] });
+const stDirty = st => !!(st.pages.length && st.undo.length > 0 && JSON.stringify(st.pages) !== st.savedState);
+const tabSt = i => (i === curTab ? S : TABS[i].st);
+function stashTab() {
+  if (curTab < 0) return;
+  const t = TABS[curTab]; for (const k of DOCKEYS) t.st[k] = S[k];
+  t.scroll = viewer.scrollTop; t.dirty = stDirty(t.st);
+}
+function loadTab(i) { curTab = i; const st = i >= 0 ? TABS[i].st : freshDoc('dokument'); for (const k of DOCKEYS) S[k] = st[k]; S.sel = null; updUndo(); }
+async function switchTab(i) {
+  if (i === curTab) return;
+  if (S.tool !== 'select') setTool('select'); else commitEditor();
+  stashTab(); loadTab(i);
+  await renderAll();
+  if (i >= 0) viewer.scrollTop = TABS[i].scroll || 0; else renderRecent();
+  renderTabs();
+}
+function freeSource(si) {
+  const sc = S.sources[si]; if (!sc) return;
+  try { sc.doc.destroy(); } catch (e) {}
+  S.sources[si] = null;
+  const pre = si + ':';
+  for (const m of [textless, textlessRes, MARKS]) for (const k of [...m.keys()]) if (String(k).startsWith(pre)) m.delete(k);
+  for (const k in OF) if (k.startsWith(pre)) delete OF[k];
+  for (const k in ocrCache) if (k.startsWith(pre)) delete ocrCache[k];
+}
+function dropTab(i) { // usuwa kartę bez pytania
+  for (const si of tabSt(i).srcs) freeSource(si);
+  TABS.splice(i, 1);
+  if (i === curTab) loadTab(-1); else if (i < curTab) curTab--;
+}
+// Zamknięcie karty: przy niezapisanych zmianach pyta; potem wraca do ekranu startowego
+async function closeTab(i) {
+  if (stDirty(tabSt(i))) {
+    await switchTab(i);
+    const r = await askModal({ title: 'Zapisać zmiany w pliku „' + S.name + '”?', text: 'Jeśli nie zapiszesz, wprowadzone zmiany zostaną utracone.',
+      buttons: [['save', 'Zapisz', 1], ['saveas', 'Zapisz jako…'], ['no', 'Nie zapisuj'], ['cancel', 'Anuluj']] });
+    if (r === 'cancel') return false;
+    if (r !== 'no') { await exportPdf(r === 'saveas' ? 'saveas' : undefined); if (stDirty(S)) return false; }
+    i = curTab;
+  }
+  const wasCur = i === curTab;
+  if (wasCur) { if (S.tool !== 'select') setTool('select'); else commitEditor(); }
+  dropTab(i);
+  if (wasCur) { await renderAll(); renderRecent(); }
+  renderTabs();
+  return true;
+}
+// aplikacja: zamykanie okna – pyta o każdy niezapisany dokument
+async function appCloseCheck() {
+  for (let i = TABS.length - 1; i >= 0; i--) if (stDirty(tabSt(i)) && !(await closeTab(i))) return false;
+  return true;
+}
+function renderTabs() {
+  const box = $('#tabList'); if (!box) return;
+  box.innerHTML = '';
+  $('#tabHome').classList.toggle('active', curTab < 0);
+  TABS.forEach((t, i) => {
+    const st = tabSt(i), d = el('div', 'tab' + (i === curTab ? ' active' : ''));
+    const dirty = i === curTab ? stDirty(S) : t.dirty;
+    if (i === curTab) t.shown = dirty;
+    d.title = st.nativePath || st.name;
+    const n = el('span'); n.textContent = (dirty ? '● ' : '') + st.name;
+    const x = el('button'); x.textContent = '✕'; x.title = 'Zamknij dokument';
+    x.onclick = e => { e.stopPropagation(); closeTab(TABS.indexOf(t)); };
+    d.onclick = () => switchTab(TABS.indexOf(t));
+    d.onauxclick = e => { if (e.button === 1) closeTab(TABS.indexOf(t)); };
+    d.append(n, x); box.appendChild(d);
+  });
+  if (window.native) native.setDoc(TABS.length ? 'x' : '');
 }
 async function blankSrc() {
   if (S.blankSrc < 0) {
@@ -1140,37 +1296,41 @@ async function blankSrc() {
   }
   return S.blankSrc;
 }
-function resetDoc(name) {
-  S.sources = []; S.pages = []; S.undo = []; S.redo = []; S.blankSrc = -1; S.sel = null; S.cur = 0; S.name = name;
-  textless.clear(); textlessRes.clear();
-  for (const k in OF) delete OF[k];
-  for (const k in ocrCache) delete ocrCache[k];
-  updUndo();
+function resetDoc(name) { // nowy dokument = nowa karta (pozostałe zostają otwarte)
+  if (S.tool !== 'select') setTool('select'); else commitEditor();
+  stashTab();
+  TABS.push({ st: freshDoc(name), scroll: 0 });
+  loadTab(TABS.length - 1);
 }
 async function openFiles(files, append, handle) {
   files = [...files].filter(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
   if (!files.length) return;
-  if (!append) {
-    S.fileHandle = handle || null; S.savedState = null; S.nativePath = window.native ? native.pathFor(files[0]) : null;
-    if (window.native) { native.setDoc(files[0].name); if (S.nativePath) native.addRecent(S.nativePath); setTimeout(renderRecent, 300); }
-    else addRecent(handle);
-  }
   commitEditor();
   busy('Wczytywanie…');
+  let locked = false;
   try {
-    if (!append) resetDoc(files[0].name.replace(/\.pdf$/i, ''));
+    if (!append) {
+      resetDoc(files[0].name.replace(/\.pdf$/i, ''));
+      S.fileHandle = handle || null; S.savedState = null; S.nativePath = window.native ? native.pathFor(files[0]) : null;
+      if (window.native) { if (S.nativePath) native.addRecent(S.nativePath); setTimeout(renderRecent, 300); }
+      else addRecent(handle);
+    }
     else snap();
     for (const f of files) {
-      const si = await addSource(new Uint8Array(await f.arrayBuffer()));
+      const si = await addSource(new Uint8Array(await f.arrayBuffer()), f.name);
+      locked = locked || S.sources[si].locked;
       const n = S.sources[si].doc.numPages;
       for (let k = 0; k < n; k++) S.pages.push({ src: si, idx: k, rot: 0, annots: [] });
     }
     if (!append) { await fitZoom(); S.zoom = Math.min(S.zoom, 1.5); }
   } catch (e) {
-    alert('Nie udało się otworzyć pliku: ' + e.message);
+    busy(false);
+    if (!e.cancel) alert('Nie udało się otworzyć pliku: ' + e.message);
   }
   busy(false);
-  await renderAll();
+  if (!append && !S.pages.length && curTab >= 0) dropTab(curTab); // nie udało się – bez pustej karty
+  await renderAll(); renderTabs();
+  if (locked) { hint('Plik był zabezpieczony – po zapisaniu kopia nie będzie już miała hasła ani blokad.'); setTimeout(() => hint(''), 6000); }
 }
 async function newDoc() {
   resetDoc('nowy-dokument');
@@ -1178,7 +1338,7 @@ async function newDoc() {
   const si = await blankSrc();
   S.pages.push({ src: si, idx: 0, rot: 0, annots: [] });
   await fitZoom(); S.zoom = Math.min(S.zoom, 1.5);
-  renderAll();
+  await renderAll(); renderTabs();
 }
 async function fitZoom() {
   if (!S.pages.length) return;
@@ -1658,10 +1818,32 @@ async function startNewText(i, x, y, spec) {
 /* ---------- „Wypełnij”: wykrywanie pól formularza (jak w Acrobacie) ---------- */
 // Z wersji strony BEZ tekstu wyszukujemy linie (ramki tabel, podkreślenia, kwadraciki), a z tekstu – etykiety.
 // Puste komórki, wolne miejsce obok etykiet i miejsca nad podkreśleniami stają się polami do wpisania.
+// Wycinek strony ze znakiem (✗/✓) w dużej rozdzielczości, z przezroczystym tłem – do wstawiania w inne kwadraciki
+const MARKS = new Map();
+async function markImage(Tl, ref) {
+  const Z = 16, pad = 0.04, [x0, y0, x1, y1] = ref.r, Wd = x1 - x0, Ht = y1 - y0;
+  const box = [ref.ink[0] - pad, ref.ink[1] - pad, ref.ink[2] + pad, ref.ink[3] + pad];
+  const vp = Tl.pp.getViewport({ scale: Z, rotation: Tl.vp.rotation });
+  const A = vp.convertToViewportPoint(x0 + box[0] * Wd, y1 - box[1] * Ht), B = vp.convertToViewportPoint(x0 + box[2] * Wd, y1 - box[3] * Ht);
+  const ox = Math.floor(Math.min(A[0], B[0])), oy = Math.floor(Math.min(A[1], B[1])), w = Math.ceil(Math.abs(B[0] - A[0])), h = Math.ceil(Math.abs(B[1] - A[1]));
+  const cv = el('canvas'); cv.width = w; cv.height = h;
+  const cx = cv.getContext('2d', { willReadFrequently: true }); cx.fillStyle = '#fff'; cx.fillRect(0, 0, w, h);
+  await Tl.pp.render({ canvasContext: cx, viewport: Tl.pp.getViewport({ scale: Z, rotation: Tl.vp.rotation, offsetX: -ox, offsetY: -oy }) }).promise;
+  const im = cx.getImageData(0, 0, w, h), d = im.data;
+  let min = 255, ir = 0, ig = 0, ib = 0;
+  for (let k = 0; k < d.length; k += 4) { const l = (d[k] * 299 + d[k + 1] * 587 + d[k + 2] * 114) / 1000; if (l < min) { min = l; ir = d[k]; ig = d[k + 1]; ib = d[k + 2]; } }
+  if (min > 200) throw new Error('brak znaku');
+  for (let k = 0; k < d.length; k += 4) {
+    const l = (d[k] * 299 + d[k + 1] * 587 + d[k + 2] * 114) / 1000;
+    d[k] = ir; d[k + 1] = ig; d[k + 2] = ib; d[k + 3] = Math.max(0, Math.min(255, Math.round((255 - l) / (255 - min) * 255)));
+  }
+  cx.putImageData(im, 0, 0);
+  return { img: cv.toDataURL('image/png'), imgBox: box };
+}
 async function detectFields(i) {
   const v = views[i], p = S.pages[i];
   if (!v || p.cont) return [];
-  if (p.fields && p.fieldsV === 9) return p.fields;
+  if (p.fields && p.fieldsV === 10) return p.fields;
   if (!p.geo || p.geo.v !== 4) { v.items = null; v.itemsP = null; p.geo = null; }
   await loadItems(i);
   const Tl = await getTextless(p);
@@ -1911,12 +2093,17 @@ async function detectFields(i) {
   // jaki znak stawia ten dokument: krzyżyk ☒ czy ptaszek ✓ – i jak wygląda
   const marked = res.filter(f => f.pre === 'cross' || f.pre === 'check');
   if (marked.length) {
-    const kind = marked.filter(f => f.pre === 'cross').length * 2 >= marked.length ? 'cross' : 'check', ref = marked.find(f => f.pre === kind);
-    p.mark = { kind, ink: ref.ink, width: ref.mw, color: ref.mc };
-    if (ref.gl) p.mark.glyph = { uni: ref.gl.uni, ofont: ref.gl.ofont, fname: ref.gl.fname, sub: ref.gl.sub };
-    S.mark = p.mark;
+    const kind = marked.filter(f => f.pre === 'cross').length * 2 >= marked.length ? 'cross' : 'check', same = marked.filter(f => f.pre === kind);
+    // wzorzec: najczęstszy wygląd znaku (pomija pojedyncze, inaczej narysowane)
+    const grp = {}; for (const f of same) { const k = Math.round((f.mw || 0) * 10) + '|' + f.mc; (grp[k] = grp[k] || []).push(f); }
+    const ref = Object.values(grp).sort((a, b) => b.length - a.length)[0][0];
+    let M = { kind, ink: ref.ink, width: ref.mw, color: ref.mc };
+    if (ref.gl) M.glyph = { uni: ref.gl.uni, ofont: ref.gl.ofont, fname: ref.gl.fname, sub: ref.gl.sub };
+    else if (S.mark && S.mark.img && S.mark.kind === kind) M = S.mark;
+    else try { Object.assign(M, await markImage(Tl, ref)); } catch (e) { console.warn('Wzorzec znaku:', e); }
+    MARKS.set(pkey(p), M); S.mark = M;
   }
-  p.fields = res; p.fieldsV = 9;
+  p.fields = res; p.fieldsV = 10;
   return res;
 }
 const fieldScr = (v, f) => scrRect(v, [[f.r[0], f.r[1]], [f.r[2], f.r[3]]]);
@@ -1941,13 +2128,17 @@ async function openField(i, k) {
       const m = (f.r[2] - f.r[0]) * 0.03;
       p.annots.push({ type: 'whiteout', pts: [[f.r[0] + m, f.r[1] + m], [f.r[2] - m, f.r[3] - m]], formField: ff });
     } else {
-      const M = p.mark || S.mark || { kind: 'check' }, [x0, y0, x1, y1] = f.r, Wd = x1 - x0, Ht = y1 - y0;
+      const M = MARKS.get(pkey(p)) || S.mark || { kind: 'check' }, [x0, y0, x1, y1] = f.r, Wd = x1 - x0, Ht = y1 - y0;
       const P = (u, t) => [x0 + u * Wd, y1 - t * Ht]; // u – od lewej, t – od góry
       const color = M.color || '#000000';
       if (M.glyph && f.gl) {
         // ten sam znak (np. ☒) tą samą czcionką, w tym samym miejscu co pusty kwadracik ☐
         const a = { type: 'text', pts: [[f.gl.x, f.gl.y]], text: M.glyph.uni, size: f.gl.size, color, font: 'orig', ofont: M.glyph.ofont, fname: M.glyph.fname, sub: M.glyph.sub, hs: 1, rot: v.rot, formField: ff };
         fixFont(a); p.annots.push(a);
+      } else if (M.img) {
+        // dokładna kopia znaku z dokumentu
+        const [a, b, c, d] = M.imgBox;
+        p.annots.push({ type: 'image', pts: [[x0 + a * Wd, y1 - b * Ht]], w: (c - a) * Wd, h: (d - b) * Ht, data: M.img, rot: v.rot, formField: ff });
       } else if (M.kind === 'cross') {
         const [a, b, c, d] = M.ink || [0.12, 0.12, 0.88, 0.88], w = M.width || Math.max(0.5, Ht * 0.1);
         p.annots.push({ type: 'pen', pts: [P(a, b), P(c, d)], color, width: w, formField: ff }, { type: 'pen', pts: [P(c, b), P(a, d)], color, width: w, formField: ff });
@@ -3504,9 +3695,10 @@ async function exportPdf(mode) {
 // otwieranie: w Chrome/Edge z dostępem do pliku (żeby „Zapisz” nadpisywało ten sam plik)
 async function openNativePaths(paths, append) {
   for (let k = 0; k < paths.length; k++) {
+    if (!append) { const ex = TABS.findIndex((t, i) => tabSt(i).nativePath === paths[k]); if (ex >= 0) { await switchTab(ex); continue; } }
     const r = await native.readFile(paths[k]);
-    await openFiles([new File([r.data], r.name, { type: 'application/pdf' })], append || k > 0);
-    if (!append && k === 0) S.nativePath = r.path;
+    await openFiles([new File([r.data], r.name, { type: 'application/pdf' })], append);
+    if (!append && curTab >= 0 && S.pages.length) { S.nativePath = r.path; renderTabs(); }
   }
 }
 /* ---------- ostatnio otwierane ---------- */
@@ -3566,16 +3758,15 @@ async function pickOpen() {
 $('#bOpen').onclick = $('#bOpen2').onclick = pickOpen;
 $('#bSaveAs').onclick = () => exportPdf('saveas');
 function markSaved() { S.savedState = JSON.stringify(S.pages); updTitle(); }
-function isDirty() { return S.pages.length && S.undo.length > 0 && JSON.stringify(S.pages) !== S.savedState; }
-function updTitle() { document.title = (S.pages.length ? S.name + ' – ' : '') + 'Edytor PDF'; }
+function isDirty() { return TABS.some((t, i) => stDirty(tabSt(i))) || (curTab < 0 && stDirty(S)); }
+function updTitle() { document.title = (S.pages.length ? S.name + ' – ' : '') + 'Edytor PDF'; renderTabs(); }
 // PDF otwarty z systemu („Otwórz za pomocą → Edytor PDF”, dwuklik na pliku)
 if ('launchQueue' in window) {
   launchQueue.setConsumer(async params => {
     if (!params.files || !params.files.length) return;
     const h = params.files[0], files = [];
     for (const fh of params.files) files.push(await fh.getFile());
-    await openFiles(files.slice(0, 1), false, h);
-    if (files.length > 1) await openFiles(files.slice(1), true);
+    for (let k = 0; k < files.length; k++) await openFiles([files[k]], false, params.files[k]);
   });
 }
 // aplikacja na Windows/macOS
@@ -3616,7 +3807,9 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
   });
 }
 $('#bMerge').onclick = () => S.pages.length ? $('#fMerge').click() : $('#fOpen').click();
-$('#bNew').onclick = newDoc;
+$('#bNew').onclick = $('#tabNew').onclick = newDoc;
+$('#tabHome').onclick = () => switchTab(-1);
+renderTabs();
 $('#fOpen').onchange = e => { openFiles(e.target.files, false); e.target.value = ''; };
 $('#fMerge').onchange = e => { openFiles(e.target.files, true); e.target.value = ''; };
 $('#bSave').onclick = () => exportPdf();

@@ -188,8 +188,7 @@ app.on('second-instance', (e, argv) => {
 });
 function openPaths(ps) {
   for (const p of ps) {
-    const free = BrowserWindow.getAllWindows().find(w => !w.hasDoc);
-    const w = free || createWindow();
+    const w = BrowserWindow.getAllWindows()[0] || createWindow(); // kolejne pliki otwierają się jako karty
     w.hasDoc = true;
     const send = () => w.webContents.send('open-path', p);
     if (w.webContents.isLoading() || !w.ready) w.once('app-ready', send); else send();
@@ -215,6 +214,13 @@ function createWindow() {
     if (w.forceClose) return;
     e.preventDefault();
     if (w.asking) return;
+    // edytor z kartami sam pyta o każdy niezapisany dokument
+    let res = null;
+    w.asking = true;
+    try { res = await w.webContents.executeJavaScript('typeof appCloseCheck === "function" ? appCloseCheck() : null', true); } catch (err) {}
+    w.asking = false;
+    if (res === false) { quitting = false; return; }
+    if (res === true) { w.forceClose = true; w.destroy(); if (quitting) setImmediate(() => app.quit()); return; }
     let st = { dirty: false, name: '' };
     try { st = await w.webContents.executeJavaScript('({ dirty: !!(typeof isDirty === "function" && isDirty()), name: typeof S !== "undefined" ? S.name : "" })'); } catch (err) {}
     if (st.dirty) {
