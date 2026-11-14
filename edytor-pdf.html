@@ -121,7 +121,8 @@ body.native .webonly{display:none!important}
 #empty .recent{width:100%;text-align:left;margin-top:8px}
 .recent .rf{display:flex!important;flex-direction:column;align-items:flex-start;width:100%;text-align:left;padding:7px 10px;border-radius:6px;background:transparent;border:0;cursor:pointer}
 .recent .rf:hover{background:#f0f1f4}
-.recent .rf b{font-weight:600;font-size:14px}.recent .rf small{color:var(--muted);font-size:11px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.recent{min-width:0;max-width:100%}.recent .rf{min-width:0;max-width:100%;box-sizing:border-box;overflow:hidden}
+.recent .rf b{font-weight:600;font-size:14px}.recent .rf b,.recent .rf small{display:block;width:100%;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.recent .rf small{color:var(--muted);font-size:11px}
 .recent .rclear{font-size:11px;color:var(--muted);background:none;border:0;padding:4px 10px;cursor:pointer;text-decoration:underline}
 #appMenu .recent{border-bottom:1px solid #eee;margin-bottom:4px;padding-bottom:4px;max-height:50vh;overflow:auto}
 #appMenu .recent h4{margin:4px 10px}
@@ -147,7 +148,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 
 <div class="bar">
   <div class="brandwrap">
-    <button class="brand" id="bBrand" title="Menu edytora"><i>PDF</i><span>Edytor PDF <small style="font-weight:400;color:var(--muted)">v27</small> ▾</span></button>
+    <button class="brand" id="bBrand" title="Menu edytora"><i>PDF</i><span>Edytor PDF <small style="font-weight:400;color:var(--muted)">v28</small> ▾</span></button>
     <div class="appmenu" id="appMenu">
       <div id="recentMenu" class="recent"></div>
       <button data-m="help">❓ Pomoc – jak działa każda opcja<small>narzędzia, skróty, czcionki, zapisywanie</small></button>
@@ -155,7 +156,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
       <button data-m="install" id="mInstall" style="display:none">⬇ Zainstaluj jako aplikację</button>
       <div class="amsep"></div>
       <a href="https://github.com/wronglogin/edytor-pdf" target="_blank" rel="noopener">ℹ️ O edytorze (GitHub) ↗</a>
-      <div class="amver">Edytor PDF · wersja 27</div>
+      <div class="amver">Edytor PDF · wersja 28</div>
     </div>
   </div>
   <button id="bOpen" title="Otwórz PDF">📂<span class="lbl">Otwórz</span></button>
@@ -225,7 +226,6 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
       <div class="row">
         <button class="primary" id="bOpen2">📂 Wybierz PDF</button>
         <button id="bNew">📄 Pusty dokument</button>
-        <button id="bSigs">✍ Moje podpisy</button>
       </div>
       <div id="recentEmpty" class="recent"></div>
     </div>
@@ -268,7 +268,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 <p><b>Zakreśl</b> <kbd>H</kbd> – półprzezroczysty marker. <b>Rysuj</b> <kbd>P</kbd> – odręczna linia. <b>Prostokąt</b> <kbd>R</kbd> – ramka. <b>Zakryj</b> <kbd>W</kbd> – biały prostokąt zasłaniający treść. Kolor i grubość ustawiasz na pasku; zmiana koloru/grubości działa też na zaznaczony element.</p></details>
 <details><summary>🖼 Obraz, ✍ Podpis</summary>
 <p><b>Obraz</b> – wstawia zdjęcie lub grafikę; potem kliknij miejsce na stronie.</p>
-<p><b>Podpis</b> – narysuj podpis myszką/palcem albo wgraj zdjęcie podpisu (JPG/PNG) – tło zostanie usunięte. Podpisy są zapamiętywane tylko na tym urządzeniu. Możesz je dodać wcześniej, bez otwartego dokumentu („✍ Moje podpisy” na ekranie startowym).</p>
+<p><b>Podpis</b> – narysuj podpis myszką/palcem albo wgraj zdjęcie podpisu (JPG/PNG) – tło zostanie usunięte. Podpisy są zapamiętywane tylko na tym urządzeniu. Możesz je dodać wcześniej, bez otwartego dokumentu – przycisk „Podpis” na pasku działa od razu.</p>
 <p><b>Powiększenie</b> – kliknij wartość (np. 150%) między − i +, wpisz własną i naciśnij Enter.</p>
 <p><b>Ostatnio otwierane</b> – lista na ekranie startowym i w menu „Edytor PDF ▾” (w aplikacji także Plik → Otwórz ostatnie).</p></details>
 <details><summary>Opcje na pasku</summary>
@@ -291,7 +291,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 </div>
 <div class="modal" id="fontsModal">
   <div class="card">
-    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v27</small></h3>
+    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v28</small></h3>
     <p class="muted">Przeglądarka nie może sama przeszukać dysku, więc wskaż raz foldery z czcionkami Worda i Acrobata. Edytor je zapamięta i będzie z nich automatycznie brał brakujące czcionki przy każdej edycji. Czcionki nie są nigdzie wysyłane.</p>
     <p class="muted"><b>Mac:</b> przeglądarka nie otworzy folderów wewnątrz aplikacji („pliki systemowe”), więc najpierw skopiuj czcionki do Dokumentów: otwórz <b>Terminal</b>, wklej polecenie poniżej i naciśnij Enter. Potem kliknij „Dodaj folder…” i wybierz <b>Dokumenty → Czcionki</b>.</p>
     <div class="paths"><div class="pt">Terminal (Mac)</div><code>mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki</code><button class="copyPath" data-path="mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki">Kopiuj</button></div>
@@ -3546,7 +3546,7 @@ async function renderRecent() {
     if (!L.length) continue;
     box.appendChild(Object.assign(el('h4'), { textContent: 'Ostatnio otwierane' }));
     for (const r of L.slice(0, max)) {
-      const b = el('button', 'rf'); b.title = r.sub;
+      const b = el('button', 'rf'); b.title = r.name + '\n' + r.sub;
       b.innerHTML = '<b></b><small></small>'; b.querySelector('b').textContent = '📄 ' + r.name; b.querySelector('small').textContent = r.sub;
       b.onclick = () => { closeAppMenu(); r.open(); };
       box.appendChild(b);
@@ -3564,7 +3564,6 @@ async function pickOpen() {
   } catch (e) {}
 }
 $('#bOpen').onclick = $('#bOpen2').onclick = pickOpen;
-$('#bSigs').onclick = openSig;
 $('#bSaveAs').onclick = () => exportPdf('saveas');
 function markSaved() { S.savedState = JSON.stringify(S.pages); updTitle(); }
 function isDirty() { return S.pages.length && S.undo.length > 0 && JSON.stringify(S.pages) !== S.savedState; }

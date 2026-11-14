@@ -219,13 +219,13 @@ function createWindow() {
     try { st = await w.webContents.executeJavaScript('({ dirty: !!(typeof isDirty === "function" && isDirty()), name: typeof S !== "undefined" ? S.name : "" })'); } catch (err) {}
     if (st.dirty) {
       w.asking = true; w.show(); w.focus();
-      const r = await dialog.showMessageBox(w, { type: 'warning', buttons: ['Zapisz', 'Nie zapisuj', 'Anuluj'], defaultId: 0, cancelId: 2, noLink: true,
+      const r = await dialog.showMessageBox(w, { type: 'warning', buttons: ['Zapisz', 'Zapisz jako…', 'Nie zapisuj', 'Anuluj'], defaultId: 0, cancelId: 3, noLink: true,
         title: 'Edytor PDF', message: 'Zapisać zmiany w pliku „' + (st.name || 'dokument') + '”?', detail: 'Jeśli nie zapiszesz, wprowadzone zmiany zostaną utracone.' });
       w.asking = false;
-      if (r.response === 2) { quitting = false; return; }
-      if (r.response === 0) {
+      if (r.response === 3) { quitting = false; return; }
+      if (r.response === 0 || r.response === 1) {
         let ok = false;
-        try { ok = await w.webContents.executeJavaScript('exportPdf().then(() => !isDirty())'); } catch (err) {}
+        try { ok = await w.webContents.executeJavaScript('exportPdf(' + (r.response === 1 ? '"saveas"' : '') + ').then(() => !isDirty())'); } catch (err) {}
         if (!ok) { quitting = false; return; } // anulowano zapis albo błąd – okno zostaje
       }
     }
