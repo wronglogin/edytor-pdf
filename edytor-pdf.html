@@ -115,13 +115,13 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 
 <div class="bar">
   <div class="brandwrap">
-    <button class="brand" id="bBrand" title="Menu edytora"><i>PDF</i><span>Edytor PDF <small style="font-weight:400;color:var(--muted)">v14</small> ▾</span></button>
+    <button class="brand" id="bBrand" title="Menu edytora"><i>PDF</i><span>Edytor PDF <small style="font-weight:400;color:var(--muted)">v15</small> ▾</span></button>
     <div class="appmenu" id="appMenu">
       <button data-m="fonts">🔤 Czcionki…<small>foldery Worda/Acrobata, pobieranie, stan</small></button>
       <button data-m="install" id="mInstall" style="display:none">⬇ Zainstaluj jako aplikację</button>
       <div class="amsep"></div>
       <a href="https://github.com/wronglogin/edytor-pdf" target="_blank" rel="noopener">ℹ️ O edytorze (GitHub) ↗</a>
-      <div class="amver">Edytor PDF · wersja 14</div>
+      <div class="amver">Edytor PDF · wersja 15</div>
     </div>
   </div>
   <button id="bOpen" title="Otwórz PDF">📂<span class="lbl">Otwórz</span></button>
@@ -145,6 +145,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 <div class="bar" id="toolbar">
   <button class="tool active" data-tool="select" title="Zaznacz / przesuń (V)">↖<span class="lbl">Zaznacz</span></button>
   <button class="tool" data-tool="edittext" title="Edytuj istniejący tekst (E)">✏️<span class="lbl">Edytuj tekst</span></button>
+  <button class="tool" data-tool="form" title="Wypełnij formularz – wykrywa puste pola do wpisania (F)">▦<span class="lbl">Wypełnij</span></button>
   <button class="tool" data-tool="text" title="Dodaj tekst (T)">𝐓<span class="lbl">Dodaj tekst</span></button>
   <button class="tool" data-tool="highlight" title="Zakreślacz (H)">🖍<span class="lbl">Zakreśl</span></button>
   <button class="tool" data-tool="pen" title="Rysuj odręcznie (P)">✎<span class="lbl">Rysuj</span></button>
@@ -198,7 +199,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 <input type="file" id="fFontDir" webkitdirectory multiple hidden>
 <div class="modal" id="fontsModal">
   <div class="card">
-    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v14</small></h3>
+    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v15</small></h3>
     <p class="muted">Przeglądarka nie może sama przeszukać dysku, więc wskaż raz foldery z czcionkami Worda i Acrobata. Edytor je zapamięta i będzie z nich automatycznie brał brakujące czcionki przy każdej edycji. Czcionki nie są nigdzie wysyłane.</p>
     <p class="muted"><b>Mac:</b> przeglądarka nie otworzy folderów wewnątrz aplikacji („pliki systemowe”), więc najpierw skopiuj czcionki do Dokumentów: otwórz <b>Terminal</b>, wklej polecenie poniżej i naciśnij Enter. Potem kliknij „Dodaj folder…” i wybierz <b>Dokumenty → Czcionki</b>.</p>
     <div class="paths"><div class="pt">Terminal (Mac)</div><code>mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki</code><button class="copyPath" data-path="mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki">Kopiuj</button></div>
@@ -1117,6 +1118,7 @@ async function renderPage(i) {
   v.painted = true;
   drawOverlay(i);
   if (S.tool === 'edittext' || S.tool === 'text') loadItems(i);
+  if (S.tool === 'form' && !S.pages[i].fields) detectFields(i).then(() => drawOverlay(i)).catch(() => {});
 }
 
 /* ---------- wykrywanie istniejącego tekstu (do edycji) ---------- */
@@ -1502,6 +1504,174 @@ async function startNewText(i, x, y, spec) {
   if (spec) openBoxEditor(i, -1, x, y, spec, style); else openEditor(i, -1, x, y, null, style);
   if (style) hint('Styl z PDF: ' + fontLabel(style) + ' · Enter – zatwierdź');
 }
+/* ---------- „Wypełnij”: wykrywanie pól formularza (jak w Acrobacie) ---------- */
+// Z wersji strony BEZ tekstu wyszukujemy linie (ramki tabel, podkreślenia, kwadraciki), a z tekstu – etykiety.
+// Puste komórki, wolne miejsce obok etykiet i miejsca nad podkreśleniami stają się polami do wpisania.
+async function detectFields(i) {
+  const v = views[i], p = S.pages[i];
+  if (!v || p.cont) return [];
+  if (p.fields) return p.fields;
+  await loadItems(i);
+  const Tl = await getTextless(p);
+  if (!Tl || views[i] !== v) return [];
+  const K = Tl.vp.scale, W = Tl.c.width, H = Tl.c.height;
+  const px = Tl.ctx.getImageData(0, 0, W, H).data, dark = new Uint8Array(W * H);
+  for (let j = 0, k = 0; j < W * H; j++, k += 4) dark[j] = px[k] * 299 + px[k + 1] * 587 + px[k + 2] * 114 < 150000 && px[k + 3] > 100 ? 1 : 0;
+  // odcinki poziome i pionowe → linie (grubość do ~3 pt)
+  const runs = (horiz, minLen) => {
+    const out = [], A = horiz ? H : W, B = horiz ? W : H;
+    for (let a = 0; a < A; a++) {
+      let b = 0;
+      while (b < B) {
+        if (!dark[horiz ? a * W + b : b * W + a]) { b++; continue; }
+        let e = b; while (e < B && dark[horiz ? a * W + e : e * W + a]) e++;
+        if (e - b >= minLen) out.push([a, b, e]);
+        b = e;
+      }
+    }
+    // sklejanie sąsiednich rzędów w jedną linię
+    const lines = [], open = [];
+    for (const [a, b, e] of out) {
+      let L = null;
+      for (const o of open) if (o.a1 >= a - 1 && Math.abs(o.b - b) < 2 * K && Math.abs(o.e - e) < 2 * K) { L = o; break; }
+      if (L) { L.a1 = a; L.b = Math.min(L.b, b); L.e = Math.max(L.e, e); }
+      else { L = { a0: a, a1: a, b, e }; open.push(L); lines.push(L); }
+      for (let q = open.length - 1; q >= 0; q--) if (open[q].a1 < a - 2) open.splice(q, 1);
+    }
+    return lines.filter(L => L.a1 - L.a0 + 1 <= 3.2 * K).map(L => ({ p: (L.a0 + L.a1) / 2, s: L.b, e: L.e, len: L.e - L.b }));
+  };
+  const HL = runs(true, 6 * K), VL = runs(false, 6 * K);
+  const view = p.geo ? p.geo.view : v.pp.view;
+  const toPx = (x, y) => [(x - view[0]) * K, (view[3] - y) * K];
+  const texts = (p.geo ? p.geo.lines : []).map(l => { const [a, b] = toPx(l[0], l[3]), [c, d] = toPx(l[2], l[1]); return { x0: a, y0: b, x1: c, y1: d }; });
+  const textIn = (x0, y0, x1, y1) => texts.filter(t => t.x1 > x0 && t.x0 < x1 && t.y1 > y0 && t.y0 < y1);
+  const F = [], cells = [];
+  const add = (x0, y0, x1, y1, kind) => { if (x1 - x0 >= (kind === 'check' ? 5 : 20) * K && y1 - y0 >= (kind === 'check' ? 5 : 8) * K) F.push({ x0, y0, x1, y1, kind }); };
+  // 1) komórki tabel
+  const longH = HL.filter(L => L.len >= 20 * K).sort((a, b) => a.p - b.p), longV = VL.filter(L => L.len >= 8 * K);
+  for (const A of longH) {
+    let B = null;
+    for (const C of longH) {
+      if (C.p <= A.p + 6 * K) continue;
+      if (Math.min(A.e, C.e) - Math.max(A.s, C.s) < 20 * K) continue;
+      if (!B || C.p < B.p) B = C;
+    }
+    if (!B || B.p - A.p > 160 * K) continue;
+    const ox0 = Math.max(A.s, B.s), ox1 = Math.min(A.e, B.e);
+    const spans = L => L.s <= A.p + 3 * K && L.e >= B.p - 3 * K;
+    const vIn = longV.filter(L => spans(L) && L.p > ox0 - 3 * K && L.p < ox1 + 3 * K);
+    // to musi być wiersz tabeli: pionowe krawędzie po obu stronach albo dwie jednakowe linie poziome (tabela bez pionowych kresek)
+    const edgeL = vIn.some(L => Math.abs(L.p - ox0) < 3 * K), edgeR = vIn.some(L => Math.abs(L.p - ox1) < 3 * K);
+    const twin = Math.abs(A.s - B.s) < 3 * K && Math.abs(A.e - B.e) < 3 * K && B.p - A.p <= 40 * K;
+    if (!(edgeL && edgeR) && !twin) continue;
+    const xs = [ox0, ox1, ...vIn.filter(L => L.p > ox0 + 2 * K && L.p < ox1 - 2 * K).map(L => L.p)].sort((a, b) => a - b);
+    for (let k = 0; k < xs.length - 1; k++) if (xs[k + 1] - xs[k] >= 15 * K) cells.push({ x0: xs[k], x1: xs[k + 1], y0: A.p, y1: B.p });
+  }
+  const pad = 2.5 * K;
+  for (const c of cells) {
+    const x0 = c.x0 + pad, x1 = c.x1 - pad, y0 = c.y0 + pad, y1 = c.y1 - pad;
+    const T = textIn(x0, y0, x1, y1);
+    if (!T.length) { add(x0, y0, x1, y1, 'text'); continue; }
+    const R = Math.max(...T.map(t => t.x1)), Bt = Math.max(...T.map(t => t.y1)), Tp = Math.min(...T.map(t => t.y0));
+    const lineH = Math.max(...T.map(t => t.y1 - t.y0));
+    if (x1 - R >= 30 * K) add(R + 6 * K, y0, x1, y1, 'text');                          // wolne miejsce za etykietą
+    else if (y1 - Bt >= Math.max(12 * K, lineH * 0.9) && (Bt - Tp) < (y1 - y0) * 0.6) add(x0, Bt + 2 * K, x1, y1, 'text'); // miejsce pod etykietą
+  }
+  // 2) podkreślenia („Imię: ________”)
+  const inCells = (x0, y0, x1, y1) => cells.some(c => Math.min(x1, c.x1) - Math.max(x0, c.x0) > 4 * K && Math.min(y1, c.y1) - Math.max(y0, c.y0) > 4 * K);
+  for (const L of HL.filter(L => L.len >= 30 * K)) {
+    const y1 = L.p - 1.5 * K, y0 = L.p - 16 * K;
+    if (inCells(L.s, y0, L.e, y1)) continue;
+    // krawędź tabeli to nie podkreślenie
+    if (cells.some(c => (Math.abs(c.y0 - L.p) < 3 * K || Math.abs(c.y1 - L.p) < 3 * K) && Math.min(c.x1, L.e) - Math.max(c.x0, L.s) > 10 * K)) continue;
+    if (HL.some(M => M !== L && M.p < y1 && M.p > y0 && Math.min(M.e, L.e) - Math.max(M.s, L.s) > 10 * K)) continue;
+    const T = textIn(L.s, y0, L.e, y1);
+    if (!T.length) add(L.s, y0, L.e, y1, 'text');
+    else { const R = Math.max(...T.map(t => t.x1)); if (L.e - R >= 30 * K) add(R + 5 * K, y0, L.e, y1, 'text'); }
+  }
+  // 3) kwadraciki do zaznaczenia
+  const shortH = HL.filter(L => L.len >= 5 * K && L.len <= 24 * K), shortV = VL.filter(L => L.len >= 5 * K && L.len <= 24 * K);
+  for (const T of shortH) for (const B of shortH) {
+    if (B.p <= T.p + 4 * K || Math.abs(B.s - T.s) > 2 * K || Math.abs(B.e - T.e) > 2 * K) continue;
+    const w = T.e - T.s, h = B.p - T.p;
+    if (h < w * 0.7 || h > w * 1.3) continue;
+    const hasL = shortV.some(V => Math.abs(V.p - T.s) < 2 * K && Math.abs(V.s - T.p) < 2 * K), hasR = shortV.some(V => Math.abs(V.p - T.e) < 2 * K && Math.abs(V.s - T.p) < 2 * K);
+    if (hasL && hasR && !textIn(T.s + K, T.p + K, T.e - K, B.p - K).length) add(T.s + K, T.p + K, T.e - K, B.p - K, 'check');
+  }
+  // 4) prawdziwe pola formularza zapisane w PDF (AcroForm)
+  const toPdfR = (x0, y0, x1, y1) => { const a = Tl.vp.convertToPdfPoint(x0, y0), b = Tl.vp.convertToPdfPoint(x1, y1); return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; };
+  let out = F.map(f => { const r = toPdfR(f.x0, f.y0, f.x1, f.y1); return { r, kind: f.kind }; });
+  try {
+    const anns = await v.pp.getAnnotations();
+    for (const a of anns) {
+      if (a.subtype !== 'Widget' || !a.rect || a.readOnly) continue;
+      const kind = a.fieldType === 'Tx' ? 'text' : (a.fieldType === 'Btn' && a.checkBox) ? 'check' : null;
+      if (!kind) continue;
+      const r = [Math.min(a.rect[0], a.rect[2]), Math.min(a.rect[1], a.rect[3]), Math.max(a.rect[0], a.rect[2]), Math.max(a.rect[1], a.rect[3])];
+      out = out.filter(f => !(Math.min(f.r[2], r[2]) - Math.max(f.r[0], r[0]) > 2 && Math.min(f.r[3], r[3]) - Math.max(f.r[1], r[1]) > 2));
+      out.push({ r, kind, acro: true });
+    }
+  } catch (e) {}
+  // duplikaty / nakładające się → zostaje większe
+  out.sort((a, b) => (b.r[2] - b.r[0]) * (b.r[3] - b.r[1]) - (a.r[2] - a.r[0]) * (a.r[3] - a.r[1]));
+  const res = [];
+  for (const f of out) {
+    const ov = res.some(g => { const ix = Math.min(f.r[2], g.r[2]) - Math.max(f.r[0], g.r[0]), iy = Math.min(f.r[3], g.r[3]) - Math.max(f.r[1], g.r[1]); return ix > 0 && iy > 0 && ix * iy > 0.4 * (f.r[2] - f.r[0]) * (f.r[3] - f.r[1]); });
+    if (!ov) res.push(f);
+    if (res.length >= 400) break;
+  }
+  // kolejność: z góry na dół, od lewej (dla klawisza Tab)
+  res.sort((a, b) => (Math.abs(b.r[3] - a.r[3]) > 4 ? b.r[3] - a.r[3] : a.r[0] - b.r[0]));
+  p.fields = res;
+  return res;
+}
+const fieldScr = (v, f) => scrRect(v, [[f.r[0], f.r[1]], [f.r[2], f.r[3]]]);
+function fieldAt(i, x, y) {
+  const v = views[i], fs = S.pages[i].fields || [];
+  for (let k = 0; k < fs.length; k++) { const b = fieldScr(v, fs[k]); if (x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h) return k; }
+  return -1;
+}
+const fieldFilled = (p, f) => p.annots.some(a => a.formField && a.formField[0] === f.r[0] && a.formField[1] === f.r[1]);
+async function openField(i, k) {
+  const v = views[i], p = S.pages[i], f = (p.fields || [])[k];
+  if (!v || !f) return;
+  // pole już wypełnione → edycja tego tekstu
+  const ai = p.annots.findIndex(a => a.formField && a.formField[0] === f.r[0] && a.formField[1] === f.r[1]);
+  if (f.kind === 'check') {
+    snap();
+    if (ai >= 0) p.annots.splice(ai, 1);
+    else {
+      const b = fieldScr(v, f), pt = (fx, fy) => toPdf(v, b.x + fx * b.w, b.y + fy * b.h);
+      p.annots.push({ type: 'pen', pts: [pt(0.18, 0.55), pt(0.42, 0.8), pt(0.84, 0.2)], color: '#000000', width: Math.max(0.8, (f.r[3] - f.r[1]) * 0.12), formField: [f.r[0], f.r[1]] });
+    }
+    afterChange(i); return;
+  }
+  if (ai >= 0) { S.formNav = { i, k }; openEditor(i, ai); return; }
+  const b = fieldScr(v, f), Hpt = f.r[3] - f.r[1];
+  let style = null;
+  try {
+    const it = nearestItem(i, b.x, b.y + b.h / 2);
+    if (it) { try { await resolveLocalFonts(it); } catch (e) {} style = styleFromItem(v, it); }
+  } catch (e) {}
+  if (views[i] !== v || S.tool !== 'form') return;
+  style = style || { font: FONTS[S.font] ? S.font : 'sans', size: 11, color: '#000000' };
+  style.size = Math.max(5, Math.min(style.size || 11, Hpt * 0.72));
+  // tekst wyśrodkowany w pionie, 2 pt od lewej krawędzi pola
+  const off = Math.max(0, (Hpt - 1.3 * style.size) / 2) * v.scale;
+  S.formNav = { i, k };
+  openBoxEditor(i, -1, b.x + 2 * v.scale, b.y + off, { bw: Math.max(10, b.w / v.scale - 3), bh: Math.max(6, (b.h - off) / v.scale), fit: true, field: [f.r[0], f.r[1]] }, style);
+  hint('Pole formularza · ' + fontLabel({ ...style }) + ' · Tab – następne pole, Enter – zatwierdź');
+}
+async function startFormMode() {
+  const todo = views.map((v, i) => i).filter(i => views[i].painted && !S.pages[i].cont && !S.pages[i].fields);
+  if (todo.length) busy('Wykrywanie pól formularza…');
+  let n = 0;
+  for (const i of todo) { try { n += (await detectFields(i)).length; } catch (e) { console.warn(e); } drawOverlay(i); }
+  busy(false);
+  const total = S.pages.reduce((s, p) => s + (p.fields ? p.fields.length : 0), 0);
+  hint(total ? `Wykryto ${total} pól. Kliknij pole, aby je wypełnić (Tab – następne).` : 'Nie znaleziono pól do wypełnienia. Możesz dodać tekst narzędziem „Dodaj tekst”.');
+  setTimeout(() => { if (!editor) hint(''); }, 4000);
+}
 async function startEditItem(i, it) {
   const v = views[i], p = S.pages[i];
   const t = setTimeout(() => busy('Przygotowanie…'), 200);
@@ -1717,6 +1887,17 @@ function drawOverlay(i) {
   if (temp && temp.pi === i) drawAnnot(ctx, v, dispA(F.sh, temp.a), i);
   // 3) to, co przeszło na stronę „ciąg dalszy”, znika z dołu tej strony
   for (const t of F.strips) { const r = scrRect(v, [[t.x0, F.floor], [t.x1, t.Bd]]); ctx.fillStyle = t.bg; ctx.fillRect(r.x - 0.5, r.y, r.w + 1, r.h); }
+  if (S.tool === 'form' && page.fields) {
+    ctx.save();
+    for (const f of page.fields) {
+      const b = fieldScr(v, f), done = fieldFilled(page, f);
+      ctx.fillStyle = done ? 'rgba(22,163,74,.06)' : 'rgba(37,99,235,.10)';
+      ctx.fillRect(b.x, b.y, b.w, b.h);
+      ctx.strokeStyle = done ? 'rgba(22,163,74,.45)' : 'rgba(37,99,235,.55)'; ctx.lineWidth = 1; ctx.setLineDash(done ? [2, 3] : []);
+      ctx.strokeRect(b.x + 0.5, b.y + 0.5, b.w - 1, b.h - 1);
+    }
+    ctx.restore();
+  }
   if (S.tool === 'edittext' && v.items) {
     ctx.save();
     for (const it of v.items) {
@@ -1893,6 +2074,16 @@ function onDown(e, i) {
     // klik = pisz od tego miejsca; przeciągnięcie = ramka na tekst
     act = { kind: 'tbox', i, x0: x, y0: y, x1: x, y1: y };
     v.overlay.setPointerCapture(e.pointerId);
+    return;
+  }
+  if (t === 'form') {
+    e.preventDefault();
+    if (hadEditor) return;
+    const hit = hitTest(i, x, y);
+    if (hit >= 0 && page.annots[hit].type === 'text' && !page.annots[hit].formField) { openEditor(i, hit); return; }
+    const k = fieldAt(i, x, y);
+    if (k >= 0) openField(i, k);
+    else if (hit >= 0 && page.annots[hit].type === 'text') openEditor(i, hit);
     return;
   }
   if (t === 'edittext') {
@@ -2137,7 +2328,7 @@ function openBoxEditor(i, ai, x, y, spec, style) {
   if (a) { [x, y] = toScr(v, dispA(v.shifts, a).pts[0]); spec = { bw: a.bw, bh: a.bh }; }
   const st0 = a ? null : style;
   const size = a ? a.size : st0 ? st0.size : S.fontSize, color = a ? a.color : st0 ? st0.color : S.color;
-  const font = a ? a.font : st0 ? st0.font : (FONTS[S.font] ? S.font : 'sans'), fitOn = a ? !!a.fit : S.fit;
+  const font = a ? a.font : st0 ? st0.font : (FONTS[S.font] ? S.font : 'sans'), fitOn = a ? !!a.fit : (spec && spec.fit != null ? spec.fit : S.fit);
   const fsrc = a || st0 || { font };
   const E = eff(fsrc), edKey = E.of ? (fsrc.sub || 'sans') : E.key;
   const ta = el('textarea', 'editor');
@@ -2154,6 +2345,14 @@ function openBoxEditor(i, ai, x, y, spec, style) {
   ta.addEventListener('input', fit);
   ta.addEventListener('keydown', ev => {
     ev.stopPropagation();
+    if (ev.key === 'Tab' && S.tool === 'form' && S.formNav) {
+      ev.preventDefault();
+      const { i: fi, k } = S.formNav, n = (S.pages[fi].fields || []).length;
+      commitEditor();
+      const nk = k + (ev.shiftKey ? -1 : 1);
+      if (nk >= 0 && nk < n) setTimeout(() => openField(fi, nk), 0);
+      return;
+    }
     if (ev.key === 'Enter' && !ev.shiftKey) { ev.preventDefault(); commitEditor(); }
     if (ev.key === 'Escape') commitEditor();
   });
@@ -2182,6 +2381,7 @@ function commitBox() {
   } else if (txt) {
     snap();
     const na = { type: 'text', box: true, pts: [toPdf(v, x, y)], bw: spec.bw, bh: spec.bh, size, fit: fitOn, text: txt, color, font, rot: v.rot };
+    if (spec.field) na.formField = spec.field;
     if (style) { for (const k of STYLE_KEYS) if (style[k] !== undefined) na[k] = style[k]; fixFont(na); }
     attach(i, na);
     page.annots.push(na);
@@ -2346,11 +2546,12 @@ function setTool(t) {
   if (t !== 'select') setSel(null);
   document.querySelectorAll('.tool').forEach(b => b.classList.toggle('active', b.dataset.tool === t || (t === 'place' && b.dataset.tool === S.placeTool)));
   document.body.classList.toggle('drawing', t !== 'select');
-  document.body.classList.toggle('t-text', t === 'text' || t === 'edittext');
+  document.body.classList.toggle('t-text', t === 'text' || t === 'edittext' || t === 'form');
   document.body.classList.toggle('t-place', t === 'place');
   views.forEach((v, i) => { v.hover = null; if ((t === 'edittext' || t === 'text') && v.painted) loadItems(i); });
   redrawAll();
   if (t === 'text') { hint('Kliknij, aby pisać, albo przeciągnij, aby narysować ramkę na tekst'); setTimeout(() => { if (S.tool === 'text' && !editor) hint(''); }, 3000); }
+  if (t === 'form') startFormMode();
   if (t === 'edittext') { hint('Kliknij tekst na stronie, aby go zmienić'); setTimeout(() => { if (S.tool === 'edittext' && !editor) hint(''); }, 2500); }
 }
 document.querySelectorAll('.tool').forEach(b => b.onclick = () => {
@@ -2910,7 +3111,7 @@ document.addEventListener('keydown', e => {
   }
   else if (e.key === 'Escape') { setTool('select'); setSel(null); }
   else if (!mod && S.pages.length) {
-    const map = { v: 'select', e: 'edittext', t: 'text', h: 'highlight', p: 'pen', r: 'rect', w: 'whiteout' };
+    const map = { v: 'select', f: 'form', e: 'edittext', t: 'text', h: 'highlight', p: 'pen', r: 'rect', w: 'whiteout' };
     if (map[k]) setTool(map[k]);
   }
 });
