@@ -79,8 +79,13 @@ body.t-place .overlay{cursor:copy}
 .paths .pt{color:var(--muted);white-space:nowrap}
 .paths code{background:#f3f4f6;border-radius:5px;padding:4px 6px;word-break:break-all;font-size:11px}
 .paths button{padding:3px 8px;font-size:12px;border:1px solid var(--line)}
-.fontlinks{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;font-size:13px;max-height:38vh;overflow:auto;padding-right:4px}
-.fontlinks .flt{grid-column:1/-1;color:var(--muted);font-size:12px;margin-top:8px;font-weight:600}
+.fontlinks{font-size:13px;max-height:40vh;overflow:auto;padding-right:4px}
+.fontlinks .flt{color:var(--muted);font-size:12px;margin-top:10px;font-weight:600}
+.frow{display:flex;align-items:center;gap:8px;padding:3px 0;border-bottom:1px solid #f0f1f4}
+.frow a{flex:1}
+.fbadge{font-size:11px;padding:2px 7px;border-radius:10px;white-space:nowrap;background:#f3f4f6;color:var(--muted)}
+.fbadge.ok{background:#dcfce7;color:#166534}
+.fbadge.no{background:#fee2e2;color:#991b1b}
 .fontlinks a{color:#1d4ed8;text-decoration:none;padding:3px 0}
 .fontlinks a:hover{text-decoration:underline}
 #fontsModal .card{max-height:92vh;overflow:auto}
@@ -184,33 +189,8 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
     <div id="fontDirList"></div>
     <h4 style="margin:16px 0 4px">Pobierz czcionki na swój komputer</h4>
     <p class="muted">Po zainstalowaniu (dwuklik na pliku → Zainstaluj) czcionki działają w każdym programie, także w Wordzie i w tym edytorze. Wszystkie poniżej są bezpłatne.</p>
-    <div class="fontlinks">
-      <div class="flt">Zastępują czcionki Windows / Office (te same wymiary)</div>
-      <a href="https://fonts.google.com/specimen/Arimo" target="_blank" rel="noopener">Arimo → Arial / Helvetica ↗</a>
-      <a href="https://fonts.google.com/specimen/Tinos" target="_blank" rel="noopener">Tinos → Times New Roman ↗</a>
-      <a href="https://fonts.google.com/specimen/Cousine" target="_blank" rel="noopener">Cousine → Courier New ↗</a>
-      <a href="https://fonts.google.com/specimen/Carlito" target="_blank" rel="noopener">Carlito → Calibri ↗</a>
-      <a href="https://fonts.google.com/specimen/Caladea" target="_blank" rel="noopener">Caladea → Cambria ↗</a>
-      <a href="https://fonts.google.com/specimen/Gelasio" target="_blank" rel="noopener">Gelasio → Georgia ↗</a>
-      <a href="https://github.com/ArtifexSoftware/urw-base35-fonts" target="_blank" rel="noopener">URW (Arial Narrow, Palatino, Century Schoolbook, Bookman) ↗</a>
-      <div class="flt">Czcionki Adobe (otwarte)</div>
-      <a href="https://fonts.google.com/specimen/Source+Sans+3" target="_blank" rel="noopener">Source Sans 3 (≈ Myriad) ↗</a>
-      <a href="https://fonts.google.com/specimen/Source+Serif+4" target="_blank" rel="noopener">Source Serif 4 (≈ Minion) ↗</a>
-      <div class="flt">Popularne czcionki otwarte (oryginały)</div>
-      <a href="https://fonts.google.com/specimen/Roboto" target="_blank" rel="noopener">Roboto ↗</a>
-      <a href="https://fonts.google.com/specimen/Open+Sans" target="_blank" rel="noopener">Open Sans ↗</a>
-      <a href="https://fonts.google.com/specimen/Lato" target="_blank" rel="noopener">Lato ↗</a>
-      <a href="https://fonts.google.com/specimen/Montserrat" target="_blank" rel="noopener">Montserrat ↗</a>
-      <a href="https://fonts.google.com/specimen/Poppins" target="_blank" rel="noopener">Poppins ↗</a>
-      <a href="https://fonts.google.com/specimen/Inter" target="_blank" rel="noopener">Inter ↗</a>
-      <a href="https://fonts.google.com/specimen/Noto+Sans" target="_blank" rel="noopener">Noto Sans ↗</a>
-      <a href="https://fonts.google.com/specimen/Noto+Serif" target="_blank" rel="noopener">Noto Serif ↗</a>
-      <a href="https://dejavu-fonts.github.io/" target="_blank" rel="noopener">DejaVu Sans / Serif ↗</a>
-      <div class="flt">Microsoft (bezpłatne, tylko do instalacji u siebie)</div>
-      <a href="https://www.microsoft.com/en-us/download/details.aspx?id=106087" target="_blank" rel="noopener">Aptos – nowa czcionka Office ↗</a>
-      <div class="flt">Wszystkie otwarte czcionki tego edytora naraz</div>
-      <a href="https://github.com/wronglogin/edytor-pdf/tree/main/fonts" target="_blank" rel="noopener">Folder „fonts” w repozytorium (z licencjami) ↗</a>
-    </div>
+    <div class="fontlinks" id="fontLinks"></div>
+    <p class="muted" style="margin-top:8px">💻 = zainstalowana na tym komputerze · 📄 = działa w edytorze. Po zainstalowaniu nowej czcionki zamknij i otwórz przeglądarkę/aplikację, a potem kliknij „↻ Odśwież”.</p>
 
     <div class="row" style="margin-top:12px">
       <button class="primary" id="fmAdd">📁 Dodaj folder…</button>
@@ -541,10 +521,73 @@ async function renderFontsModal() {
     row.appendChild(x); box.appendChild(row);
   }
 }
-function openFontsModal() { $('#fontsModal').style.display = 'flex'; renderFontsModal(); }
+// czcionki do pobrania: gdzie je zdobyć, jak się nazywają w systemie i która rodzina edytora to ta sama czcionka
+const G_FONTS = 'https://fonts.google.com/specimen/';
+const FONT_SOURCES = [
+  ['Zastępują czcionki Windows / Office (te same wymiary)', [
+    ['Arimo', 'Arial / Helvetica', G_FONTS + 'Arimo', 'sans', 'Arial'], ['Tinos', 'Times New Roman', G_FONTS + 'Tinos', 'serif', 'Times New Roman'],
+    ['Cousine', 'Courier New', G_FONTS + 'Cousine', 'mono', 'Courier New'], ['Carlito', 'Calibri', G_FONTS + 'Carlito', 'calibri', 'Calibri'],
+    ['Caladea', 'Cambria', G_FONTS + 'Caladea', 'cambria', 'Cambria'], ['Gelasio', 'Georgia', G_FONTS + 'Gelasio', 'georgia', 'Georgia'],
+    ['Nimbus Sans Narrow', 'Arial Narrow', 'https://github.com/ArtifexSoftware/urw-base35-fonts', 'narrow', 'Arial Narrow'],
+    ['P052', 'Palatino', 'https://github.com/ArtifexSoftware/urw-base35-fonts', 'palatino', 'Palatino'],
+    ['C059', 'Century Schoolbook', 'https://github.com/ArtifexSoftware/urw-base35-fonts', 'school', 'Century Schoolbook'],
+    ['URW Bookman', 'Bookman', 'https://github.com/ArtifexSoftware/urw-base35-fonts', 'bookman', 'Bookman Old Style']]],
+  ['Czcionki Adobe (otwarte)', [
+    ['Source Sans 3', 'Myriad', G_FONTS + 'Source+Sans+3', 'srcsans', 'Myriad Pro'], ['Source Serif 4', 'Minion', G_FONTS + 'Source+Serif+4', 'srcserif', 'Minion Pro']]],
+  ['Popularne czcionki otwarte (oryginały)', [
+    ['Roboto', '', G_FONTS + 'Roboto', 'roboto'], ['Open Sans', '', G_FONTS + 'Open+Sans', 'opensans'], ['Lato', '', G_FONTS + 'Lato', 'lato'],
+    ['Montserrat', '', G_FONTS + 'Montserrat', 'montserrat'], ['Poppins', '', G_FONTS + 'Poppins', 'poppins'], ['Inter', '', G_FONTS + 'Inter', 'inter'],
+    ['Noto Sans', '', G_FONTS + 'Noto+Sans', 'notosans'], ['Noto Serif', '', G_FONTS + 'Noto+Serif', 'notoserif'],
+    ['DejaVu Sans', '', 'https://dejavu-fonts.github.io/', 'dejavusans'], ['DejaVu Serif', '', 'https://dejavu-fonts.github.io/', 'dejavuserif']]],
+  ['Microsoft (bezpłatna, tylko do instalacji u siebie)', [
+    ['Aptos', 'nowa czcionka Office', 'https://www.microsoft.com/en-us/download/details.aspx?id=106087', null]]]
+];
+// czy czcionka jest zainstalowana w systemie: tekst zmienia szerokość, gdy przeglądarka ma tę czcionkę (działa bez pytania o zgodę, także w Safari)
+function sysHasFont(name) {
+  const t = 'mmmmmmmmmmlliWWWąęł0123456789';
+  for (const base of ['monospace', 'serif', 'sans-serif']) {
+    measure.font = `72px ${base}`; const w0 = measure.measureText(t).width;
+    measure.font = `72px "${name}", ${base}`;
+    if (Math.abs(measure.measureText(t).width - w0) > 0.01) return true;
+  }
+  return false;
+}
+async function renderFontLinks() {
+  const box = $('#fontLinks'); if (!box) return;
+  box.innerHTML = '';
+  const idx = await userFontIndex();
+  const inFolders = n => idx.some(e => normFont(e.full).startsWith(normFont(n)) || normFont(e.ps).startsWith(normFont(n)));
+  for (const [title, items] of FONT_SOURCES) {
+    box.appendChild(Object.assign(el('div', 'flt'), { textContent: title }));
+    for (const [name, replaces, url, fam, orig] of items) {
+      const row = el('div', 'frow');
+      const a = el('a'); a.href = url; a.target = '_blank'; a.rel = 'noopener';
+      a.textContent = name + (replaces ? ' → ' + replaces : '') + ' ↗';
+      const sys = sysHasFont(name);
+      const b1 = el('span', 'fbadge ' + (sys ? 'ok' : 'no')); b1.textContent = sys ? '💻 zainstalowana' : '💻 brak';
+      b1.title = sys ? 'Czcionka jest zainstalowana na tym komputerze' : 'Nie ma jej w systemie – kliknij nazwę, aby pobrać';
+      const b2 = el('span', 'fbadge'); b2.textContent = '📄 sprawdzam…';
+      row.append(a, b1, b2);
+      if (orig && sysHasFont(orig)) { const o = el('span', 'fbadge ok'); o.textContent = 'oryginał ' + orig + ' ✓'; o.title = 'Na komputerze jest oryginalna czcionka – edytor użyje jej w pierwszej kolejności'; row.appendChild(o); }
+      box.appendChild(row);
+      // 📄: czy edytor ma tę czcionkę (wbudowaną, z folderu albo z systemu)
+      (async () => {
+        let ok = false, how = '';
+        if (fam && FONTS[fam]) { ok = await loadFace(fam); how = 'wbudowana'; }
+        if (!ok && inFolders(name)) { ok = true; how = 'z folderu'; }
+        if (!ok && sys && 'queryLocalFonts' in window) { ok = true; how = 'z komputera'; }
+        b2.className = 'fbadge ' + (ok ? 'ok' : 'no');
+        b2.textContent = ok ? '📄 działa (' + how + ')' : (fam ? '📄 nie wczytała się' : '📄 nie działa');
+        b2.title = ok ? '' : fam ? 'Plik czcionki nie wczytał się ze strony – sprawdź internet i odśwież' :
+          ('queryLocalFonts' in window ? 'Zainstaluj czcionkę na komputerze, potem uruchom ponownie aplikację' : 'Ta przeglądarka nie udostępnia czcionek systemowych – dodaj folder z czcionką w „Dodaj folder…” albo użyj Chrome/Edge');
+      })();
+    }
+  }
+}
+function openFontsModal() { $('#fontsModal').style.display = 'flex'; renderFontsModal(); renderFontLinks(); }
 $('#fmAdd').onclick = addFontFolder;
 $('#bFonts').onclick = openFontsModal;
-$('#fmRescan').onclick = rescanFolders;
+$('#fmRescan').onclick = async () => { await rescanFolders(); renderFontLinks(); };
 $('#fmClose').onclick = () => { $('#fontsModal').style.display = 'none'; };
 document.querySelectorAll('.copyPath').forEach(b => b.onclick = async () => {
   try { await navigator.clipboard.writeText(b.dataset.path); b.textContent = 'Skopiowano ✓'; setTimeout(() => { b.textContent = 'Kopiuj'; }, 1500); } catch (e) {}
