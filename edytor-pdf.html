@@ -133,6 +133,7 @@ body.native .webonly{display:none!important}
 #tabList{display:flex;gap:2px;min-width:0}
 .tab{display:flex;align-items:center;gap:6px;max-width:220px;min-width:60px;padding:4px 6px 4px 12px;border-radius:8px 8px 0 0;background:#eceef2;cursor:pointer;font-size:13px;color:#333}
 .tab.active{background:#fff;font-weight:600}
+.tab i.lock{font-style:normal;font-size:12px;flex:none;cursor:help}
 .tab span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tab button{border:0;background:transparent;border-radius:50%;width:20px;height:20px;line-height:1;font-size:11px;cursor:pointer;color:#555;flex:none;padding:0}
 .tab button:hover{background:#d5d9e0;color:#000}
@@ -168,7 +169,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 </div>
 <div class="bar">
   <div class="brandwrap">
-    <button class="brand" id="bBrand" title="Menu edytora"><i>PDF</i><span>Edytor PDF <small style="font-weight:400;color:var(--muted)">v30</small> ▾</span></button>
+    <button class="brand" id="bBrand" title="Menu edytora"><i>PDF</i><span>Edytor PDF <small style="font-weight:400;color:var(--muted)">v31</small> ▾</span></button>
     <div class="appmenu" id="appMenu">
       <div id="recentMenu" class="recent"></div>
       <button data-m="help">❓ Pomoc – jak działa każda opcja<small>narzędzia, skróty, czcionki, zapisywanie</small></button>
@@ -176,7 +177,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
       <button data-m="install" id="mInstall" style="display:none">⬇ Zainstaluj jako aplikację</button>
       <div class="amsep"></div>
       <a href="https://github.com/wronglogin/edytor-pdf" target="_blank" rel="noopener">ℹ️ O edytorze (GitHub) ↗</a>
-      <div class="amver">Edytor PDF · wersja 30</div>
+      <div class="amver">Edytor PDF · wersja 31</div>
     </div>
   </div>
   <button id="bOpen" title="Otwórz PDF">📂<span class="lbl">Otwórz</span></button>
@@ -271,7 +272,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
     <div id="helpBody">
 <details open><summary>🗂 Karty dokumentów</summary>
 <p>Każdy otwarty plik ma swoją kartę na samej górze – klikaj karty, aby przełączać się między dokumentami. <b>＋ Utwórz</b> otwiera pusty dokument. <b>✕</b> na karcie zamyka dokument (przy niezapisanych zmianach zapyta: Zapisz / Zapisz jako / Nie zapisuj / Anuluj) i wraca do ekranu startowego z ostatnio otwieranymi plikami. <b>🏠</b> pokazuje ekran startowy bez zamykania dokumentów. Kropka ● przy nazwie oznacza niezapisane zmiany.</p>
-<p><b>Pliki z hasłem</b> – edytor zapyta o hasło, a przy zapisie zabezpieczy plik tym samym hasłem. Pliki z samą blokadą edycji (bez hasła do otwarcia) zapisują się bez blokady.</p></details>
+<p><b>Pliki z hasłem</b> – edytor zapyta o hasło, a przy zapisie zabezpieczy plik tym samym hasłem. Pliki z samą blokadą edycji (bez hasła do otwarcia) zapisują się bez blokady. Na karcie dokumentu widać wtedy znaczek: 🔑 – plik ma hasło do otwarcia, 🔒 – plik ma hasło właściciela (blokadę edycji); najedź na znaczek, aby zobaczyć opis.</p></details>
 <details><summary>📂 Otwieranie, dołączanie, zapisywanie</summary>
 <p><b>Otwórz</b> – wczytuje PDF (możesz też przeciągnąć plik na okno). Plik nigdy nie jest nigdzie wysyłany – wszystko dzieje się na Twoim komputerze.</p>
 <p><b>Dołącz PDF</b> – dokleja strony innego pliku na końcu dokumentu.</p>
@@ -322,7 +323,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 </div>
 <div class="modal" id="fontsModal">
   <div class="card">
-    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v30</small></h3>
+    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v31</small></h3>
     <p class="muted">Przeglądarka nie może sama przeszukać dysku, więc wskaż raz foldery z czcionkami Worda i Acrobata. Edytor je zapamięta i będzie z nich automatycznie brał brakujące czcionki przy każdej edycji. Czcionki nie są nigdzie wysyłane.</p>
     <p class="muted"><b>Mac:</b> przeglądarka nie otworzy folderów wewnątrz aplikacji („pliki systemowe”), więc najpierw skopiuj czcionki do Dokumentów: otwórz <b>Terminal</b>, wklej polecenie poniżej i naciśnij Enter. Potem kliknij „Dodaj folder…” i wybierz <b>Dokumenty → Czcionki</b>.</p>
     <div class="paths"><div class="pt">Terminal (Mac)</div><code>mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki</code><button class="copyPath" data-path="mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki">Kopiuj</button></div>
@@ -1216,9 +1217,9 @@ function askModal({ title, text, input, buttons }) {
   });
 }
 /* ---------- karty dokumentów ---------- */
-const DOCKEYS = ['pages', 'undo', 'redo', 'name', 'fileHandle', 'nativePath', 'savedState', 'sel', 'cur', 'zoom', 'blankSrc', 'mark', 'lastText', 'formNav', 'srcs', 'docPw'];
+const DOCKEYS = ['pages', 'undo', 'redo', 'name', 'fileHandle', 'nativePath', 'savedState', 'sel', 'cur', 'zoom', 'blankSrc', 'mark', 'lastText', 'formNav', 'srcs', 'docPw', 'docLock'];
 const TABS = []; let curTab = -1;
-const freshDoc = name => ({ pages: [], undo: [], redo: [], name, fileHandle: null, nativePath: null, savedState: null, sel: null, cur: 0, zoom: S.zoom, blankSrc: -1, mark: null, lastText: null, formNav: null, srcs: [], docPw: '' });
+const freshDoc = name => ({ pages: [], undo: [], redo: [], name, fileHandle: null, nativePath: null, savedState: null, sel: null, cur: 0, zoom: S.zoom, blankSrc: -1, mark: null, lastText: null, formNav: null, srcs: [], docPw: '', docLock: '' });
 const stDirty = st => !!(st.pages.length && st.undo.length > 0 && JSON.stringify(st.pages) !== st.savedState);
 const tabSt = i => (i === curTab ? S : TABS[i].st);
 function stashTab() {
@@ -1281,6 +1282,12 @@ function renderTabs() {
     if (i === curTab) t.shown = dirty;
     d.title = st.nativePath || st.name;
     const n = el('span'); n.textContent = (dirty ? '● ' : '') + st.name;
+    if (st.docLock) {
+      const k = el('i', 'lock'); k.textContent = st.docLock === 'user' ? '🔑' : '🔒';
+      k.title = st.docLock === 'user' ? 'Plik ma hasło do otwarcia – przy zapisie zostanie zabezpieczony tym samym hasłem.'
+        : 'Plik ma hasło właściciela (blokadę edycji nałożoną przez autora). Tutaj możesz go edytować, ale zapisana kopia nie będzie już miała tej blokady.';
+      d.append(k);
+    }
     const x = el('button'); x.textContent = '✕'; x.title = 'Zamknij dokument';
     x.onclick = e => { e.stopPropagation(); closeTab(TABS.indexOf(t)); };
     d.onclick = () => switchTab(TABS.indexOf(t));
@@ -1321,6 +1328,7 @@ async function openFiles(files, append, handle) {
       const si = await addSource(new Uint8Array(await f.arrayBuffer()), f.name);
       locked = locked || S.sources[si].locked;
       if (!append && S.sources[si].pw) S.docPw = S.sources[si].pw; // hasło wraca do pliku przy zapisie
+      if (!append && S.sources[si].locked) S.docLock = S.sources[si].pw ? 'user' : 'owner';
       const n = S.sources[si].doc.numPages;
       for (let k = 0; k < n; k++) S.pages.push({ src: si, idx: k, rot: 0, annots: [] });
     }
@@ -1332,7 +1340,7 @@ async function openFiles(files, append, handle) {
   busy(false);
   if (!append && !S.pages.length && curTab >= 0) dropTab(curTab); // nie udało się – bez pustej karty
   await renderAll(); renderTabs();
-  if (locked) { hint(S.docPw ? 'Plik ma hasło – przy zapisie zostanie zabezpieczony tym samym hasłem.' : 'Plik miał blokadę edycji – zapisana kopia nie będzie jej miała.'); setTimeout(() => hint(''), 6000); }
+  if (locked) { hint(S.docPw ? '🔑 Plik ma hasło – przy zapisie zostanie zabezpieczony tym samym hasłem.' : '🔒 Plik ma hasło właściciela (blokadę edycji) – zapisana kopia nie będzie jej miała.'); setTimeout(() => hint(''), 8000); }
 }
 async function newDoc() {
   resetDoc('nowy-dokument');
