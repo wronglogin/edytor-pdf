@@ -64,6 +64,14 @@ main{flex:1;display:flex;min-height:0;position:relative}
 body.drawing .overlay{touch-action:none;cursor:crosshair}
 body.t-text .overlay{cursor:text}
 body.t-place .overlay{cursor:copy}
+.edtools{position:absolute;z-index:8;display:flex;gap:2px;align-items:center;background:#1f2328;border-radius:8px;padding:3px;box-shadow:0 4px 14px rgba(0,0,0,.3)}
+.edtools>button{color:#fff;padding:4px 9px;font-weight:700;font-size:12px;border-radius:5px}
+.edtools>button:hover{background:rgba(255,255,255,.16)!important}
+.edtools>button.big{font-size:17px}
+.edpop{display:none;position:absolute;top:calc(100% + 4px);left:0;background:#1f2328;color:#fff;border-radius:8px;padding:5px 8px;gap:6px;align-items:center;white-space:nowrap;font-size:12px;box-shadow:0 4px 14px rgba(0,0,0,.3)}
+.edpop.open{display:flex}
+.edpop button{color:#fff;padding:3px 9px;font-size:14px;border:1px solid rgba(255,255,255,.25);border-radius:5px}
+.edpop button:hover{background:rgba(255,255,255,.16)!important}
 .spellmirror{position:absolute;z-index:6;pointer-events:none;color:transparent;overflow:hidden;margin:0;border:0;box-sizing:border-box}
 .sp-bad{text-decoration:underline wavy #dc2626;text-decoration-skip-ink:none;text-underline-offset:2px}
 .spellmenu{position:fixed;z-index:90;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 28px rgba(0,0,0,.18);padding:4px;min-width:190px;font-size:13px}
@@ -115,13 +123,13 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 
 <div class="bar">
   <div class="brandwrap">
-    <button class="brand" id="bBrand" title="Menu edytora"><i>PDF</i><span>Edytor PDF <small style="font-weight:400;color:var(--muted)">v15</small> ▾</span></button>
+    <button class="brand" id="bBrand" title="Menu edytora"><i>PDF</i><span>Edytor PDF <small style="font-weight:400;color:var(--muted)">v16</small> ▾</span></button>
     <div class="appmenu" id="appMenu">
       <button data-m="fonts">🔤 Czcionki…<small>foldery Worda/Acrobata, pobieranie, stan</small></button>
       <button data-m="install" id="mInstall" style="display:none">⬇ Zainstaluj jako aplikację</button>
       <div class="amsep"></div>
       <a href="https://github.com/wronglogin/edytor-pdf" target="_blank" rel="noopener">ℹ️ O edytorze (GitHub) ↗</a>
-      <div class="amver">Edytor PDF · wersja 15</div>
+      <div class="amver">Edytor PDF · wersja 16</div>
     </div>
   </div>
   <button id="bOpen" title="Otwórz PDF">📂<span class="lbl">Otwórz</span></button>
@@ -199,7 +207,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 <input type="file" id="fFontDir" webkitdirectory multiple hidden>
 <div class="modal" id="fontsModal">
   <div class="card">
-    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v15</small></h3>
+    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v16</small></h3>
     <p class="muted">Przeglądarka nie może sama przeszukać dysku, więc wskaż raz foldery z czcionkami Worda i Acrobata. Edytor je zapamięta i będzie z nich automatycznie brał brakujące czcionki przy każdej edycji. Czcionki nie są nigdzie wysyłane.</p>
     <p class="muted"><b>Mac:</b> przeglądarka nie otworzy folderów wewnątrz aplikacji („pliki systemowe”), więc najpierw skopiuj czcionki do Dokumentów: otwórz <b>Terminal</b>, wklej polecenie poniżej i naciśnij Enter. Potem kliknij „Dodaj folder…” i wybierz <b>Dokumenty → Czcionki</b>.</p>
     <div class="paths"><div class="pt">Terminal (Mac)</div><code>mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki</code><button class="copyPath" data-path="mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki">Kopiuj</button></div>
@@ -687,11 +695,13 @@ function boxScr(v, a) {
 }
 // układ tekstu: zawijanie do szerokości akapitu, wyjustowanie; wynik w jednostkach PDF
 function layoutText(a, noOrig) {
-  const fm = (t, wi) => { const E = effW(a, wi, noOrig); measure.font = effCss(E, a.size); return measure.measureText(effStr(E, t)).width * E.hs; };
+  const ls = a.ls || 0;
+  const fm = (t, wi) => { const E = effW(a, wi, noOrig); measure.font = effCss(E, a.size); return measure.measureText(effStr(E, t)).width * E.hs + ls * [...t].length; };
   const E0 = effW(a, 0, noOrig);
   measure.font = effCss(E0, a.size);
   let spaceW = measure.measureText(effStr(E0, ' ')).width * E0.hs;
   if (!(spaceW > 0) || spaceW > a.size) spaceW = a.size * 0.28;
+  spaceW += ls;
   const runs = []; let k = 0, wi = 0;
   for (const para of a.text.split('\n')) {
     const words = para.split(/[^\S\n]+/).filter(Boolean);
@@ -1817,6 +1827,7 @@ function drawAnnot(ctx, v, a, i, opts) {
         const E = effW(a, r.wi);
         ctx.font = effCss(E, a.size * s);
         ctx.save(); ctx.translate(r.dx * s, r.k * lh * s); ctx.scale(E.hs, 1);
+        if (a.ls && 'letterSpacing' in ctx) ctx.letterSpacing = (a.ls * s / E.hs) + 'px';
         ctx.fillText(effStr(E, r.t), 0, 0);
         ctx.restore();
       }
@@ -2335,13 +2346,16 @@ function openBoxEditor(i, ai, x, y, spec, style) {
   ta.value = a ? a.text : '';
   Object.assign(ta.style, { left: x + 'px', top: y + 'px', width: spec.bw * s + 'px', whiteSpace: 'pre-wrap', color, resize: 'none' });
   const fit = () => {
-    let sz = size;
-    if (fitOn) sz = boxView({ ...fsrc, type: 'text', box: true, pts: [[0, 0]], bw: spec.bw, bh: spec.bh, size, fit: true, text: ta.value, font, rot: 0, st: undefined }).size;
-    ta.style.font = cssFont(edKey, sz * s); ta.style.lineHeight = '1.2';
+    const cs = editor && editor.ta === ta ? editor : { size, ls: (a && a.ls) || 0 };
+    let sz = cs.size;
+    if (fitOn) sz = boxView({ ...fsrc, type: 'text', box: true, pts: [[0, 0]], bw: spec.bw, bh: spec.bh, size: cs.size, ls: cs.ls, fit: true, text: ta.value, font, rot: 0, st: undefined }).size;
+    ta.style.font = cssFont(edKey, sz * s); ta.style.lineHeight = '1.2'; ta.style.letterSpacing = (cs.ls || 0) * s + 'px';
     ta.style.height = 'auto';
     ta.style.height = Math.max(spec.bh * s, ta.scrollHeight) + 'px';
     ta.style.outlineColor = ta.scrollHeight > spec.bh * s + 2 ? '#dc2626' : '#2563eb';
+    placeTools(ta);
   };
+  ta._fit = fit;
   ta.addEventListener('input', fit);
   ta.addEventListener('keydown', ev => {
     ev.stopPropagation();
@@ -2360,27 +2374,88 @@ function openBoxEditor(i, ai, x, y, spec, style) {
   v.box.appendChild(ta);
   fit();
   attachSpell(ta);
-  editor = { kind: 'box', ta, i, ai, x, y, spec, size, color, font, fitOn, style: st0 };
+  editor = { kind: 'box', ta, i, ai, x, y, spec, size, ls: (a && a.ls) || 0, color, font, fitOn, style: st0 };
+  edTools(ta);
   if (a) { a._hidden = true; drawOverlay(i); }
   setTimeout(() => ta.focus(), 0);
   hint(fitOn ? 'Tekst w ramce – gdy się nie zmieści, czcionka się zmniejszy. Enter – zatwierdź, Shift+Enter – nowa linia'
     : 'Tekst w ramce – gdy się nie zmieści, ramka zrobi się czerwona: powiększ ją, ciągnąc za róg. Enter – zatwierdź');
 }
+function edTools(ta) {
+  const t = el('div', 'edtools');
+  t.innerHTML = '<button data-a="dec" title="Zmniejsz tekst">A</button><button data-a="inc" class="big" title="Powiększ tekst">A</button>' +
+    '<button data-a="del" title="Usuń tekst">🗑</button><button data-a="sym" title="Zamień na symbol (✓ ✗ ●)">⟳▾</button>' +
+    '<button data-a="ls" title="Odstępy między literami">VA↔</button><div class="edpop"></div>';
+  const pop = t.querySelector('.edpop');
+  t.addEventListener('mousedown', e => e.preventDefault()); // pole tekstowe zostaje aktywne
+  t.addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (!b || !editor || editor.ta !== ta) return;
+    if (b.dataset.a) edAction(b.dataset.a, ta, pop);
+  });
+  ta.parentNode.appendChild(t); ta._tools = t; placeTools(ta);
+}
+function placeTools(ta) {
+  const t = ta._tools; if (!t) return;
+  const top = parseFloat(ta.style.top) || 0, h = ta.offsetHeight || 20;
+  t.style.left = (parseFloat(ta.style.left) || 0) + 'px';
+  t.style.top = (top >= 46 ? top - 42 : top + h + 6) + 'px';
+}
+function edAction(act, ta, pop) {
+  const ed = editor;
+  if (act === 'dec' || act === 'inc') {
+    ed.size = Math.max(3, Math.round(ed.size * (act === 'inc' ? 1.1 : 1 / 1.1) * 10) / 10);
+    ta._fit(); hint('Wielkość tekstu: ' + ed.size + ' pt'); return;
+  }
+  if (act === 'del') { ta.value = ''; commitEditor(); return; }
+  if (act === 'sym') {
+    pop.innerHTML = '<span>Zamień na:</span><button data-s="check" title="Ptaszek">✓</button><button data-s="cross" title="Krzyżyk">✗</button><button data-s="dot" title="Kropka">●</button>';
+    pop.onclick = e => { const b = e.target.closest('[data-s]'); if (b) toSymbol(b.dataset.s); };
+    pop.classList.toggle('open'); return;
+  }
+  if (act === 'ls') {
+    const draw = () => { pop.innerHTML = `<span>Odstęp liter</span><button data-l="-">−</button><b>${(ed.ls || 0).toFixed(1)} pt</b><button data-l="+">+</button><button data-l="0" title="Bez odstępu">0</button>`; };
+    pop.onclick = e => {
+      const b = e.target.closest('[data-l]'); if (!b) return;
+      ed.ls = b.dataset.l === '0' ? 0 : Math.round(((ed.ls || 0) + (b.dataset.l === '+' ? 0.5 : -0.5)) * 10) / 10;
+      ta._fit(); draw();
+    };
+    draw(); pop.classList.toggle('open');
+  }
+}
+// zamiana wpisywanego tekstu na symbol rysowany wektorowo (wygląda tak samo w każdym czytniku PDF)
+function toSymbol(kind) {
+  const ed = editor, i = ed.i, v = views[i], s = v.scale, ta = ed.ta;
+  const r = ta.getBoundingClientRect(), br = v.overlay.getBoundingClientRect();
+  const x0 = r.left - br.left, y0 = r.top - br.top;
+  const boxH = ed.kind === 'box' ? ed.spec.bh * s : ed.size * 1.25 * s;
+  const h = Math.min(boxH, ed.size * 1.25 * s);
+  const by = y0 + Math.max(0, (boxH - h) / 2);
+  const P = (fx, fy) => toPdf(v, x0 + 2 + fx * h, by + fy * h);
+  const field = ed.spec && ed.spec.field, w = Math.max(0.8, h / s * 0.12), color = ed.color || '#000000';
+  const mk = (pts, width) => { const a = { type: 'pen', pts, color, width: width || w }; if (field) a.formField = field; return a; };
+  const anns = kind === 'check' ? [mk([P(0.15, 0.55), P(0.4, 0.8), P(0.85, 0.2)])]
+    : kind === 'cross' ? [mk([P(0.2, 0.2), P(0.8, 0.8)]), mk([P(0.8, 0.2), P(0.2, 0.8)])]
+    : [mk([P(0.5, 0.5), P(0.5005, 0.5)], h / s * 0.45)];
+  ta.value = ''; commitEditor();
+  snap(); anns.forEach(a => { attach(i, a); S.pages[i].annots.push(a); });
+  afterChange(i);
+}
 function commitBox() {
-  const { ta, i, ai, x, y, spec, size, color, font, fitOn, style } = editor;
+  const { ta, i, ai, x, y, spec, size, ls, color, font, fitOn, style } = editor;
   editor = null;
   const txt = ta.value.replace(/\s+$/, '');
-  detachSpell(ta); ta.remove(); hint('');
+  detachSpell(ta); if (ta._tools) ta._tools.remove(); ta.remove(); hint('');
   const page = S.pages[i], v = views[i];
   if (!page || !v) return;
   if (ai >= 0) {
     const a = page.annots[ai]; if (!a) return;
     delete a._hidden;
     if (!txt) { snap(); page.annots.splice(ai, 1); S.sel = null; updSelUI(); }
-    else if (txt !== a.text) { snap(); a.text = txt; }
+    else if (txt !== a.text || a.size !== size || (a.ls || 0) !== (ls || 0)) { snap(); a.text = txt; a.size = size; a.ls = ls || undefined; }
   } else if (txt) {
     snap();
-    const na = { type: 'text', box: true, pts: [toPdf(v, x, y)], bw: spec.bw, bh: spec.bh, size, fit: fitOn, text: txt, color, font, rot: v.rot };
+    const na = { type: 'text', box: true, pts: [toPdf(v, x, y)], bw: spec.bw, bh: spec.bh, size, ls: ls || undefined, fit: fitOn, text: txt, color, font, rot: v.rot };
     if (spec.field) na.formField = spec.field;
     if (style) { for (const k of STYLE_KEYS) if (style[k] !== undefined) na[k] = style[k]; fixFont(na); }
     attach(i, na);
@@ -2409,12 +2484,16 @@ function openEditor(i, ai, x, y, preset, style) {
   if (hsT !== 1) ta.style.transform = `scaleX(${hsT})`;
   if (wrap) { ta.style.whiteSpace = 'pre-wrap'; ta.style.width = wrap * s / hsT + 'px'; }
   const fit = () => {
-    if (wrap) { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 2 + 'px'; return; }
-    measure.font = cssFont(edKey, size * s);
+    const cs = editor && editor.ta === ta ? editor : { size, ls: (src && src.ls) || 0 }, z = cs.size, ls = cs.ls || 0;
+    ta.style.font = cssFont(edKey, z * s); ta.style.lineHeight = String(lhR); ta.style.letterSpacing = ls * s + 'px';
+    if (wrap) { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 2 + 'px'; placeTools(ta); return; }
+    measure.font = cssFont(edKey, z * s);
     const lines = ta.value.split('\n');
-    ta.style.width = Math.max(60, ...lines.map(l => measure.measureText(l).width)) + size * s + 'px';
-    ta.style.height = lines.length * size * lhR * s + 4 + 'px';
+    ta.style.width = Math.max(60, ...lines.map(l => measure.measureText(l).width + ls * s * [...l].length)) + z * s + 'px';
+    ta.style.height = lines.length * z * lhR * s + 4 + 'px';
+    placeTools(ta);
   };
+  ta._fit = fit;
   ta.addEventListener('input', fit);
   ta.addEventListener('keydown', ev => {
     ev.stopPropagation();
@@ -2425,7 +2504,8 @@ function openEditor(i, ai, x, y, preset, style) {
   v.box.appendChild(ta);
   fit();
   attachSpell(ta);
-  editor = { ta, i, ai, x, y, size, color, preset, style: st0 };
+  editor = { ta, i, ai, x, y, size, ls: (src && src.ls) || 0, color, preset, style: st0 };
+  edTools(ta);
   if (a) a._hidden = true;
   if (preset) temp = { pi: i, a: { type: 'text', text: '', pts: preset.pts, size, rot: preset.rot, cover: preset.cover, coverColor: preset.coverColor, patch: preset.patch, _hidden: true } };
   drawOverlay(i);
@@ -2435,23 +2515,29 @@ function openEditor(i, ai, x, y, preset, style) {
 function commitEditor() {
   if (!editor) return;
   if (editor.kind === 'box') return commitBox();
-  const { ta, i, ai, x, y, size, color, preset, style } = editor;
+  const { ta, i, ai, x, y, size, ls, color, preset, style } = editor;
   editor = null;
   if (preset) temp = null;
   const txt = ta.value.replace(/\s+$/, '');
-  detachSpell(ta); ta.remove(); hint('');
+  detachSpell(ta); if (ta._tools) ta._tools.remove(); ta.remove(); hint('');
   const page = S.pages[i], v = views[i];
   if (!page || !v) return;
   if (ai >= 0) {
     const a = page.annots[ai]; if (!a) return;
     delete a._hidden;
     if (!txt && !a.cover) { snap(); page.annots.splice(ai, 1); S.sel = null; updSelUI(); }
-    else if (txt !== a.text) { snap(); if (a.st) a.ws = restyle(a.text, a.ws, txt); a.text = txt; fixFont(a); }
+    else if (txt !== a.text || a.size !== size || (a.ls || 0) !== (ls || 0)) {
+      snap();
+      if (txt !== a.text) { if (a.st) a.ws = restyle(a.text, a.ws, txt); a.text = txt; }
+      if (a.size !== size) { if (a.lh) a.lh *= size / a.size; a.size = size; }
+      a.ls = ls || undefined; fixFont(a);
+    }
   } else if (preset) {
     // edycja istniejącego tekstu: zakrycie oryginału (prawdziwym tłem) + nowy tekst w tym samym miejscu
-    if (txt !== preset.text) {
+    if (txt !== preset.text || size !== preset.size || ls) {
       snap();
-      const na = { ...preset, type: 'text', text: txt, color, reflow: S.reflow };
+      const na = { ...preset, type: 'text', text: txt, color, reflow: S.reflow, size, ls: ls || undefined };
+      if (na.lh && size !== preset.size) na.lh *= size / preset.size;
       if (na.st) { na.st = na.st.map(x => ({ ...x })); na.ws = restyle(preset.text, preset.ws, txt); }
       fixFont(na);
       page.annots.push(na);
@@ -2459,7 +2545,7 @@ function commitEditor() {
   } else if (txt) {
     snap();
     const pt = toPdf(v, x, y + size * 0.95 * v.scale);
-    const na = { type: 'text', pts: [pt], text: txt, size, color, font: FONTS[S.font] ? S.font : 'sans', rot: v.rot };
+    const na = { type: 'text', pts: [pt], text: txt, size, ls: ls || undefined, color, font: FONTS[S.font] ? S.font : 'sans', rot: v.rot };
     if (style) { for (const k of STYLE_KEYS) if (style[k] !== undefined) na[k] = style[k]; fixFont(na); }
     attach(i, na);
     page.annots.push(na);
@@ -2897,10 +2983,12 @@ async function buildPdf(noOrig) {
       if (!a.text) return;
       const L = layoutText(a, noOrig), lh = a.lh || a.size * 1.25;
       const rad = a.rot * Math.PI / 180, ux = Math.cos(rad), uy = Math.sin(rad), dx = Math.sin(rad), dy = -Math.cos(rad);
-      let curTz = 100;
+      let curTz = 100, curTc = 0;
       for (const r of L.runs) {
         if (opts && opts.minK != null && r.k < opts.minK) continue;
         const E = effW(a, r.wi, noOrig);
+        const tc = a.ls ? Math.round(a.ls / (E.hs || 1) * 1000) / 1000 : 0;
+        if (tc !== curTc) { pg.pushOperators(PDFOperator.of('Tc', [PDFNumber.of(tc)])); curTc = tc; }
         let font, str = t => t, isStd = false;
         if (E.of) { font = await getOrig(E.ofKey); const o = E.of; str = t => ofStr(o, t); }
         else { const fr = await getFont(E.key); font = fr.f; isStd = !!fr.std; if (!fr.ok) str = toAscii; }
@@ -2915,6 +3003,7 @@ async function buildPdf(noOrig) {
         }
       }
       if (curTz !== 100) pg.pushOperators(PDFOperator.of('Tz', [PDFNumber.of(100)]));
+      if (curTc !== 0) pg.pushOperators(PDFOperator.of('Tc', [PDFNumber.of(0)]));
     } else if (a.type === 'image') {
       const im = await emb(a.data), rad = a.rot * Math.PI / 180;
       pg.drawImage(im, {
