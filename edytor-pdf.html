@@ -168,12 +168,9 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
   <div class="card">
     <h3>Moje czcionki</h3>
     <p class="muted">Przeglądarka nie może sama przeszukać dysku, więc wskaż raz foldery z czcionkami Worda i Acrobata. Edytor je zapamięta i będzie z nich automatycznie brał brakujące czcionki przy każdej edycji. Czcionki nie są nigdzie wysyłane.</p>
-    <div class="paths">
-      <div class="pt">macOS – Word</div><code>/Applications/Microsoft Word.app/Contents/Resources/DFonts</code><button class="copyPath" data-path="/Applications/Microsoft Word.app/Contents/Resources/DFonts">Kopiuj</button>
-      <div class="pt">macOS – Acrobat</div><code>/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font</code><button class="copyPath" data-path="/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font">Kopiuj</button>
-      <div class="pt">Windows – Acrobat</div><code>C:\Program Files\Adobe\Acrobat DC\Resource\Font</code><button class="copyPath" data-path="C:\Program Files\Adobe\Acrobat DC\Resource\Font">Kopiuj</button>
-    </div>
-    <p class="muted">Na Macu: kliknij „Dodaj folder”, naciśnij <b>Cmd+Shift+G</b>, wklej skopiowaną ścieżkę i zatwierdź. Na Windowsie czcionki Office są już w systemie – tu wystarczy folder Acrobata (jeśli przeglądarka go nie otworzy, skopiuj go np. do Dokumentów i wskaż kopię).</p>
+    <p class="muted"><b>Mac:</b> przeglądarka nie otworzy folderów wewnątrz aplikacji („pliki systemowe”), więc najpierw skopiuj czcionki do Dokumentów: otwórz <b>Terminal</b>, wklej polecenie poniżej i naciśnij Enter. Potem kliknij „Dodaj folder…” i wybierz <b>Dokumenty → Czcionki</b>.</p>
+    <div class="paths"><div class="pt">Terminal (Mac)</div><code>mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki</code><button class="copyPath" data-path="mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki">Kopiuj</button></div>
+    <p class="muted"><b>Windows:</b> czcionki Office są już w systemie. Czcionki Acrobata skopiuj z <code>C:\Program Files\Adobe\Acrobat DC\Resource\Font</code> np. do Dokumentów i wskaż kopię.</p>
     <div id="fontDirList"></div>
     <div class="row" style="margin-top:12px">
       <button class="primary" id="fmAdd">📁 Dodaj folder…</button>
