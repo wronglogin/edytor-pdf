@@ -182,7 +182,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
       <button data-m="install" id="mInstall" style="display:none">⬇ Zainstaluj jako aplikację</button>
       <div class="amsep"></div>
       <a href="https://github.com/wronglogin/edytor-pdf" target="_blank" rel="noopener">ℹ️ O edytorze (GitHub) ↗</a>
-      <div class="amver">Edytor PDF · wersja 37</div>
+      <div class="amver">Edytor PDF · wersja 38</div>
     </div>
   </div>
   <button id="bOpen" title="Otwórz PDF">📂<span class="lbl">Otwórz</span></button>
@@ -213,6 +213,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
   <button class="tool" data-tool="highlight" title="Zakreślacz (H)">🖍<span class="lbl">Zakreśl</span></button>
   <button class="tool" data-tool="pen" title="Rysuj odręcznie (P)">✎<span class="lbl">Rysuj</span></button>
   <button class="tool" data-tool="rect" title="Prostokąt (R)">▭<span class="lbl">Prostokąt</span></button>
+  <button class="tool" data-tool="snip" title="Kopiuj obszar – zaznacz fragment strony (np. kwadracik), a jego kopię przeciągnij w nowe miejsce; Ctrl+V wkleja kolejne (C)">✂<span class="lbl">Kopiuj obszar</span></button>
   <button class="tool" data-tool="whiteout" title="Zakryj (biały prostokąt) (W)">⬜<span class="lbl">Zakryj</span></button>
   <button class="tool" data-tool="image" title="Wstaw obraz">🖼<span class="lbl">Obraz</span></button>
   <button class="tool" data-tool="sign" title="Podpis">✍<span class="lbl">Podpis</span></button>
@@ -307,6 +308,9 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 <p>Styl dostaje zaznaczone okienko, a jeśli nic nie jest zaznaczone – ostatnio wpisane okienko. Potem jest używany dla każdego nowego tekstu i pola, dopóki nie klikniesz ✕ na etykiecie 💧 obok „Styl z PDF”. Każde okienko możesz zmienić osobno: zaznacz je i użyj 💧 jeszcze raz.</p></details>
 <details><summary>🖍 Zakreśl, ✎ Rysuj, ▭ Prostokąt, ⬜ Zakryj</summary>
 <p><b>Zakreśl</b> <kbd>H</kbd> – półprzezroczysty marker. <b>Rysuj</b> <kbd>P</kbd> – odręczna linia. <b>Prostokąt</b> <kbd>R</kbd> – ramka. <b>Zakryj</b> <kbd>W</kbd> – biały prostokąt zasłaniający treść. Kolor i grubość ustawiasz na pasku; zmiana koloru/grubości działa też na zaznaczony element.</p></details>
+<details><summary>✂ Kopiuj obszar, kopiuj / wklej</summary>
+<p><b>Kopiuj obszar</b> <kbd>C</kbd> – przeciągnij prostokąt wokół fragmentu strony (np. zaznaczonego kwadracika, pieczątki, logo). Jego kopia pojawi się obok, już zaznaczona – przeciągnij ją w docelowe miejsce (strzałki przesuwają dokładnie). <kbd>Ctrl/Cmd+V</kbd> wkleja kolejną kopię, także na innej stronie.</p>
+<p>Dodane przez Ciebie elementy (tekst, podpis, obraz, rysunek) kopiujesz tak: zaznacz element, <kbd>Ctrl/Cmd+C</kbd>, potem <kbd>Ctrl/Cmd+V</kbd>.</p></details>
 <details><summary>🖼 Obraz, ✍ Podpis</summary>
 <p><b>Obraz</b> – wstawia zdjęcie lub grafikę; potem kliknij miejsce na stronie.</p>
 <p><b>Podpis</b> – narysuj podpis myszką/palcem albo wgraj zdjęcie podpisu (JPG/PNG) – tło zostanie usunięte. Podpisy są zapamiętywane tylko na tym urządzeniu. Możesz je dodać wcześniej, bez otwartego dokumentu – przycisk „Podpis” na pasku działa od razu.</p>
@@ -332,7 +336,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 </div>
 <div class="modal" id="fontsModal">
   <div class="card">
-    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v37</small></h3>
+    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v38</small></h3>
     <p class="muted">Przeglądarka nie może sama przeszukać dysku, więc wskaż raz foldery z czcionkami Worda i Acrobata. Edytor je zapamięta i będzie z nich automatycznie brał brakujące czcionki przy każdej edycji. Czcionki nie są nigdzie wysyłane.</p>
     <p class="muted"><b>Mac:</b> przeglądarka nie otworzy folderów wewnątrz aplikacji („pliki systemowe”), więc najpierw skopiuj czcionki do Dokumentów: otwórz <b>Terminal</b>, wklej polecenie poniżej i naciśnij Enter. Potem kliknij „Dodaj folder…” i wybierz <b>Dokumenty → Czcionki</b>.</p>
     <div class="paths"><div class="pt">Terminal (Mac)</div><code>mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki</code><button class="copyPath" data-path="mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki">Kopiuj</button></div>
@@ -2672,6 +2676,7 @@ function onDown(e, i) {
   const p = toPdf(v, x, y);
   temp = { pi: i, a: t === 'pen'
     ? { type: 'pen', pts: [p], color: S.color, width: S.width }
+    : t === 'snip' ? { type: 'rect', pts: [p, p], color: '#2563eb', width: 1, snip: true }
     : { type: t, pts: [p, p], color: t === 'highlight' && S.color === '#000000' ? '#ffd60a' : S.color, width: S.width } };
   act = { kind: 'draw', i, lx: x, ly: y };
   v.overlay.setPointerCapture(e.pointerId);
@@ -2753,7 +2758,8 @@ function onUp(e, i) {
     if (a.type === 'pen') ok = a.pts.length > 1;
     else { const [x1, y1] = toScr(v, a.pts[0]), [x2, y2] = toScr(v, a.pts[1]); ok = Math.abs(x2 - x1) > 3 && Math.abs(y2 - y1) > 3; }
     temp = null;
-    if (ok) { snap(); attach(i, a); S.pages[i].annots.push(a); }
+    if (ok && a.snip) snipRegion(i, a.pts);
+    else if (ok) { snap(); attach(i, a); S.pages[i].annots.push(a); }
     drawOverlay(i);
   } else if (act.kind === 'move' && act.moved) {
     // po przeciągnięciu – przyczep element do treści w nowym miejscu
@@ -3190,6 +3196,50 @@ function nudge(dx, dy) {
   clearTimeout(S.nudgeT);
   S.nudgeT = setTimeout(() => afterChange(i), 400);
 }
+/* ---------- kopiuj / wklej: zaznaczony element albo wycinek strony ---------- */
+// Wycinek strony (treść PDF w dużej rozdzielczości) jako obraz, który można wkleić w inne miejsce
+async function snipRegion(i, pts) {
+  const p = S.pages[i];
+  const x0 = Math.min(pts[0][0], pts[1][0]), x1 = Math.max(pts[0][0], pts[1][0]), y0 = Math.min(pts[0][1], pts[1][1]), y1 = Math.max(pts[0][1], pts[1][1]);
+  busy('Kopiowanie obszaru…');
+  try {
+    const Tl = await getTextless(p), Z = Math.max(2, Math.min(10, 2400 / Math.max(x1 - x0, y1 - y0)));
+    const vp = Tl.pp.getViewport({ scale: Z, rotation: Tl.vp.rotation });
+    const A = vp.convertToViewportPoint(x0, y1), B = vp.convertToViewportPoint(x1, y0);
+    const ox = Math.round(Math.min(A[0], B[0])), oy = Math.round(Math.min(A[1], B[1])), w = Math.max(1, Math.round(Math.abs(B[0] - A[0]))), h = Math.max(1, Math.round(Math.abs(B[1] - A[1])));
+    const cv = el('canvas'); cv.width = w; cv.height = h;
+    const cx = cv.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, w, h);
+    await Tl.pp.render({ canvasContext: cx, viewport: Tl.pp.getViewport({ scale: Z, rotation: Tl.vp.rotation, offsetX: -ox, offsetY: -oy }) }).promise;
+    S.clip = { n: 0, a: { type: 'image', pts: [[x0, y1]], w: x1 - x0, h: y1 - y0, data: cv.toDataURL('image/png'), rot: views[i].rot } };
+    busy(false);
+    setTool('select');
+    pasteClip(i);
+    hint('Skopiowano obszar – przeciągnij kopię w docelowe miejsce. Ctrl+V wkleja kolejną.'); setTimeout(() => { if (!editor) hint(''); }, 5000);
+  } catch (e) { busy(false); alert('Nie udało się skopiować obszaru: ' + e.message); }
+}
+function copySel() {
+  const a = selA(); if (!a) return false;
+  S.clip = { n: 0, a: JSON.parse(JSON.stringify(a)) };
+  hint('Skopiowano – Ctrl+V wkleja'); setTimeout(() => { if (!editor) hint(''); }, 2000);
+  return true;
+}
+function pasteClip(i) {
+  if (!S.clip || !S.pages.length) return false;
+  if (i == null) i = S.sel ? S.sel.pi : S.cur;
+  const p = S.pages[i]; if (!p || !views[i]) return false;
+  commitEditor(); snap();
+  const a = JSON.parse(JSON.stringify(S.clip.a)), d = 10 * (++S.clip.n);
+  delete a.formField; delete a.ax; delete a.ay; delete a.cover; delete a.patch; delete a.reflow;
+  a.pts = a.pts.map(q => [q[0] + d, q[1] - d]);
+  attach(i, a); p.annots.push(a);
+  if (a.type === 'text') S.lastText = { pi: i, a };
+  if (S.tool !== 'select') setTool('select');
+  afterChange(i);
+  setSel({ pi: i, ai: p.annots.length - 1 });
+  return true;
+}
+document.addEventListener('copy', e => { if (/^(INPUT|TEXTAREA)$/.test(e.target.tagName) || editor || !S.sel) return; if (copySel()) e.preventDefault(); });
+document.addEventListener('paste', e => { if (/^(INPUT|TEXTAREA)$/.test(e.target.tagName) || editor) return; if (pasteClip()) e.preventDefault(); });
 function delSel() {
   if (!S.sel || !selA()) return;
   snap();
@@ -3946,7 +3996,7 @@ document.addEventListener('keydown', e => {
   }
   else if (e.key === 'Escape') { setTool('select'); setSel(null); }
   else if (!mod && S.pages.length) {
-    const map = { v: 'select', f: 'form', i: 'pick', e: 'edittext', t: 'text', h: 'highlight', p: 'pen', r: 'rect', w: 'whiteout' };
+    const map = { v: 'select', f: 'form', i: 'pick', e: 'edittext', t: 'text', h: 'highlight', p: 'pen', r: 'rect', w: 'whiteout', c: 'snip' };
     if (map[k] === 'pick') startPick(); else if (map[k]) setTool(map[k]);
   }
 });
