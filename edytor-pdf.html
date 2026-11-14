@@ -65,6 +65,9 @@ body.drawing .overlay{touch-action:none;cursor:crosshair}
 body.t-text .overlay{cursor:text}
 body.t-place .overlay{cursor:copy}
 .edtools{position:absolute;z-index:8;display:flex;gap:2px;align-items:center;background:#1f2328;border-radius:8px;padding:3px;box-shadow:0 4px 14px rgba(0,0,0,.3)}
+#pickChip{gap:6px;align-items:center;background:#eef4ff;border:1px solid #9cb8f0;border-radius:6px;padding:2px 4px 2px 8px;font-size:12px}
+#pickChip i{display:inline-block;width:12px;height:12px;border-radius:3px;border:1px solid #0003}
+#pickChip button{padding:0 6px;font-size:13px}
 .edtools>button{color:#fff;padding:4px 9px;font-weight:700;font-size:12px;border-radius:5px}
 .edtools>button:hover{background:rgba(255,255,255,.16)!important}
 .edtools>button.big{font-size:17px}
@@ -123,13 +126,13 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 
 <div class="bar">
   <div class="brandwrap">
-    <button class="brand" id="bBrand" title="Menu edytora"><i>PDF</i><span>Edytor PDF <small style="font-weight:400;color:var(--muted)">v18</small> ▾</span></button>
+    <button class="brand" id="bBrand" title="Menu edytora"><i>PDF</i><span>Edytor PDF <small style="font-weight:400;color:var(--muted)">v19</small> ▾</span></button>
     <div class="appmenu" id="appMenu">
       <button data-m="fonts">🔤 Czcionki…<small>foldery Worda/Acrobata, pobieranie, stan</small></button>
       <button data-m="install" id="mInstall" style="display:none">⬇ Zainstaluj jako aplikację</button>
       <div class="amsep"></div>
       <a href="https://github.com/wronglogin/edytor-pdf" target="_blank" rel="noopener">ℹ️ O edytorze (GitHub) ↗</a>
-      <div class="amver">Edytor PDF · wersja 18</div>
+      <div class="amver">Edytor PDF · wersja 19</div>
     </div>
   </div>
   <button id="bOpen" title="Otwórz PDF">📂<span class="lbl">Otwórz</span></button>
@@ -155,6 +158,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
   <button class="tool" data-tool="edittext" title="Edytuj istniejący tekst (E)">✏️<span class="lbl">Edytuj tekst</span></button>
   <button class="tool" data-tool="form" title="Wypełnij formularz – wykrywa puste pola do wpisania (F)">▦<span class="lbl">Wypełnij</span></button>
   <button class="tool" data-tool="text" title="Dodaj tekst (T)">𝐓<span class="lbl">Dodaj tekst</span></button>
+  <button class="tool" data-tool="pick" title="Próbnik – kliknij słowo w PDF, aby skopiować jego czcionkę, wielkość i kolor (I)">💧<span class="lbl">Próbnik</span></button>
   <button class="tool" data-tool="highlight" title="Zakreślacz (H)">🖍<span class="lbl">Zakreśl</span></button>
   <button class="tool" data-tool="pen" title="Rysuj odręcznie (P)">✎<span class="lbl">Rysuj</span></button>
   <button class="tool" data-tool="rect" title="Prostokąt (R)">▭<span class="lbl">Prostokąt</span></button>
@@ -182,6 +186,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
   <label class="ctl" title="Gdy edytowany akapit urośnie lub się skróci, treść pod nim przesunie się w dół lub w górę"><input type="checkbox" id="cReflow" checked> Przesuwaj treść</label>
   <label class="ctl" title="Tekst w ramce: gdy się nie mieści, czcionka zmniejsza się automatycznie. Wyłączone – powiększasz ramkę ręcznie, ciągnąc za róg."><input type="checkbox" id="cFit" checked> Dopasuj do ramki</label>
   <label class="ctl" title="Nowy tekst dostaje czcionkę, wielkość i kolor najbliższego tekstu w dokumencie. Wyłączone – używane są ustawienia z paska."><input type="checkbox" id="cMatch" checked> Styl z PDF</label>
+  <span id="pickChip" class="ctl" style="display:none" title="Styl skopiowany próbnikiem – używany dla nowego tekstu i pól formularza"></span>
   <div class="sep"></div>
   <button id="bDel" title="Usuń zaznaczony element (Delete)" disabled>🗑<span class="lbl">Usuń element</span></button>
 </div>
@@ -207,7 +212,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 <input type="file" id="fFontDir" webkitdirectory multiple hidden>
 <div class="modal" id="fontsModal">
   <div class="card">
-    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v18</small></h3>
+    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v19</small></h3>
     <p class="muted">Przeglądarka nie może sama przeszukać dysku, więc wskaż raz foldery z czcionkami Worda i Acrobata. Edytor je zapamięta i będzie z nich automatycznie brał brakujące czcionki przy każdej edycji. Czcionki nie są nigdzie wysyłane.</p>
     <p class="muted"><b>Mac:</b> przeglądarka nie otworzy folderów wewnątrz aplikacji („pliki systemowe”), więc najpierw skopiuj czcionki do Dokumentów: otwórz <b>Terminal</b>, wklej polecenie poniżej i naciśnij Enter. Potem kliknij „Dodaj folder…” i wybierz <b>Dokumenty → Czcionki</b>.</p>
     <div class="paths"><div class="pt">Terminal (Mac)</div><code>mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki</code><button class="copyPath" data-path="mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki">Kopiuj</button></div>
@@ -1527,7 +1532,8 @@ function styleFromItem(v, it) {
 async function startNewText(i, x, y, spec) {
   const v = views[i];
   let style = null;
-  if (S.matchPdf && !S.pages[i].cont) {
+  if (S.picked) style = { ...S.picked };
+  else if (S.matchPdf && !S.pages[i].cont) {
     const t = setTimeout(() => busy('Wykrywanie czcionki…'), 250);
     try {
       await loadItems(i);
@@ -1538,7 +1544,7 @@ async function startNewText(i, x, y, spec) {
   }
   if (views[i] !== v || S.tool !== 'text') return;
   if (spec) openBoxEditor(i, -1, x, y, spec, style); else openEditor(i, -1, x, y, null, style);
-  if (style) hint('Styl z PDF: ' + fontLabel(style) + ' · Enter – zatwierdź');
+  if (style) hint((S.picked ? 'Styl z próbnika: ' : 'Styl z PDF: ') + fontLabel(style) + ' · Enter – zatwierdź');
 }
 /* ---------- „Wypełnij”: wykrywanie pól formularza (jak w Acrobacie) ---------- */
 // Z wersji strony BEZ tekstu wyszukujemy linie (ramki tabel, podkreślenia, kwadraciki), a z tekstu – etykiety.
@@ -1546,7 +1552,7 @@ async function startNewText(i, x, y, spec) {
 async function detectFields(i) {
   const v = views[i], p = S.pages[i];
   if (!v || p.cont) return [];
-  if (p.fields && p.fieldsV === 3) return p.fields;
+  if (p.fields && p.fieldsV === 4) return p.fields;
   if (!p.geo || p.geo.v !== 3) { v.items = null; v.itemsP = null; p.geo = null; }
   await loadItems(i);
   const Tl = await getTextless(p);
@@ -1630,8 +1636,20 @@ async function detectFields(i) {
     for (let k = 0; k < xs.length - 1; k++) if (xs[k + 1] - xs[k] >= 15 * K) cells.push({ x0: xs[k], x1: xs[k + 1], y0: A.p, y1: B.p });
   }
   const pad = 2.5 * K;
+  // „…agreed with the customer:” + puste miejsce pod spodem → pole w tym miejscu
+  const underLabel = (T, x0, x1, y1) => {
+    let n = 0;
+    for (const t of T) {
+      if (!t.label) continue;
+      const lh = t.y1 - t.y0, below = texts.filter(o => o !== t && o.y0 > t.y1 - 1 * K && o.y0 < y1 && o.x1 > x0 && o.x0 < x1);
+      const nb = below.length ? Math.min(...below.map(o => o.y0)) : y1;
+      if (nb - t.y1 >= Math.max(12 * K, lh * 1.1)) { add(x0, t.y1 + 1 * K, x1, nb - 1 * K, 'text'); n++; }
+    }
+    return n;
+  };
   for (const c of cells) {
     const x0 = c.x0 + pad, x1 = c.x1 - pad, y0 = c.y0 + pad, y1 = c.y1 - pad;
+    if (DOTS.some(L => L.p > c.y0 && L.p < c.y1 + 2 * K && L.s >= c.x0 - 2 * K && L.e <= c.x1 + 2 * K)) { underLabel(textIn(x0, y0, x1, y1), x0, x1, y1); continue; }
     if (DOTS.some(L => L.p > c.y0 && L.p < c.y1 + 2 * K && L.s >= c.x0 - 2 * K && L.e <= c.x1 + 2 * K)) continue; // tu pole wyznaczy linia z kropek
     const T = textIn(x0, y0, x1, y1);
     if (!T.length) { add(x0, y0, x1, y1, 'text'); continue; }
@@ -1644,6 +1662,7 @@ async function detectFields(i) {
       add(rx0, ry0, x1, ry1, 'text'); rowFields++;
     }
     if (rowFields) continue;
+    if (underLabel(T, x0, x1, y1)) continue;
     const R = Math.max(...T.map(t => t.x1)), Bt = Math.max(...T.map(t => t.y1)), Tp = Math.min(...T.map(t => t.y0));
     const lineH = Math.max(...T.map(t => t.y1 - t.y0));
     if (x1 - R >= 30 * K) add(R + 6 * K, y0, x1, y1, 'text');                          // wolne miejsce za etykietą
@@ -1662,7 +1681,7 @@ async function detectFields(i) {
     if (HL.some(M => M !== L && M.p < y1 && M.p > y0 && Math.min(M.e, L.e) - Math.max(M.s, L.s) > 10 * K)) continue;
     // tekst wiersza powyżej nie może „wchodzić” w pole – obniżamy górną krawędź
     for (const t of texts) if (t.x1 > L.s && t.x0 < L.e && t.y0 < y0 && t.y1 > y0) y0 = t.y1 + 1 * K;
-    const T = texts.filter(t => t.x1 > L.s && t.x0 < L.e && Math.min(t.y1, y1) - Math.max(t.y0, y0) > 0.5 * (t.y1 - t.y0));
+    const T = texts.filter(t => Math.min(t.x1, L.e) - Math.max(t.x0, L.s) > 3 * K && Math.min(t.y1, y1) - Math.max(t.y0, y0) > 0.5 * (t.y1 - t.y0));
     if (!T.length) add(L.s, y0, L.e, y1, 'text');
     else { const R = Math.max(...T.map(t => t.x1)); if (L.e - R >= 30 * K) add(R + 5 * K, y0, L.e, y1, 'text'); }
   }
@@ -1699,7 +1718,7 @@ async function detectFields(i) {
   }
   // kolejność: z góry na dół, od lewej (dla klawisza Tab)
   res.sort((a, b) => (Math.abs(b.r[3] - a.r[3]) > 4 ? b.r[3] - a.r[3] : a.r[0] - b.r[0]));
-  p.fields = res; p.fieldsV = 3;
+  p.fields = res; p.fieldsV = 4;
   return res;
 }
 const fieldScr = (v, f) => scrRect(v, [[f.r[0], f.r[1]], [f.r[2], f.r[3]]]);
@@ -1725,8 +1744,8 @@ async function openField(i, k) {
   }
   if (ai >= 0) { S.formNav = { i, k }; openEditor(i, ai); return; }
   const b = fieldScr(v, f), Hpt = f.r[3] - f.r[1];
-  let style = null;
-  try {
+  let style = S.picked ? { ...S.picked } : null;
+  if (!style) try {
     const it = nearestItem(i, b.x, b.y + b.h / 2);
     if (it) { try { await resolveLocalFonts(it); } catch (e) {} style = styleFromItem(v, it); }
   } catch (e) {}
@@ -2128,6 +2147,7 @@ function onDown(e, i) {
   const hadEditor = !!editor;
   commitEditor();
   const t = S.tool;
+  if (t === 'pick') { e.preventDefault(); pickAt(i, x, y); return; }
   if (t === 'select') {
     const h = handleAt(i, x, y);
     let kind = 'move', hid = 'move';
@@ -2452,7 +2472,7 @@ function edTools(ta) {
   const t = el('div', 'edtools');
   t.innerHTML = '<button data-a="dec" title="Zmniejsz tekst">A</button><button data-a="inc" class="big" title="Powiększ tekst">A</button>' +
     '<button data-a="del" title="Usuń tekst">🗑</button><button data-a="sym" title="Zamień na symbol (✓ ✗ ●)">⟳▾</button>' +
-    '<button data-a="ls" title="Odstępy między literami">VA↔</button><div class="edpop"></div>';
+    '<button data-a="ls" title="Odstępy między literami">VA↔</button><button data-a="pick" title="Próbnik – skopiuj styl słowa z PDF">💧</button><div class="edpop"></div>';
   const pop = t.querySelector('.edpop');
   t.addEventListener('mousedown', e => e.preventDefault()); // pole tekstowe zostaje aktywne
   t.addEventListener('click', e => {
@@ -2475,6 +2495,13 @@ function edAction(act, ta, pop) {
     ta._fit(); hint('Wielkość tekstu: ' + ed.size + ' pt'); return;
   }
   if (act === 'del') { ta.value = ''; commitEditor(); return; }
+  if (act === 'pick') {
+    if (!ta.value.trim()) { hint('Najpierw wpisz tekst, potem użyj próbnika'); return; }
+    const back = S.tool; commitEditor();
+    const a = selA(); const tg = a && a.type === 'text' ? { ...S.sel } : null;
+    if (S.tool !== back) S.tool = back;
+    startPick(tg); return;
+  }
   if (act === 'sym') {
     pop.innerHTML = '<span>Zamień na:</span><button data-s="check" title="Ptaszek">✓</button><button data-s="cross" title="Krzyżyk">✗</button><button data-s="dot" title="Kropka">●</button>';
     pop.onclick = e => { const b = e.target.closest('[data-s]'); if (b) toSymbol(b.dataset.s); };
@@ -2691,6 +2718,59 @@ function delSel() {
   S.pages[pi].annots.splice(ai, 1);
   S.sel = null; updSelUI(); afterChange(pi);
 }
+/* ---------- próbnik: kopiuje czcionkę, wielkość i kolor słowa z PDF ---------- */
+function startPick(target) {
+  if (!S.pages.length) return alert('Najpierw otwórz dokument PDF.');
+  const prev = S.tool === 'pick' ? (S.pickPrev || 'select') : S.tool;
+  if (target === undefined) { const a = selA(); target = a && a.type === 'text' ? { ...S.sel } : null; }
+  setTool('pick');
+  S.pickPrev = prev; S.pickTarget = target;
+  views.forEach((v, i) => { v.overlay.style.cursor = 'crosshair'; if (v.painted) loadItems(i); });
+  hint(target ? 'Kliknij słowo, którego styl ma dostać zaznaczony tekst' : 'Kliknij słowo w dokumencie – jego czcionka, wielkość i kolor będą używane dla nowego tekstu');
+}
+async function pickAt(i, x, y) {
+  const v = views[i];
+  const t = setTimeout(() => busy('Odczyt stylu…'), 250);
+  let st = null;
+  try {
+    await loadItems(i);
+    const it = nearestItem(i, x, y);
+    if (it) {
+      const b = scrRect(v, dispA(v.shifts, it).cover);
+      if (Math.hypot(Math.max(b.x - x, 0, x - b.x - b.w), Math.max(b.y - y, 0, y - b.y - b.h)) < 40) {
+        try { await resolveLocalFonts(it); } catch (e) {}
+        st = styleFromItem(v, it);
+      }
+    }
+  } catch (e) { console.warn(e); }
+  clearTimeout(t); busy(false);
+  if (!st) { hint('Tu nie ma tekstu z PDF – kliknij bliżej słowa.'); return; }
+  S.picked = st; updPickChip();
+  const tg = S.pickTarget, a = tg && S.pages[tg.pi] && S.pages[tg.pi].annots[tg.ai];
+  if (a && a.type === 'text') {
+    snap();
+    for (const k of STYLE_KEYS) delete a[k];
+    for (const k of STYLE_KEYS) if (st[k] !== undefined) a[k] = st[k];
+    if (a.lh) a.lh *= st.size / a.size;
+    a.size = st.size; a.color = st.color; delete a.st; delete a.ws;
+    fixFont(a); afterChange(tg.pi);
+  }
+  const back = S.pickPrev || 'select';
+  S.pickTarget = null;
+  setTool(back);
+  if (a && back === 'select') setSel(tg);
+  hint('Próbnik: ' + fontLabel(st) + (a ? ' – zastosowano do zaznaczonego tekstu' : ' – będzie używany dla nowego tekstu i pól'));
+  setTimeout(() => { if (!editor) hint(''); }, 3500);
+}
+function updPickChip() {
+  const c = $('#pickChip'), st = S.picked;
+  if (!st) { c.style.display = 'none'; return; }
+  c.style.display = 'inline-flex';
+  c.innerHTML = '💧 <i></i><span></span><button title="Wyłącz próbnik – wróć do „Styl z PDF”">✕</button>';
+  c.querySelector('i').style.background = st.color;
+  c.querySelector('span').textContent = fontLabel(st).replace(/ \(.*\)$/, '');
+  c.querySelector('button').onclick = () => { S.picked = null; updPickChip(); };
+}
 function setTool(t) {
   commitEditor();
   S.tool = t;
@@ -2711,6 +2791,7 @@ document.querySelectorAll('.tool').forEach(b => b.onclick = () => {
   const t = b.dataset.tool;
   if (!S.pages.length) return alert('Najpierw otwórz dokument PDF.');
   if (t === 'image') $('#fImg').click();
+  else if (t === 'pick') startPick();
   else if (t === 'sign') openSig();
   else setTool(t);
 });
@@ -3267,8 +3348,8 @@ document.addEventListener('keydown', e => {
   }
   else if (e.key === 'Escape') { setTool('select'); setSel(null); }
   else if (!mod && S.pages.length) {
-    const map = { v: 'select', f: 'form', e: 'edittext', t: 'text', h: 'highlight', p: 'pen', r: 'rect', w: 'whiteout' };
-    if (map[k]) setTool(map[k]);
+    const map = { v: 'select', f: 'form', i: 'pick', e: 'edittext', t: 'text', h: 'highlight', p: 'pen', r: 'rect', w: 'whiteout' };
+    if (map[k] === 'pick') startPick(); else if (map[k]) setTool(map[k]);
   }
 });
 
