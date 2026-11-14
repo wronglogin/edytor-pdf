@@ -135,7 +135,8 @@ body.native .webonly{display:none!important}
 .tab.active{background:#fff;font-weight:600}
 .tab i.lock{font-style:normal;font-size:12px;flex:none;cursor:help}
 .tab span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.tab button{border:0;background:transparent;border-radius:50%;width:20px;height:20px;line-height:1;font-size:11px;cursor:pointer;color:#555;flex:none;padding:0}
+.tab button{border:0;background:transparent;border-radius:50%;width:20px;height:20px;font-size:0;cursor:pointer;color:#555;flex:none;padding:0;margin:0;display:grid;place-items:center}
+.tab button::before{content:"";width:10px;height:10px;background:linear-gradient(45deg,transparent 43%,currentColor 43%,currentColor 57%,transparent 57%),linear-gradient(-45deg,transparent 43%,currentColor 43%,currentColor 57%,transparent 57%)}
 .tab button:hover{background:#d5d9e0;color:#000}
 #askModal{z-index:95}#askModal .card{width:min(480px,100%)}
 #askInput{width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid #ccd;border-radius:8px;font:inherit;margin-top:6px;caret-color:auto}
@@ -169,15 +170,16 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 </div>
 <div class="bar">
   <div class="brandwrap">
-    <button class="brand" id="bBrand" title="Menu edytora"><i>PDF</i><span>Edytor PDF <small style="font-weight:400;color:var(--muted)">v31</small> ▾</span></button>
+    <button class="brand" id="bBrand" title="Menu edytora"><i>PDF</i><span>Edytor PDF <small style="font-weight:400;color:var(--muted)">v32</small> ▾</span></button>
     <div class="appmenu" id="appMenu">
       <div id="recentMenu" class="recent"></div>
       <button data-m="help">❓ Pomoc – jak działa każda opcja<small>narzędzia, skróty, czcionki, zapisywanie</small></button>
+      <button data-m="pw">🔐 Zabezpiecz hasłem…<small>zapisz PDF zaszyfrowany (AES-256) albo usuń hasło</small></button>
       <button data-m="fonts">🔤 Czcionki…<small>foldery Worda/Acrobata, pobieranie, stan</small></button>
       <button data-m="install" id="mInstall" style="display:none">⬇ Zainstaluj jako aplikację</button>
       <div class="amsep"></div>
       <a href="https://github.com/wronglogin/edytor-pdf" target="_blank" rel="noopener">ℹ️ O edytorze (GitHub) ↗</a>
-      <div class="amver">Edytor PDF · wersja 31</div>
+      <div class="amver">Edytor PDF · wersja 32</div>
     </div>
   </div>
   <button id="bOpen" title="Otwórz PDF">📂<span class="lbl">Otwórz</span></button>
@@ -192,7 +194,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
   <button id="bFit" title="Dopasuj do szerokości">↔</button>
   <span id="pageInfo"></span>
   <div class="grow"></div>
-  <button id="bHelp" title="Pomoc – jak działa każda opcja (F1)">❓<span class="lbl">Pomoc</span></button>
+  <button id="bHelp" class="webonly" title="Pomoc – jak działa każda opcja (F1)">❓<span class="lbl">Pomoc</span></button>
   <button id="bPrint" title="Drukuj (Ctrl+P)">🖨<span class="lbl">Drukuj</span></button>
   <button id="bInstall" style="display:none" title="Zainstaluj jako aplikację na tym komputerze">⬇<span class="lbl">Zainstaluj</span></button>
   <button id="bSaveAs" title="Zapisz jako nowy plik (Ctrl+Shift+S)">📄<span class="lbl">Zapisz jako</span></button>
@@ -272,7 +274,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
     <div id="helpBody">
 <details open><summary>🗂 Karty dokumentów</summary>
 <p>Każdy otwarty plik ma swoją kartę na samej górze – klikaj karty, aby przełączać się między dokumentami. <b>＋ Utwórz</b> otwiera pusty dokument. <b>✕</b> na karcie zamyka dokument (przy niezapisanych zmianach zapyta: Zapisz / Zapisz jako / Nie zapisuj / Anuluj) i wraca do ekranu startowego z ostatnio otwieranymi plikami. <b>🏠</b> pokazuje ekran startowy bez zamykania dokumentów. Kropka ● przy nazwie oznacza niezapisane zmiany.</p>
-<p><b>Pliki z hasłem</b> – edytor zapyta o hasło, a przy zapisie zabezpieczy plik tym samym hasłem. Pliki z samą blokadą edycji (bez hasła do otwarcia) zapisują się bez blokady. Na karcie dokumentu widać wtedy znaczek: 🔑 – plik ma hasło do otwarcia, 🔒 – plik ma hasło właściciela (blokadę edycji); najedź na znaczek, aby zobaczyć opis.</p></details>
+<p><b>Pliki z hasłem</b> – edytor zapyta o hasło, a przy zapisie zabezpieczy plik tym samym hasłem. Pliki z samą blokadą edycji (bez hasła do otwarcia) zapisują się bez blokady. Własne hasło ustawisz w menu „Edytor PDF ▾” → <b>🔐 Zabezpiecz hasłem…</b> (tam też je zmienisz albo usuniesz). Na karcie dokumentu widać wtedy znaczek: 🔑 – plik ma hasło do otwarcia, 🔒 – plik ma hasło właściciela (blokadę edycji); najedź na znaczek, aby zobaczyć opis.</p></details>
 <details><summary>📂 Otwieranie, dołączanie, zapisywanie</summary>
 <p><b>Otwórz</b> – wczytuje PDF (możesz też przeciągnąć plik na okno). Plik nigdy nie jest nigdzie wysyłany – wszystko dzieje się na Twoim komputerze.</p>
 <p><b>Dołącz PDF</b> – dokleja strony innego pliku na końcu dokumentu.</p>
@@ -323,7 +325,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 </div>
 <div class="modal" id="fontsModal">
   <div class="card">
-    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v31</small></h3>
+    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v32</small></h3>
     <p class="muted">Przeglądarka nie może sama przeszukać dysku, więc wskaż raz foldery z czcionkami Worda i Acrobata. Edytor je zapamięta i będzie z nich automatycznie brał brakujące czcionki przy każdej edycji. Czcionki nie są nigdzie wysyłane.</p>
     <p class="muted"><b>Mac:</b> przeglądarka nie otworzy folderów wewnątrz aplikacji („pliki systemowe”), więc najpierw skopiuj czcionki do Dokumentów: otwórz <b>Terminal</b>, wklej polecenie poniżej i naciśnij Enter. Potem kliknij „Dodaj folder…” i wybierz <b>Dokumenty → Czcionki</b>.</p>
     <div class="paths"><div class="pt">Terminal (Mac)</div><code>mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki</code><button class="copyPath" data-path="mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki">Kopiuj</button></div>
@@ -745,6 +747,7 @@ $('#appMenu').addEventListener('click', e => {
   closeAppMenu();
   if (b.dataset.m === 'fonts') openFontsModal();
   if (b.dataset.m === 'help') openHelp();
+  if (b.dataset.m === 'pw') setDocPassword();
   if (b.dataset.m === 'install') $('#bInstall').click();
 });
 document.addEventListener('mousedown', e => { if (!e.target.closest('.brandwrap')) closeAppMenu(); });
@@ -1198,11 +1201,11 @@ async function addSource(bytes, name) {
   return S.sources.length - 1;
 }
 /* ---------- okno z pytaniem (hasło, zamykanie) ---------- */
-function askModal({ title, text, input, buttons }) {
+function askModal({ title, text, input, show, buttons }) {
   return new Promise(res => {
     const m = $('#askModal'), inp = $('#askInput'), box = $('#askBtns');
     $('#askTitle').textContent = title; $('#askText').textContent = text || '';
-    inp.style.display = input ? '' : 'none'; inp.value = '';
+    inp.style.display = input ? '' : 'none'; inp.value = ''; inp.type = show ? 'text' : 'password';
     box.innerHTML = '';
     const done = id => { m.style.display = 'none'; document.removeEventListener('keydown', onKey, true); res(input ? { id, value: inp.value } : id); };
     const onKey = e => {
@@ -1215,6 +1218,22 @@ function askModal({ title, text, input, buttons }) {
     m.style.display = 'flex';
     setTimeout(() => (input ? inp : box.firstChild).focus(), 30);
   });
+}
+// Hasło do pliku: ustawia (lub usuwa) hasło, którym plik będzie szyfrowany przy każdym zapisie
+async function setDocPassword() {
+  if (!S.pages.length) return alert('Najpierw otwórz dokument PDF.');
+  const has = !!S.docPw;
+  const r = await askModal({ title: has ? 'Hasło do pliku' : 'Zabezpiecz plik hasłem', show: true, input: true,
+    text: (has ? 'Ten plik ma już hasło. Wpisz nowe, aby je zmienić, albo usuń hasło. ' : 'Wpisz hasło, które będzie potrzebne do otwarcia pliku. ') + 'Plik zostanie zaszyfrowany (AES-256) przy zapisie. Zapamiętaj hasło – bez niego pliku nie da się otworzyć ani odzyskać.',
+    buttons: [['set', 'Ustaw hasło i zapisz', 1], ...(has ? [['remove', 'Usuń hasło i zapisz']] : []), ['cancel', 'Anuluj']] });
+  if (r.id === 'cancel') return;
+  if (r.id === 'set') {
+    if (!r.value) return alert('Hasło nie może być puste.');
+    try { await loadDecrypt(); } catch (e) { return alert('Nie można włączyć szyfrowania: ' + e.message); }
+    S.docPw = r.value; S.docLock = 'user';
+  } else { S.docPw = ''; S.docLock = ''; }
+  renderTabs();
+  await exportPdf(S.nativePath || S.fileHandle ? undefined : 'saveas');
 }
 /* ---------- karty dokumentów ---------- */
 const DOCKEYS = ['pages', 'undo', 'redo', 'name', 'fileHandle', 'nativePath', 'savedState', 'sel', 'cur', 'zoom', 'blankSrc', 'mark', 'lastText', 'formNav', 'srcs', 'docPw', 'docLock'];
@@ -1288,7 +1307,7 @@ function renderTabs() {
         : 'Plik ma hasło właściciela (blokadę edycji nałożoną przez autora). Tutaj możesz go edytować, ale zapisana kopia nie będzie już miała tej blokady.';
       d.append(k);
     }
-    const x = el('button'); x.textContent = '✕'; x.title = 'Zamknij dokument';
+    const x = el('button'); x.title = 'Zamknij dokument'; x.setAttribute('aria-label', 'Zamknij dokument');
     x.onclick = e => { e.stopPropagation(); closeTab(TABS.indexOf(t)); };
     d.onclick = () => switchTab(TABS.indexOf(t));
     d.onauxclick = e => { if (e.button === 1) closeTab(TABS.indexOf(t)); };
