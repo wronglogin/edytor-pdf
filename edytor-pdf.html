@@ -79,6 +79,11 @@ body.t-place .overlay{cursor:copy}
 .paths .pt{color:var(--muted);white-space:nowrap}
 .paths code{background:#f3f4f6;border-radius:5px;padding:4px 6px;word-break:break-all;font-size:11px}
 .paths button{padding:3px 8px;font-size:12px;border:1px solid var(--line)}
+.fontlinks{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;font-size:13px;max-height:38vh;overflow:auto;padding-right:4px}
+.fontlinks .flt{grid-column:1/-1;color:var(--muted);font-size:12px;margin-top:8px;font-weight:600}
+.fontlinks a{color:#1d4ed8;text-decoration:none;padding:3px 0}
+.fontlinks a:hover{text-decoration:underline}
+#fontsModal .card{max-height:92vh;overflow:auto}
 .fdir{display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin-bottom:6px;font-size:13px}
 .siglist{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
 .sigitem{position:relative;border:1px solid var(--line);border-radius:8px;padding:6px 10px;cursor:pointer;height:66px;display:flex;align-items:center;background:repeating-conic-gradient(#f1f2f4 0 25%,#fff 0 50%) 0 0/12px 12px}
@@ -108,6 +113,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
   <span id="pageInfo"></span>
   <div class="grow"></div>
   <button id="bPrint" title="Drukuj (Ctrl+P)">🖨<span class="lbl">Drukuj</span></button>
+  <button id="bFonts" title="Czcionki: moje foldery i linki do pobrania">🔤<span class="lbl">Czcionki</span></button>
   <button id="bInstall" style="display:none" title="Zainstaluj jako aplikację na tym komputerze">⬇<span class="lbl">Zainstaluj</span></button>
   <button id="bSaveAs" title="Zapisz jako nowy plik (Ctrl+Shift+S)">📄<span class="lbl">Zapisz jako</span></button>
   <button id="bSave" class="primary" title="Zapisz (Ctrl+S)">💾<span class="lbl">Zapisz</span></button>
@@ -176,6 +182,36 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
     <div class="paths"><div class="pt">Terminal (Mac)</div><code>mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki</code><button class="copyPath" data-path="mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki">Kopiuj</button></div>
     <p class="muted"><b>Windows:</b> czcionki Office są już w systemie. Czcionki Acrobata skopiuj z <code>C:\Program Files\Adobe\Acrobat DC\Resource\Font</code> np. do Dokumentów i wskaż kopię.</p>
     <div id="fontDirList"></div>
+    <h4 style="margin:16px 0 4px">Pobierz czcionki na swój komputer</h4>
+    <p class="muted">Po zainstalowaniu (dwuklik na pliku → Zainstaluj) czcionki działają w każdym programie, także w Wordzie i w tym edytorze. Wszystkie poniżej są bezpłatne.</p>
+    <div class="fontlinks">
+      <div class="flt">Zastępują czcionki Windows / Office (te same wymiary)</div>
+      <a href="https://fonts.google.com/specimen/Arimo" target="_blank" rel="noopener">Arimo → Arial / Helvetica ↗</a>
+      <a href="https://fonts.google.com/specimen/Tinos" target="_blank" rel="noopener">Tinos → Times New Roman ↗</a>
+      <a href="https://fonts.google.com/specimen/Cousine" target="_blank" rel="noopener">Cousine → Courier New ↗</a>
+      <a href="https://fonts.google.com/specimen/Carlito" target="_blank" rel="noopener">Carlito → Calibri ↗</a>
+      <a href="https://fonts.google.com/specimen/Caladea" target="_blank" rel="noopener">Caladea → Cambria ↗</a>
+      <a href="https://fonts.google.com/specimen/Gelasio" target="_blank" rel="noopener">Gelasio → Georgia ↗</a>
+      <a href="https://github.com/ArtifexSoftware/urw-base35-fonts" target="_blank" rel="noopener">URW (Arial Narrow, Palatino, Century Schoolbook, Bookman) ↗</a>
+      <div class="flt">Czcionki Adobe (otwarte)</div>
+      <a href="https://fonts.google.com/specimen/Source+Sans+3" target="_blank" rel="noopener">Source Sans 3 (≈ Myriad) ↗</a>
+      <a href="https://fonts.google.com/specimen/Source+Serif+4" target="_blank" rel="noopener">Source Serif 4 (≈ Minion) ↗</a>
+      <div class="flt">Popularne czcionki otwarte (oryginały)</div>
+      <a href="https://fonts.google.com/specimen/Roboto" target="_blank" rel="noopener">Roboto ↗</a>
+      <a href="https://fonts.google.com/specimen/Open+Sans" target="_blank" rel="noopener">Open Sans ↗</a>
+      <a href="https://fonts.google.com/specimen/Lato" target="_blank" rel="noopener">Lato ↗</a>
+      <a href="https://fonts.google.com/specimen/Montserrat" target="_blank" rel="noopener">Montserrat ↗</a>
+      <a href="https://fonts.google.com/specimen/Poppins" target="_blank" rel="noopener">Poppins ↗</a>
+      <a href="https://fonts.google.com/specimen/Inter" target="_blank" rel="noopener">Inter ↗</a>
+      <a href="https://fonts.google.com/specimen/Noto+Sans" target="_blank" rel="noopener">Noto Sans ↗</a>
+      <a href="https://fonts.google.com/specimen/Noto+Serif" target="_blank" rel="noopener">Noto Serif ↗</a>
+      <a href="https://dejavu-fonts.github.io/" target="_blank" rel="noopener">DejaVu Sans / Serif ↗</a>
+      <div class="flt">Microsoft (bezpłatne, tylko do instalacji u siebie)</div>
+      <a href="https://www.microsoft.com/en-us/download/details.aspx?id=106087" target="_blank" rel="noopener">Aptos – nowa czcionka Office ↗</a>
+      <div class="flt">Wszystkie otwarte czcionki tego edytora naraz</div>
+      <a href="https://github.com/wronglogin/edytor-pdf/tree/main/fonts" target="_blank" rel="noopener">Folder „fonts” w repozytorium (z licencjami) ↗</a>
+    </div>
+
     <div class="row" style="margin-top:12px">
       <button class="primary" id="fmAdd">📁 Dodaj folder…</button>
       <button id="fmRescan">↻ Odśwież</button>
@@ -507,6 +543,7 @@ async function renderFontsModal() {
 }
 function openFontsModal() { $('#fontsModal').style.display = 'flex'; renderFontsModal(); }
 $('#fmAdd').onclick = addFontFolder;
+$('#bFonts').onclick = openFontsModal;
 $('#fmRescan').onclick = rescanFolders;
 $('#fmClose').onclick = () => { $('#fontsModal').style.display = 'none'; };
 document.querySelectorAll('.copyPath').forEach(b => b.onclick = async () => {
