@@ -115,13 +115,13 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 
 <div class="bar">
   <div class="brandwrap">
-    <button class="brand" id="bBrand" title="Menu edytora"><i>PDF</i><span>Edytor PDF <small style="font-weight:400;color:var(--muted)">v13</small> ▾</span></button>
+    <button class="brand" id="bBrand" title="Menu edytora"><i>PDF</i><span>Edytor PDF <small style="font-weight:400;color:var(--muted)">v14</small> ▾</span></button>
     <div class="appmenu" id="appMenu">
       <button data-m="fonts">🔤 Czcionki…<small>foldery Worda/Acrobata, pobieranie, stan</small></button>
       <button data-m="install" id="mInstall" style="display:none">⬇ Zainstaluj jako aplikację</button>
       <div class="amsep"></div>
       <a href="https://github.com/wronglogin/edytor-pdf" target="_blank" rel="noopener">ℹ️ O edytorze (GitHub) ↗</a>
-      <div class="amver">Edytor PDF · wersja 13</div>
+      <div class="amver">Edytor PDF · wersja 14</div>
     </div>
   </div>
   <button id="bOpen" title="Otwórz PDF">📂<span class="lbl">Otwórz</span></button>
@@ -153,7 +153,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
   <button class="tool" data-tool="image" title="Wstaw obraz">🖼<span class="lbl">Obraz</span></button>
   <button class="tool" data-tool="sign" title="Podpis">✍<span class="lbl">Podpis</span></button>
   <div class="sep"></div>
-  <label class="ctl" title="Kolor">Kolor <input type="color" id="cColor" value="#e11d48"></label>
+  <label class="ctl" title="Kolor">Kolor <input type="color" id="cColor" value="#000000"></label>
   <label class="ctl" title="Grubość linii">Grubość <input type="range" id="cWidth" min="1" max="20" value="3"></label>
   <label class="ctl" title="Rozmiar tekstu">Tekst <input type="number" id="cFont" min="6" max="96" value="14"></label>
   <label class="ctl" title="Czcionka">Czcionka <select id="cFam">
@@ -198,7 +198,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 <input type="file" id="fFontDir" webkitdirectory multiple hidden>
 <div class="modal" id="fontsModal">
   <div class="card">
-    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v13</small></h3>
+    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v14</small></h3>
     <p class="muted">Przeglądarka nie może sama przeszukać dysku, więc wskaż raz foldery z czcionkami Worda i Acrobata. Edytor je zapamięta i będzie z nich automatycznie brał brakujące czcionki przy każdej edycji. Czcionki nie są nigdzie wysyłane.</p>
     <p class="muted"><b>Mac:</b> przeglądarka nie otworzy folderów wewnątrz aplikacji („pliki systemowe”), więc najpierw skopiuj czcionki do Dokumentów: otwórz <b>Terminal</b>, wklej polecenie poniżej i naciśnij Enter. Potem kliknij „Dodaj folder…” i wybierz <b>Dokumenty → Czcionki</b>.</p>
     <div class="paths"><div class="pt">Terminal (Mac)</div><code>mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki</code><button class="copyPath" data-path="mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki">Kopiuj</button></div>
@@ -290,7 +290,7 @@ const viewer = $('#viewer'), thumbsEl = $('#thumbs');
 const S = {
   sources: [],   // {bytes, doc}
   pages: [],     // {src, idx, rot, annots:[]}
-  zoom: 1.25, tool: 'select', color: '#e11d48', width: 3, fontSize: 14, font: 'sans', reflow: true, fit: true, matchPdf: true,
+  zoom: 1.25, tool: 'select', color: '#000000', width: 3, fontSize: 14, font: 'sans', reflow: true, fit: true, matchPdf: true,
   sel: null, undo: [], redo: [], name: 'dokument', pending: null, blankSrc: -1, cur: 0
 };
 let views = [], renderToken = 0, temp = null, act = null, editor = null;
