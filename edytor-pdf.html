@@ -215,7 +215,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
         <button class="appx" data-m="app:releases">⬇ Pobierz najnowszą wersję aplikacji ↗</button>
         <div class="amsep"></div>
         <a href="https://github.com/wronglogin/edytor-pdf" target="_blank" rel="noopener">ℹ️ O edytorze (GitHub) ↗</a>
-        <div class="amver">Edytor PDF · wersja 43</div>
+        <div class="amver">Edytor PDF · wersja 44</div>
         <div class="amver appx" id="appVer"></div>
       </div>
     </div>
@@ -243,7 +243,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
   <div class="grow"></div>
   <button id="bHelp" class="webonly" title="Pomoc – jak działa każda opcja (F1)">❓<span class="lbl">Pomoc</span></button>
   <button id="bAtt" style="display:none" title="Załączniki dołączone do tego PDF">📎<span class="lbl">Załączniki</span></button>
-  <button id="bPrint" title="Drukuj (Ctrl+P)">🖨<span class="lbl">Drukuj</span></button>
+  <button id="bPrint" title="Drukuj (Ctrl+P)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/><circle cx="17.5" cy="12" r=".6" fill="currentColor"/></svg><span class="lbl">Drukuj</span></button>
   <button id="bSaveAs" title="Zapisz jako nowy plik (Ctrl+Shift+S)">📄<span class="lbl">Zapisz jako</span></button>
   <button id="bSave" class="primary" title="Zapisz (Ctrl+S)">💾<span class="lbl">Zapisz</span></button>
 </div>
@@ -402,7 +402,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 </div>
 <div class="modal" id="fontsModal">
   <div class="card">
-    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v43</small></h3>
+    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v44</small></h3>
     <p class="muted">Przeglądarka nie może sama przeszukać dysku, więc wskaż raz foldery z czcionkami Worda i Acrobata. Edytor je zapamięta i będzie z nich automatycznie brał brakujące czcionki przy każdej edycji. Czcionki nie są nigdzie wysyłane.</p>
     <p class="muted"><b>Mac:</b> przeglądarka nie otworzy folderów wewnątrz aplikacji („pliki systemowe”), więc najpierw skopiuj czcionki do Dokumentów: otwórz <b>Terminal</b>, wklej polecenie poniżej i naciśnij Enter. Potem kliknij „Dodaj folder…” i wybierz <b>Dokumenty → Czcionki</b>.</p>
     <div class="paths"><div class="pt">Terminal (Mac)</div><code>mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki</code><button class="copyPath" data-path="mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki">Kopiuj</button></div>

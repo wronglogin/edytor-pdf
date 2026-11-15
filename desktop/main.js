@@ -222,7 +222,7 @@ app.on('open-file', (e, p) => { e.preventDefault(); if (app.isReady()) openPaths
 app.on('second-instance', (e, argv) => {
   const ps = pdfArgs(argv);
   if (ps.length) openPaths(ps);
-  else { const w = BrowserWindow.getAllWindows()[0]; if (w) { if (w.isMinimized()) w.restore(); w.focus(); } }
+  else { const w = BrowserWindow.getAllWindows()[0]; if (w) { if (w.isMinimized()) w.restore(); w.show(); w.focus(); } else if (app.isReady()) createWindow(); }
 });
 function openPaths(ps) {
   for (const p of ps) {
@@ -250,6 +250,7 @@ function createWindow() {
   w.on('leave-full-screen', () => w.webContents.send('fullscreen', false));
   w.webContents.on('did-finish-load', () => { w.ready = true; w.emit('app-ready'); });
   w.once('ready-to-show', () => w.show());
+  setTimeout(() => { if (!w.isDestroyed() && !w.isVisible()) w.show(); }, 4000); // na wszelki wypadek – okno nigdy nie zostaje ukryte
   w.loadURL('app://edytor/edytor-pdf.html');
   // linki (pobieranie czcionek, GitHub) – w zwykłej przeglądarce
   w.webContents.setWindowOpenHandler(({ url }) => { if (/^https?:/.test(url)) shell.openExternal(url); return { action: 'deny' }; });
@@ -270,7 +271,7 @@ function createWindow() {
     try { res = await w.webContents.executeJavaScript('typeof appCloseCheck === "function" ? appCloseCheck() : null', true); } catch (err) {}
     w.asking = false;
     if (res === false) { quitting = false; return; }
-    if (res === true) { w.forceClose = true; w.destroy(); if (quitting) setImmediate(() => app.quit()); return; }
+    if (res === true) { w.forceClose = true; w.destroy(); if (quitting || (process.platform !== 'darwin' && !BrowserWindow.getAllWindows().length)) setImmediate(() => app.quit()); return; }
     let st = { dirty: false, name: '' };
     try { st = await w.webContents.executeJavaScript('({ dirty: !!(typeof isDirty === "function" && isDirty()), name: typeof S !== "undefined" ? S.name : "" })'); } catch (err) {}
     if (st.dirty) {
@@ -286,7 +287,7 @@ function createWindow() {
       }
     }
     w.forceClose = true; w.destroy();
-    if (quitting) setImmediate(() => app.quit());
+    if (quitting || (process.platform !== 'darwin' && !BrowserWindow.getAllWindows().length)) setImmediate(() => app.quit());
   });
   w.webContents.on('will-prevent-unload', e => {
     const c = dialog.showMessageBoxSync(w, { type: 'question', buttons: ['Zamknij bez zapisywania', 'Anuluj'], defaultId: 1, cancelId: 1,
