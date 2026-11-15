@@ -1,0 +1,38 @@
+# Test rozruchu aplikacji na Windows i macOS (czy okno w ogóle się otwiera)
+name: Smoke
+on:
+  push:
+    branches: [main]
+    paths: ['desktop/main.js', 'desktop/preload.js', '.github/workflows/smoke.yml']
+  workflow_dispatch:
+jobs:
+  smoke:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Pliki edytora
+        shell: bash
+        run: |
+          mkdir -p desktop/app
+          cp edytor-pdf.html spell-worker.js manifest.webmanifest icon-192.png icon-512.png desktop/app/
+          cp -R fonts dict lib desktop/app/
+      - name: Zależności
+        working-directory: desktop
+        run: npm install --no-audit --no-fund
+      - name: Start aplikacji
+        working-directory: desktop
+        shell: bash
+        env:
+          EDYTOR_SMOKE: ${{ runner.temp }}/smoke.json
+        run: |
+          npx electron . || echo "exit code $?"
+          echo "---- wynik ----"
+          cat "$EDYTOR_SMOKE"
+          grep -q '"ok":true' "$EDYTOR_SMOKE"

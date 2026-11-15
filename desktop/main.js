@@ -343,3 +343,18 @@ app.whenReady().then(() => {
   app.on('activate', () => { if (!BrowserWindow.getAllWindows().length) createWindow(); });
 });
 app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
+
+// Test rozruchu (CI): EDYTOR_SMOKE=<plik> – po starcie zapisuje stan okna do pliku i kończy
+if (process.env.EDYTOR_SMOKE) {
+  const out = process.env.EDYTOR_SMOKE, done = d => { try { fs.writeFileSync(out, JSON.stringify(d)); } catch (e) {} app.exit(d.ok ? 0 : 1); };
+  process.on('uncaughtException', e => done({ ok: false, err: String(e && e.stack || e) }));
+  setTimeout(() => done({ ok: false, err: 'timeout' }), 60000);
+  app.whenReady().then(() => setTimeout(async () => {
+    try {
+      const w = BrowserWindow.getAllWindows()[0];
+      const r = await w.webContents.executeJavaScript(`({ cls: document.body.className, bar: !!document.querySelector('#titlebar'), pdfjs: typeof pdfjsLib, lib: typeof PDFLib, ver: native.appVersion, frameless: native.frameless })`);
+      done({ ok: true, visible: w.isVisible(), bounds: w.getBounds(), menuVisible: w.isMenuBarVisible(), ...r });
+    } catch (e) { done({ ok: false, err: String(e && e.stack || e) }); }
+  }, 12000));
+}
+
