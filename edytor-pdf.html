@@ -5,14 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Edytor PDF</title>
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#d7373f">
+<meta name="theme-color" content="#1e1f22">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <script src="https://unpkg.com/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js"></script>
 <style>
-:root{--acc:#d7373f;--acc2:#b92d34;--bg:#e9eaee;--bar:#fff;--line:#d9dbe1;--txt:#1f2328;--muted:#6b7280}
+:root{--acc:#d7373f;--acc2:#b92d34;--bg:#1e1f22;--bar:#2b2d31;--panel:#2b2d31;--pane:#232428;--field:#1e1f22;--hover:#3a3d42;--line:#3f4248;--txt:#e3e5e8;--muted:#9aa0a8;--accbg:#4a2327;--accline:#7a2f35;--acctxt:#ff8d93}
+html{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;font:14px/1.3 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--txt);background:var(--bg)}
 body{display:flex;flex-direction:column;overflow:hidden;caret-color:transparent}
@@ -23,41 +24,41 @@ textarea,input{caret-color:auto}
 .brand{font-weight:700;margin-right:10px;display:flex;align-items:center;gap:8px}
 .brandwrap{position:relative}
 button.brand{padding:4px 8px;border:1px solid transparent;font:inherit;font-weight:700}
-button.brand:hover,button.brand.open{background:#f0f1f4}
-.appmenu{display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:80;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.18);padding:6px;min-width:250px}
+button.brand:hover,button.brand.open{background:var(--hover)}
+.appmenu{display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:80;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.18);padding:6px;min-width:250px}
 .appmenu.open{display:block}
 .appmenu button,.appmenu a{display:flex;flex-direction:column;align-items:flex-start;width:100%;text-align:left;padding:8px 10px;border-radius:6px;color:inherit;text-decoration:none;font-size:14px;font-weight:400}
-.appmenu button:hover,.appmenu a:hover{background:#f0f1f4}
+.appmenu button:hover,.appmenu a:hover{background:var(--hover)}
 .appmenu small{color:var(--muted);font-size:11px;margin-top:2px}
 .amsep{height:1px;background:var(--line);margin:4px 2px}
 .amver{color:var(--muted);font-size:11px;padding:4px 10px}
 .brand i{width:28px;height:28px;border-radius:7px;background:var(--acc);color:#fff;display:grid;place-items:center;font-style:normal;font-size:11px;font-weight:800}
 button{font:inherit;border:1px solid transparent;background:transparent;border-radius:6px;padding:6px 10px;cursor:pointer;color:inherit;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
-button:hover:not(:disabled){background:#f0f1f4}
+button:hover:not(:disabled){background:var(--hover)}
 button.primary{background:var(--acc);color:#fff}
 button.primary:hover:not(:disabled){background:var(--acc2)}
 button:disabled{opacity:.35;cursor:default}
 .sep{width:1px;height:22px;background:var(--line);margin:0 4px}
 .grow{flex:1}
-.tool.active{background:#fde8e9;color:var(--acc);border-color:#f5c2c5}
+.tool.active{background:var(--accbg);color:var(--acctxt);border-color:var(--accline)}
 .ctl{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);padding:0 6px}
-.ctl input[type=color]{width:30px;height:26px;border:1px solid var(--line);border-radius:6px;padding:1px;background:#fff}
+.ctl input[type=color]{width:30px;height:26px;border:1px solid var(--line);border-radius:6px;padding:1px;background:var(--panel)}
 .ctl input[type=range]{width:80px}
-.tbtn{min-width:30px;justify-content:center;padding:4px 8px;border:1px solid var(--line);background:#fff}
-.tbtn.on{background:#fde8e9;color:var(--acc);border-color:#f5c2c5}
-.ctl select{padding:4px;border:1px solid var(--line);border-radius:6px;font:inherit;background:#fff}
-.ctl input[type=number]{width:52px;padding:4px;border:1px solid var(--line);border-radius:6px;font:inherit}
+.tbtn{min-width:30px;justify-content:center;padding:4px 8px;border:1px solid var(--line);background:var(--field)}
+.tbtn.on{background:var(--accbg);color:var(--acctxt);border-color:var(--accline)}
+.ctl select{padding:4px;border:1px solid var(--line);border-radius:6px;font:inherit;background:var(--field);color:var(--txt)}
+.ctl input[type=number]{width:52px;padding:4px;border:1px solid var(--line);border-radius:6px;font:inherit;background:var(--field);color:var(--txt)}
 #zoomTxt,#pageInfo{min-width:48px;text-align:center;font-size:12px;color:var(--muted)}
-#zoomTxt{width:52px;border:1px solid transparent;border-radius:6px;background:transparent;padding:4px 2px;font:inherit;font-size:12px}
-#zoomTxt:hover{border-color:#d5d9e0}#zoomTxt:focus{border-color:#2563eb;outline:none;background:#fff;color:#111}
+#zoomTxt{color:var(--muted);width:52px;border:1px solid transparent;border-radius:6px;background:transparent;padding:4px 2px;font:inherit;font-size:12px}
+#zoomTxt:hover{border-color:var(--line)}#zoomTxt:focus{border-color:#2563eb;outline:none;background:var(--panel);color:var(--txt)}
 main{flex:1;display:flex;min-height:0;position:relative}
-#side{width:160px;display:flex;flex-direction:column;min-height:0;background:#f6f7f9;border-right:1px solid var(--line);flex:none}
+#side{width:160px;display:flex;flex-direction:column;min-height:0;background:var(--pane);border-right:1px solid var(--line);flex:none}
 #thumbs{flex:1;min-height:0;overflow:auto;padding:12px 10px}
 #sideAtt:empty{display:none}
-#sideAtt{border-top:1px solid var(--line);max-height:42%;overflow:auto;padding:8px 8px 10px;background:#fff}
+#sideAtt{border-top:1px solid var(--line);max-height:42%;overflow:auto;padding:8px 8px 10px;background:var(--panel)}
 #sideAtt h4{margin:0 0 4px;font-size:12px;font-weight:700;cursor:pointer}
 #sideAtt button{display:block;width:100%;text-align:left;border:0;background:transparent;padding:5px 6px;border-radius:6px;cursor:pointer;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#sideAtt button:hover{background:#eef1f6}#sideAtt small{color:var(--muted)}
+#sideAtt button:hover{background:var(--hover)}#sideAtt small{color:var(--muted)}
 .thumb{display:flex;flex-direction:column;align-items:center;gap:4px;margin-bottom:14px;cursor:pointer;font-size:11px;color:var(--muted)}
 .thumb canvas{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);border-radius:2px}
 .thumb.cur canvas{outline:3px solid var(--acc);outline-offset:1px}
@@ -72,53 +73,53 @@ main{flex:1;display:flex;min-height:0;position:relative}
 body.drawing .overlay{touch-action:none;cursor:crosshair}
 body.t-text .overlay{cursor:text}
 body.t-place .overlay{cursor:copy}
-.edtools{position:absolute;z-index:8;display:flex;gap:2px;align-items:center;background:#1f2328;border-radius:8px;padding:3px;box-shadow:0 4px 14px rgba(0,0,0,.3)}
-#pickChip{gap:6px;align-items:center;background:#eef4ff;border:1px solid #9cb8f0;border-radius:6px;padding:2px 4px 2px 8px;font-size:12px}
+.edtools{position:absolute;z-index:8;display:flex;gap:2px;align-items:center;border:1px solid #4a4d53;background:#111316;border-radius:8px;padding:3px;box-shadow:0 4px 14px rgba(0,0,0,.3)}
+#pickChip{gap:6px;align-items:center;background:#1f2b45;border:1px solid #3b5a9a;border-radius:6px;padding:2px 4px 2px 8px;font-size:12px}
 #pickChip i{display:inline-block;width:12px;height:12px;border-radius:3px;border:1px solid #0003}
 #pickChip button{padding:0 6px;font-size:13px}
 .edtools>button{color:#fff;padding:4px 9px;font-weight:700;font-size:12px;border-radius:5px}
 .edtools>button:hover{background:rgba(255,255,255,.16)!important}
 .edtools>button.big{font-size:17px}
-.edpop{display:none;position:absolute;top:calc(100% + 4px);left:0;background:#1f2328;color:#fff;border-radius:8px;padding:5px 8px;gap:6px;align-items:center;white-space:nowrap;font-size:12px;box-shadow:0 4px 14px rgba(0,0,0,.3)}
+.edpop{display:none;position:absolute;top:calc(100% + 4px);left:0;background:#111316;color:#fff;border-radius:8px;padding:5px 8px;gap:6px;align-items:center;white-space:nowrap;font-size:12px;box-shadow:0 4px 14px rgba(0,0,0,.3)}
 .edpop.open{display:flex}
 .edpop button{color:#fff;padding:3px 9px;font-size:14px;border:1px solid rgba(255,255,255,.25);border-radius:5px}
 .edpop button:hover{background:rgba(255,255,255,.16)!important}
 .spellmirror{position:absolute;z-index:6;pointer-events:none;color:transparent;overflow:hidden;margin:0;border:0;box-sizing:border-box}
 .sp-bad{text-decoration:underline wavy #dc2626;text-decoration-skip-ink:none;text-underline-offset:2px}
-.spellmenu{position:fixed;z-index:90;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 28px rgba(0,0,0,.18);padding:4px;min-width:190px;font-size:13px}
+.spellmenu{position:fixed;z-index:90;background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 28px rgba(0,0,0,.18);padding:4px;min-width:190px;font-size:13px}
 .smi{padding:6px 10px;border-radius:5px;cursor:pointer}
-.smi:hover{background:#f0f1f4}
+.smi:hover{background:var(--hover)}
 .smi.sug{font-weight:600}
 .smi.muted{color:var(--muted);cursor:default}
 .smsep{height:1px;background:var(--line);margin:4px 2px}
 .editor{position:absolute;border:none;outline:1.5px dashed #2563eb;background:rgba(255,255,255,.7);padding:0;margin:0;resize:none;overflow:hidden;white-space:pre;line-height:1.25;z-index:5;min-width:60px}
 #empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:20px}
-.drop{border:2px dashed #b8bcc6;border-radius:16px;padding:40px 32px;text-align:center;background:#fff;max-width:460px}
+.drop{border:2px dashed var(--line);border-radius:16px;padding:40px 32px;text-align:center;background:var(--panel);max-width:460px}
 .drop h2{margin:0 0 8px;font-size:22px}
 .drop p{color:var(--muted);margin:0 0 20px}
 .drop .row{justify-content:center}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-#hint{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#1f2328;color:#fff;padding:9px 16px;border-radius:8px;display:none;z-index:50;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.25)}
-#busy{position:fixed;inset:0;background:rgba(255,255,255,.6);display:none;align-items:center;justify-content:center;z-index:60;font-weight:600}
+#hint{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);border:1px solid #4a4d53;background:#111316;color:#fff;padding:9px 16px;border-radius:8px;display:none;z-index:50;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+#busy{position:fixed;inset:0;background:rgba(20,21,23,.65);display:none;align-items:center;justify-content:center;z-index:60;font-weight:600}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:70;padding:16px}
-.card{background:#fff;border-radius:12px;padding:18px;width:min(560px,100%);box-shadow:0 10px 40px rgba(0,0,0,.3)}
+.card{background:var(--panel);border-radius:12px;padding:18px;width:min(560px,100%);box-shadow:0 10px 40px rgba(0,0,0,.3)}
 .card h3{margin:0 0 4px}
 .muted{color:var(--muted);margin:0 0 12px;font-size:13px}
 .paths{display:grid;grid-template-columns:auto 1fr auto;gap:6px 8px;align-items:center;margin:4px 0 12px;font-size:12px}
 .paths .pt{color:var(--muted);white-space:nowrap}
-.paths code{background:#f3f4f6;border-radius:5px;padding:4px 6px;word-break:break-all;font-size:11px}
+.paths code{background:var(--hover);border-radius:5px;padding:4px 6px;word-break:break-all;font-size:11px}
 .paths button{padding:3px 8px;font-size:12px;border:1px solid var(--line)}
 .fontlinks{font-size:13px;max-height:40vh;overflow:auto;padding-right:4px}
 .fontlinks .flt{color:var(--muted);font-size:12px;margin-top:10px;font-weight:600}
-.frow{display:flex;align-items:center;gap:8px;padding:3px 0;border-bottom:1px solid #f0f1f4}
+.frow{display:flex;align-items:center;gap:8px;padding:3px 0;border-bottom:1px solid var(--hover)}
 .frow a{flex:1}
-.fbadge{font-size:11px;padding:2px 7px;border-radius:10px;white-space:nowrap;background:#f3f4f6;color:var(--muted)}
-.fbadge.ok{background:#dcfce7;color:#166534}
-.fbadge.no{background:#fee2e2;color:#991b1b}
-.fontlinks a{color:#1d4ed8;text-decoration:none;padding:3px 0}
+.fbadge{font-size:11px;padding:2px 7px;border-radius:10px;white-space:nowrap;background:var(--hover);color:var(--muted)}
+.fbadge.ok{background:#143d24;color:#7ee2a0}
+.fbadge.no{background:#4a1f1f;color:#ff9c9c}
+.fontlinks a{color:#7aa7ff;text-decoration:none;padding:3px 0}
 .fontlinks a:hover{text-decoration:underline}
 #fontsModal .card{max-height:92vh;overflow:auto}
-#appBanner{position:fixed;right:16px;bottom:16px;z-index:80;background:#1f2328;color:#fff;border-radius:10px;padding:10px 12px;font-size:13px;box-shadow:0 6px 24px rgba(0,0,0,.3);display:flex;gap:8px;align-items:center}
+#appBanner{position:fixed;right:16px;bottom:16px;z-index:80;border:1px solid #4a4d53;background:#111316;color:#fff;border-radius:10px;padding:10px 12px;font-size:13px;box-shadow:0 6px 24px rgba(0,0,0,.3);display:flex;gap:8px;align-items:center}
 #appBanner button{background:#fff;color:#1f2328;border-radius:6px;padding:4px 10px;font-weight:600}
 #appBanner button.x{background:transparent;color:#fff;padding:4px 6px}
 body.native .webonly{display:none!important}
@@ -126,57 +127,69 @@ body.native .webonly{display:none!important}
 .recent h4{margin:14px 0 4px;font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
 #empty .recent{width:100%;text-align:left;margin-top:8px}
 .recent .rf{display:flex!important;flex-direction:column;align-items:flex-start;width:100%;text-align:left;padding:7px 10px;border-radius:6px;background:transparent;border:0;cursor:pointer}
-.recent .rf:hover{background:#f0f1f4}
+.recent .rf:hover{background:var(--hover)}
 .recent{min-width:0;max-width:100%}.recent .rf{min-width:0;max-width:100%;box-sizing:border-box;overflow:hidden}
 .recent .rf b{font-weight:600;font-size:14px}.recent .rf b,.recent .rf small{display:block;width:100%;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.recent .rf small{color:var(--muted);font-size:11px}
 .recent .rclear{font-size:11px;color:var(--muted);background:none;border:0;padding:4px 10px;cursor:pointer;text-decoration:underline}
-#appMenu .recent{border-bottom:1px solid #eee;margin-bottom:4px;padding-bottom:4px;max-height:50vh;overflow:auto}
+#appMenu .recent{border-bottom:1px solid var(--line);margin-bottom:4px;padding-bottom:4px;max-height:50vh;overflow:auto}
 #appMenu .recent h4{margin:4px 10px}
-#tabs{display:flex;align-items:stretch;gap:2px;background:#dfe2e8;padding:4px 8px 0;min-height:32px;overflow-x:auto;flex:none}
-#tabs>button{background:transparent;border:0;border-radius:8px 8px 0 0;padding:4px 10px;font-size:13px;cursor:pointer;white-space:nowrap;color:#333}
-#tabs>button:hover{background:#eceef2}#tabHome.active{background:#fff}
-#tabNew{border:1px solid #b9bfca!important;border-radius:6px!important;margin:0 0 4px 6px;align-self:center;padding:3px 10px!important}
+#titlebar{display:flex;align-items:stretch;min-height:40px;flex:none;background:var(--bg);-webkit-app-region:drag;app-region:drag}
+#titlebar button,#titlebar .tab,#titlebar input,#titlebar .appmenu,#titlebar a{-webkit-app-region:no-drag;app-region:no-drag}
+#titlebar .tbl{display:flex;align-items:center;gap:2px;padding:0 4px 0 8px;flex:none}
+#titlebar .brand{margin-right:2px}#titlebar .brand i{width:24px;height:24px;font-size:9px;border-radius:6px}
+#titlebar .qb{width:32px;height:30px;padding:0;justify-content:center;font-size:15px}
+#titlebar .tsep{width:1px;align-self:stretch;background:var(--line);margin:9px 5px}
+body.frameless.win #titlebar{padding-right:142px}
+body.frameless.mac #titlebar{padding-left:78px}
+body.frameless.mac.fullscreen #titlebar{padding-left:0}
+#tabs{display:flex;align-items:stretch;gap:2px;background:transparent;padding:6px 6px 0;min-height:32px;overflow-x:auto;flex:1;min-width:0;scrollbar-width:none}
+#tabs::-webkit-scrollbar{display:none}
+.appx{display:none!important}body.frameless .appx{display:flex!important}body.frameless .amver.appx{display:block!important}
+#tabs>button{background:transparent;border:0;border-radius:8px 8px 0 0;padding:4px 10px;font-size:13px;cursor:pointer;white-space:nowrap;color:var(--txt);flex:none}
+#tabs>button:hover{background:var(--hover)}#tabHome.active{background:var(--bar)}
+#tabNew{border:1px solid var(--line)!important;border-radius:6px!important;margin:0 0 4px 6px;align-self:center;padding:3px 10px!important}
 #tabList{display:flex;gap:2px;min-width:0}
-.tab{display:flex;align-items:center;gap:6px;max-width:220px;min-width:60px;padding:4px 6px 4px 12px;border-radius:8px 8px 0 0;background:#eceef2;cursor:pointer;font-size:13px;color:#333}
-.tab.active{background:#fff;font-weight:600}
+.tab{display:flex;align-items:center;gap:6px;max-width:220px;min-width:60px;padding:4px 6px 4px 12px;border-radius:8px 8px 0 0;background:transparent;cursor:pointer;font-size:13px;color:var(--muted)}
+.tab:hover{background:var(--pane)}
+.tab.active{background:var(--bar);color:#fff;font-weight:600;box-shadow:inset 0 2px 0 var(--acc)}
 .tab i.lock{font-style:normal;font-size:12px;flex:none;cursor:help}
 .tab span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.tab button{border:0;background:transparent;border-radius:50%;width:20px;height:20px;font-size:0;cursor:pointer;color:#555;flex:none;padding:0;margin:0;display:grid;place-items:center}
+.tab button{border:0;background:transparent;border-radius:50%;width:20px;height:20px;font-size:0;cursor:pointer;color:var(--muted);flex:none;padding:0;margin:0;display:grid;place-items:center}
 .tab button::before{content:"";width:10px;height:10px;background:linear-gradient(45deg,transparent 43%,currentColor 43%,currentColor 57%,transparent 57%),linear-gradient(-45deg,transparent 43%,currentColor 43%,currentColor 57%,transparent 57%)}
-.tab button:hover{background:#d5d9e0;color:#000}
+.tab button:hover{background:var(--hover);color:#fff}
 #attModal .card{width:min(680px,100%);max-height:92vh;overflow:auto}
-.att{display:flex;align-items:center;gap:8px;padding:8px 4px;border-top:1px solid #eee}
+.att{display:flex;align-items:center;gap:8px;padding:8px 4px;border-top:1px solid var(--line)}
 .att .nm{flex:1;min-width:0}.att .nm b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}
 .att .nm small{color:var(--muted);font-size:11px}
-.att button{padding:5px 10px;border-radius:6px;border:1px solid #c5cad3;background:#fff;cursor:pointer;font-size:12px;flex:none}
-.att button:hover{background:#f0f1f4}
-#attPrev:empty{display:none}#attPrev{margin-top:10px;border:1px solid #e3e6ea;border-radius:8px;padding:8px;max-height:50vh;overflow:auto;background:#fafbfc}
+.att button{padding:5px 10px;border-radius:6px;border:1px solid var(--line);background:var(--panel);cursor:pointer;font-size:12px;flex:none}
+.att button:hover{background:var(--hover)}
+#attPrev:empty{display:none}#attPrev{margin-top:10px;border:1px solid var(--line);border-radius:8px;padding:8px;max-height:50vh;overflow:auto;background:var(--field)}
 #attPrev img{max-width:100%;display:block;margin:auto}#attPrev pre{margin:0;white-space:pre-wrap;word-break:break-word;font-size:12px;user-select:text;-webkit-user-select:text}
 #askModal{z-index:95}#askModal .card{width:min(480px,100%)}
-#askRow{display:flex;align-items:center;margin-top:6px;border:1px solid #ccd;border-radius:8px;overflow:hidden;background:#fff}
+#askRow{display:flex;align-items:center;margin-top:6px;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--field)}
 #askRow:focus-within{border-color:#2563eb;box-shadow:0 0 0 2px #2563eb33}
-#askInput{flex:1;min-width:0;box-sizing:border-box;padding:8px 10px;border:0;outline:none;font:inherit;caret-color:auto;user-select:text;-webkit-user-select:text;background:transparent}
+#askInput{color:var(--txt);flex:1;min-width:0;box-sizing:border-box;padding:8px 10px;border:0;outline:none;font:inherit;caret-color:auto;user-select:text;-webkit-user-select:text;background:transparent}
 #askRow button{border:0;background:transparent;padding:6px 9px;cursor:pointer;font-size:15px;line-height:1;opacity:.65}
-#askRow button:hover{opacity:1;background:#f0f1f4}#askEye.on{opacity:1;background:#e6ecfb}
+#askRow button:hover{opacity:1;background:var(--hover)}#askEye.on{opacity:1;background:#1f2b45}
 #askBtns{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:16px}
-#askBtns button{padding:8px 14px;border-radius:8px;border:1px solid #c5cad3;background:#fff;cursor:pointer;font:inherit}
+#askBtns button{padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:var(--panel);cursor:pointer;font:inherit}
 #askBtns button.pri{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
 #helpModal .card{max-height:92vh;overflow:auto;width:min(760px,100%)}
-#helpModal input{width:100%;padding:7px 10px;border:1px solid #ccd;border-radius:8px;margin:4px 0 10px;font:inherit}
-#helpModal details{border-top:1px solid #eee;padding:7px 0}
+#helpModal input{background:var(--field);color:var(--txt);width:100%;padding:7px 10px;border:1px solid var(--line);border-radius:8px;margin:4px 0 10px;font:inherit}
+#helpModal details{border-top:1px solid var(--line);padding:7px 0}
 #helpModal summary{cursor:pointer;font-weight:600;font-size:14px}
-#helpModal details p,#helpModal details li{font-size:13px;line-height:1.5;color:#333;margin:5px 0}
+#helpModal details p,#helpModal details li{font-size:13px;line-height:1.5;color:var(--txt);margin:5px 0}
 #helpModal table.cmp{border-collapse:collapse;width:100%;font-size:12.5px;margin:6px 0}
-#helpModal table.cmp th,#helpModal table.cmp td{border:1px solid #e3e6ea;padding:5px 8px;text-align:left;vertical-align:top}
-#helpModal table.cmp th{background:#f5f6f8}
-#helpModal kbd{background:#f1f3f6;border:1px solid #d5d9e0;border-radius:4px;padding:0 5px;font-size:12px}
+#helpModal table.cmp th,#helpModal table.cmp td{border:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top}
+#helpModal table.cmp th{background:var(--hover)}
+#helpModal kbd{background:var(--hover);border:1px solid var(--line);border-radius:4px;padding:0 5px;font-size:12px}
 .fdir{display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin-bottom:6px;font-size:13px}
 .siglist{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
 .sigitem{position:relative;border:1px solid var(--line);border-radius:8px;padding:6px 10px;cursor:pointer;height:66px;display:flex;align-items:center;background:repeating-conic-gradient(#f1f2f4 0 25%,#fff 0 50%) 0 0/12px 12px}
-.sigitem:hover{border-color:var(--acc);box-shadow:0 0 0 2px #fde8e9}
+.sigitem:hover{border-color:var(--acc);box-shadow:0 0 0 2px var(--accbg)}
 .sigitem img{max-height:52px;max-width:170px;display:block}
-.sigitem .x{position:absolute;top:-9px;right:-9px;width:22px;height:22px;border-radius:50%;background:#fff;border:1px solid var(--line);font-size:11px;padding:0;justify-content:center}
-.sigitem .x:hover{background:#fde8e9;color:var(--acc)}
+.sigitem .x{position:absolute;top:-9px;right:-9px;width:22px;height:22px;border-radius:50%;background:#fff;color:#333;border:1px solid var(--line);font-size:11px;padding:0;justify-content:center}
+.sigitem .x:hover{background:var(--accbg);color:var(--acc)}
 #sigPad{width:100%;height:200px;border:1px solid var(--line);border-radius:8px;touch-action:none;background:#fff;display:block;margin-bottom:12px;cursor:crosshair}
 body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 @media(max-width:800px){#side{display:none}.lbl{display:none}#viewer{padding:8px}.brand span{display:none}}
@@ -184,30 +197,43 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 </head>
 <body>
 
-<div id="tabs">
-  <button id="tabHome" title="Ekran startowy – ostatnio otwierane pliki">🏠</button>
-  <div id="tabList"></div>
-  <button id="tabNew" title="Utwórz pusty dokument PDF">＋ Utwórz</button>
+<div id="titlebar">
+  <div class="tbl">
+  <div class="brandwrap">
+      <button class="brand" id="bBrand" title="Menu edytora"><i>PDF</i><span>Edytor PDF ▾</span></button>
+      <div class="appmenu" id="appMenu">
+        <div id="recentMenu" class="recent"></div>
+        <button data-m="pw">🔐 Zabezpiecz hasłem…<small>zapisz PDF zaszyfrowany (AES-256) albo usuń hasło</small></button>
+        <button data-m="fonts">🔤 Czcionki…<small>foldery Worda/Acrobata, pobieranie, stan</small></button>
+        <button data-m="install" id="mInstall" style="display:none">⬇ Zainstaluj aplikację przeglądarki<small>ta strona w osobnym oknie</small></button>
+        <a class="webonly" href="https://github.com/wronglogin/edytor-pdf/releases/latest" target="_blank" rel="noopener">💻 Pobierz pełną wersję na komputer ↗<small style="display:block;color:var(--muted);font-size:11px">instalator Windows (.exe) / Mac (.dmg)</small></a>
+        <div class="amsep appx"></div>
+        <button class="appx" data-m="help">❓ Pomoc<small>F1</small></button>
+        <button class="appx" data-m="app:new-window">🗔 Nowe okno<small>Ctrl+N</small></button>
+        <button class="appx" data-m="app:fullscreen">⛶ Pełny ekran<small>F11</small></button>
+        <button class="appx" data-m="app:forget-pw">🗝 Zapomnij zapamiętane hasła</button>
+        <button class="appx" data-m="app:releases">⬇ Pobierz najnowszą wersję aplikacji ↗</button>
+        <div class="amsep"></div>
+        <a href="https://github.com/wronglogin/edytor-pdf" target="_blank" rel="noopener">ℹ️ O edytorze (GitHub) ↗</a>
+        <div class="amver">Edytor PDF · wersja 43</div>
+        <div class="amver appx" id="appVer"></div>
+      </div>
+    </div>
+    <span class="tsep"></span>
+    <button id="bSaveQ" class="qb" title="Zapisz (Ctrl+S)">💾</button>
+    <button id="bUndo" class="qb" title="Cofnij (Ctrl+Z)">↶</button>
+    <button id="bRedo" class="qb" title="Ponów (Ctrl+Y)">↷</button>
+    <span class="tsep"></span>
+  </div>
+  <div id="tabs">
+    <button id="tabHome" title="Ekran startowy – ostatnio otwierane pliki">🏠</button>
+    <div id="tabList"></div>
+    <button id="tabNew" title="Utwórz pusty dokument PDF">＋ Utwórz</button>
+  </div>
 </div>
 <div class="bar">
-  <div class="brandwrap">
-    <button class="brand" id="bBrand" title="Menu edytora"><i>PDF</i><span>Edytor PDF ▾</span></button>
-    <div class="appmenu" id="appMenu">
-      <div id="recentMenu" class="recent"></div>
-      <button data-m="pw">🔐 Zabezpiecz hasłem…<small>zapisz PDF zaszyfrowany (AES-256) albo usuń hasło</small></button>
-      <button data-m="fonts">🔤 Czcionki…<small>foldery Worda/Acrobata, pobieranie, stan</small></button>
-      <button data-m="install" id="mInstall" style="display:none">⬇ Zainstaluj aplikację przeglądarki<small>ta strona w osobnym oknie</small></button>
-      <a class="webonly" href="https://github.com/wronglogin/edytor-pdf/releases/latest" target="_blank" rel="noopener">💻 Pobierz pełną wersję na komputer ↗<small style="display:block;color:var(--muted);font-size:11px">instalator Windows (.exe) / Mac (.dmg)</small></a>
-      <div class="amsep"></div>
-      <a href="https://github.com/wronglogin/edytor-pdf" target="_blank" rel="noopener">ℹ️ O edytorze (GitHub) ↗</a>
-      <div class="amver">Edytor PDF · wersja 42</div>
-    </div>
-  </div>
   <button id="bOpen" title="Otwórz PDF">📂<span class="lbl">Otwórz</span></button>
   <button id="bMerge" title="Dołącz kolejny PDF na końcu">➕<span class="lbl">Dołącz PDF</span></button>
-  <div class="sep"></div>
-  <button id="bUndo" title="Cofnij (Ctrl+Z)">↶</button>
-  <button id="bRedo" title="Ponów (Ctrl+Y)">↷</button>
   <div class="sep"></div>
   <button id="bZoomOut" title="Pomniejsz">−</button>
   <input id="zoomTxt" value="100%" title="Powiększenie – wpisz wartość i naciśnij Enter" inputmode="numeric">
@@ -307,6 +333,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
     <input id="helpSearch" placeholder="Szukaj, np. podpis, czcionka, kropki, zapisz…">
     <div id="helpBody">
 <details open><summary>🗂 Karty dokumentów</summary>
+<p><b>Górny pasek</b>: logo z menu „Edytor PDF ▾”, szybkie Zapisz / Cofnij / Ponów, karty dokumentów i „＋ Utwórz”. W pełnej wersji na komputer to jedyny pasek okna – dawne menu Plik / Widok / Pomoc (Nowe okno, Pełny ekran, Zapomnij hasła, wersja aplikacji) jest teraz w „Edytor PDF ▾”, a okno przesuwasz, chwytając za wolne miejsce na pasku.</p>
 <p>Każdy otwarty plik ma swoją kartę na samej górze – klikaj karty, aby przełączać się między dokumentami. <b>＋ Utwórz</b> otwiera pusty dokument. <b>✕</b> na karcie zamyka dokument (przy niezapisanych zmianach zapyta: Zapisz / Zapisz jako / Nie zapisuj / Anuluj) i wraca do ekranu startowego z ostatnio otwieranymi plikami. <b>🏠</b> pokazuje ekran startowy bez zamykania dokumentów. Kropka ● przy nazwie oznacza niezapisane zmiany.</p>
 <p><b>Pliki z hasłem</b> – edytor zapyta o hasło, a przy zapisie zabezpieczy plik tym samym hasłem. Pliki z samą blokadą edycji (bez hasła do otwarcia) zapisują się bez blokady. Aplikacja na komputerze zapamiętuje hasło do danego pliku (zaszyfrowane w pęku kluczy systemu) i następnym razem otwiera go bez pytania; zapamiętane hasła usuniesz w menu Plik → „Zapomnij zapamiętane hasła”. Własne hasło ustawisz w menu „Edytor PDF ▾” → <b>🔐 Zabezpiecz hasłem…</b> (tam też je zmienisz albo usuniesz). Na karcie dokumentu widać wtedy znaczek: 🔑 – plik ma hasło do otwarcia, 🔒 – plik ma hasło właściciela (blokadę edycji); najedź na znaczek, aby zobaczyć opis.</p></details>
 <details><summary>📂 Otwieranie, dołączanie, zapisywanie</summary>
@@ -375,7 +402,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 </div>
 <div class="modal" id="fontsModal">
   <div class="card">
-    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v42</small></h3>
+    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v43</small></h3>
     <p class="muted">Przeglądarka nie może sama przeszukać dysku, więc wskaż raz foldery z czcionkami Worda i Acrobata. Edytor je zapamięta i będzie z nich automatycznie brał brakujące czcionki przy każdej edycji. Czcionki nie są nigdzie wysyłane.</p>
     <p class="muted"><b>Mac:</b> przeglądarka nie otworzy folderów wewnątrz aplikacji („pliki systemowe”), więc najpierw skopiuj czcionki do Dokumentów: otwórz <b>Terminal</b>, wklej polecenie poniżej i naciśnij Enter. Potem kliknij „Dodaj folder…” i wybierz <b>Dokumenty → Czcionki</b>.</p>
     <div class="paths"><div class="pt">Terminal (Mac)</div><code>mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki</code><button class="copyPath" data-path="mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki">Kopiuj</button></div>
@@ -797,6 +824,7 @@ $('#appMenu').addEventListener('click', e => {
   closeAppMenu();
   if (b.dataset.m === 'fonts') openFontsModal();
   if (b.dataset.m === 'help') openHelp();
+  if (b.dataset.m.startsWith('app:') && window.native && native.appAction) native.appAction(b.dataset.m.slice(4));
   if (b.dataset.m === 'pw') setDocPassword();
   if (b.dataset.m === 'install') installPwa();
 });
@@ -4006,6 +4034,11 @@ if ('launchQueue' in window) {
 // aplikacja na Windows/macOS
 if (window.native) {
   document.body.classList.add('native');
+  if (native.frameless) { // okno bez systemowego paska – nasz pasek tytułu jest jedynym
+    document.body.classList.add('frameless', native.platform === 'darwin' ? 'mac' : 'win');
+    $('#appVer').textContent = 'Aplikacja · wersja ' + (native.appVersion || '');
+    native.on('fullscreen', on => document.body.classList.toggle('fullscreen', !!on));
+  }
   native.on('open-path', p => openNativePaths([p]));
   native.on('menu', m => {
     if (m === 'open') pickOpen();
@@ -4043,6 +4076,7 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
 $('#bMerge').onclick = () => S.pages.length ? $('#fMerge').click() : $('#fOpen').click();
 $('#bNew').onclick = $('#tabNew').onclick = newDoc;
 $('#bAtt').onclick = openAttModal;
+$('#bSaveQ').onclick = () => $('#bSave').click();
 $('#attClose').onclick = () => { $('#attModal').style.display = 'none'; };
 $('#attModal').addEventListener('mousedown', e => { if (e.target.id === 'attModal') $('#attModal').style.display = 'none'; });
 $('#tabHome').onclick = () => switchTab(-1);

@@ -1,7 +1,7 @@
 // Edytor PDF – aplikacja na Windows i macOS (Electron)
 // Edytor to ta sama strona co na GitHub Pages, spakowana do aplikacji. Nowe wersje edytora
 // pobierają się same w tle; nowe wersje samej aplikacji – na Windowsie instalują się same.
-const { app, BrowserWindow, protocol, net, ipcMain, dialog, shell, Menu, safeStorage } = require('electron');
+const { app, BrowserWindow, protocol, net, ipcMain, dialog, shell, Menu, safeStorage, nativeTheme } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
@@ -207,6 +207,14 @@ ipcMain.on('set-doc', (e, name) => { const w = BrowserWindow.fromWebContents(e.s
 let quitting = false;
 app.on('before-quit', () => { quitting = true; });
 ipcMain.on('relaunch', () => { app.relaunch(); app.quit(); });
+ipcMain.on('app-version', e => { e.returnValue = app.getVersion(); });
+ipcMain.on('app-action', (e, what) => {
+  const w = BrowserWindow.fromWebContents(e.sender);
+  if (what === 'new-window') createWindow();
+  else if (what === 'fullscreen' && w) w.setFullScreen(!w.isFullScreen());
+  else if (what === 'releases') shell.openExternal(RELEASES);
+  else if (what === 'forget-pw') { try { fs.rmSync(PWFILE(), { force: true }); } catch (err) {} dialog.showMessageBox(w, { type: 'info', title: 'Edytor PDF', message: 'Zapamiętane hasła do plików zostały usunięte.' }); }
+});
 
 const pdfArgs = argv => argv.slice(1).filter(a => /\.pdf$/i.test(a) && exists(a));
 let pending = pdfArgs(process.argv);
@@ -228,11 +236,18 @@ function openPaths(ps) {
 
 /* ---------- okno ---------- */
 function createWindow() {
+  // jeden pasek u góry: edytor rysuje własny pasek tytułu, system dokłada tylko przyciski okna
+  const frame = process.platform === 'win32' ? { titleBarStyle: 'hidden', titleBarOverlay: { color: '#1e1f22', symbolColor: '#e3e5e8', height: 40 } }
+    : process.platform === 'darwin' ? { titleBarStyle: 'hiddenInset' } : {};
   const w = new BrowserWindow({
+    ...frame, backgroundColor: '#1e1f22',
     width: 1400, height: 950, minWidth: 900, minHeight: 600, show: false, title: 'Edytor PDF',
     icon: path.join(BUNDLE, 'icon-512.png'),
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true, spellcheck: false }
   });
+  if (process.platform === 'win32') w.setMenuBarVisibility(false); // skróty z menu działają dalej
+  w.on('enter-full-screen', () => w.webContents.send('fullscreen', true));
+  w.on('leave-full-screen', () => w.webContents.send('fullscreen', false));
   w.webContents.on('did-finish-load', () => { w.ready = true; w.emit('app-ready'); });
   w.once('ready-to-show', () => w.show());
   w.loadURL('app://edytor/edytor-pdf.html');
@@ -305,7 +320,7 @@ function buildMenu() {
       mac ? { role: 'close', label: 'Zamknij okno' } : { role: 'quit', label: 'Zakończ' }
     ] },
     { label: 'Edycja', submenu: [{ role: 'undo', label: 'Cofnij' }, { role: 'redo', label: 'Ponów' }, { type: 'separator' }, { role: 'cut', label: 'Wytnij' }, { role: 'copy', label: 'Kopiuj' }, { role: 'paste', label: 'Wklej' }, { role: 'selectAll', label: 'Zaznacz wszystko' }] },
-    { label: 'Widok', submenu: [{ role: 'reload', label: 'Odśwież' }, { role: 'togglefullscreen', label: 'Pełny ekran' }, { role: 'toggleDevTools', label: 'Narzędzia dewelopera' }] },
+    { label: 'Widok', submenu: [{ role: 'reload', label: 'Odśwież' }, { role: 'togglefullscreen', label: 'Pełny ekran', accelerator: process.platform === 'darwin' ? 'Ctrl+Cmd+F' : 'F11' }, { role: 'toggleDevTools', label: 'Narzędzia dewelopera' }] },
     { label: 'Pomoc', submenu: [
       { label: 'Pomoc edytora', accelerator: 'F1', click: send('help') },
       { label: 'Pobierz najnowszą wersję aplikacji', click: () => shell.openExternal(RELEASES) },
@@ -315,6 +330,7 @@ function buildMenu() {
 }
 
 app.whenReady().then(() => {
+  nativeTheme.themeSource = 'dark';
   pickVersion();
   protocol.handle('app', handleApp);
   buildMenu();
