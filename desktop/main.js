@@ -248,9 +248,9 @@ function createWindow() {
   if (process.platform === 'win32') w.setMenuBarVisibility(false); // skróty z menu działają dalej
   w.on('enter-full-screen', () => w.webContents.send('fullscreen', true));
   w.on('leave-full-screen', () => w.webContents.send('fullscreen', false));
-  w.webContents.on('did-finish-load', () => { w.ready = true; w.emit('app-ready'); });
+  w.webContents.on('did-finish-load', () => { w.ready = true; w.emit('app-ready'); if (!w.isDestroyed() && !w.isVisible()) w.show(); });
   w.once('ready-to-show', () => w.show());
-  setTimeout(() => { if (!w.isDestroyed() && !w.isVisible()) w.show(); }, 4000); // na wszelki wypadek – okno nigdy nie zostaje ukryte
+  setTimeout(() => { if (!w.isDestroyed() && !w.isVisible()) w.show(); }, 1500); // na wszelki wypadek – okno nigdy nie zostaje ukryte
   w.loadURL('app://edytor/edytor-pdf.html');
   // linki (pobieranie czcionek, GitHub) – w zwykłej przeglądarce
   w.webContents.setWindowOpenHandler(({ url }) => { if (/^https?:/.test(url)) shell.openExternal(url); return { action: 'deny' }; });
