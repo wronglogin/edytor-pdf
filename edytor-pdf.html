@@ -69,6 +69,14 @@ main{flex:1;display:flex;min-height:0;position:relative}
 .pagehead button{padding:2px 6px;font-size:13px}
 .pagebox{position:relative;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.15),0 6px 18px rgba(0,0,0,.08)}
 .pagebox canvas{position:absolute;left:0;top:0}
+.textLayer{position:absolute;text-align:initial;inset:0;overflow:hidden;line-height:1;text-size-adjust:none;-webkit-text-size-adjust:none;forced-color-adjust:none;transform-origin:0 0;z-index:2;pointer-events:none;user-select:text;-webkit-user-select:text;caret-color:transparent}
+.textLayer :is(span,br){color:transparent;position:absolute;white-space:pre;cursor:text;transform-origin:0% 0%}
+.textLayer span.markedContent{top:0;height:0}
+.textLayer ::selection{background:rgba(37,99,235,.35)}
+.textLayer br::selection{background:transparent}
+.textLayer .endOfContent{display:block;position:absolute;inset:100% 0 0;z-index:-1;cursor:default;user-select:none}
+.textLayer .endOfContent.active{top:0}
+body.t-select .textLayer span:not(.markedContent){pointer-events:auto}
 .overlay{touch-action:pan-x pan-y}
 body.drawing .overlay{touch-action:none;cursor:crosshair}
 body.t-text .overlay{cursor:text}
@@ -77,6 +85,7 @@ body.t-place .overlay{cursor:copy}
 #pickChip{gap:6px;align-items:center;background:#1f2b45;border:1px solid #3b5a9a;border-radius:6px;padding:2px 4px 2px 8px;font-size:12px}
 #pickChip i{display:inline-block;width:12px;height:12px;border-radius:3px;border:1px solid #0003}
 #pickChip button{padding:0 6px;font-size:13px}
+.edtools{pointer-events:none}.edtools>*{pointer-events:auto}
 .edtools>button{color:#fff;padding:4px 9px;font-weight:700;font-size:12px;border-radius:5px}
 .edtools>button:hover{background:rgba(255,255,255,.16)!important}
 .edtools>button.big{font-size:17px}
@@ -93,8 +102,9 @@ body.t-place .overlay{cursor:copy}
 .smi.muted{color:var(--muted);cursor:default}
 .smsep{height:1px;background:var(--line);margin:4px 2px}
 .editor{position:absolute;border:none;outline:1.5px dashed #2563eb;background:rgba(255,255,255,.7);padding:0;margin:0;resize:none;overflow:hidden;white-space:pre;line-height:1.25;z-index:5;min-width:60px}
-#empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:20px}
-.drop{border:2px dashed var(--line);border-radius:16px;padding:40px 32px;text-align:center;background:var(--panel);max-width:460px}
+#empty{position:absolute;inset:0;display:flex;align-items:safe center;justify-content:center;padding:20px;overflow:auto}
+.drop{border:2px dashed var(--line);border-radius:16px;padding:clamp(18px,4vh,40px) 32px;text-align:center;background:var(--panel);max-width:460px;width:100%;min-width:0;margin:auto 0}
+#empty .recent{max-height:max(160px,calc(100vh - 470px));overflow:auto}
 .drop h2{margin:0 0 8px;font-size:22px}
 .drop p{color:var(--muted);margin:0 0 20px}
 .drop .row{justify-content:center}
@@ -195,7 +205,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 @media(max-width:800px){#side{display:none}.lbl{display:none}#viewer{padding:8px}.brand span{display:none}}
 </style>
 </head>
-<body>
+<body class="t-select">
 
 <div id="titlebar">
   <div class="tbl">
@@ -215,7 +225,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
         <button class="appx" data-m="app:releases">⬇ Pobierz najnowszą wersję aplikacji ↗</button>
         <div class="amsep"></div>
         <a href="https://github.com/wronglogin/edytor-pdf" target="_blank" rel="noopener">ℹ️ O edytorze (GitHub) ↗</a>
-        <div class="amver">Edytor PDF · wersja 44</div>
+        <div class="amver">Edytor PDF · wersja 45</div>
         <div class="amver appx" id="appVer"></div>
       </div>
     </div>
@@ -343,18 +353,19 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 <p><b>Drukuj</b> <kbd>Ctrl/Cmd+P</kbd> – drukuje dokument razem z Twoimi zmianami; w oknie drukowania możesz też wybrać „Zapisz jako PDF”.</p>
 <p><b>↶ ↷</b> – cofnij/ponów (<kbd>Ctrl/Cmd+Z</kbd>, <kbd>Ctrl/Cmd+Y</kbd>). <b>− +</b> – powiększenie, <b>↔</b> – dopasuj do szerokości.</p></details>
 <details><summary>↖ Zaznacz <kbd>V</kbd></summary>
+<p><b>Kopiowanie tekstu z PDF:</b> w trybie Zaznacz przeciągnij myszą po tekście dokumentu (kursor zmienia się w „I”), potem <kbd>Ctrl/Cmd+C</kbd> albo prawy przycisk → Kopiuj. Dwuklik zaznacza słowo, trzyklik – linię. Na skanach tekst da się zaznaczyć dopiero po rozpoznaniu (🔍 OCR nad stroną).</p>
 <p>Kliknięcie włączonego narzędzia jeszcze raz (albo <kbd>Esc</kbd>) wyłącza je i wraca do zwykłego przeglądania. Kliknij dodany element (tekst, podpis, obraz, rysunek), aby go zaznaczyć. Przeciągnij, aby przesunąć; ciągnij za uchwyty (rogi i boki), aby zmienić rozmiar. Strzałki przesuwają o 1 px, z <kbd>Shift</kbd> o 10 px, z <kbd>Alt</kbd> o ćwierć piksela. <kbd>Delete</kbd> albo „Usuń element” – usuwa. Dwuklik na tekście – edycja.</p></details>
 <details><summary>✏️ Edytuj tekst <kbd>E</kbd></summary>
 <p>Kliknij istniejący tekst w PDF, aby go zmienić. Edytor zakrywa oryginał prawdziwym tłem i pisze tą samą czcionką (z PDF, z komputera albo najbardziej podobnym zamiennikiem – informację widać na dole). Działa także na skanach (rozpoznawanie tekstu OCR).</p>
 <p>Gdy akapit się wydłuży, treść pod nim przesunie się w dół (opcja „Przesuwaj treść”); jeśli zabraknie miejsca, powstanie strona „ciąg dalszy”.</p></details>
 <details><summary>▦ Wypełnij <kbd>F</kbd></summary>
 <p>Wyszukuje na stronie miejsca do wpisania – puste komórki tabel, miejsce za etykietą („Date:”, „www:”), nad podkreśleniami i kropkami („........”), kwadraciki do zaznaczenia oraz prawdziwe pola formularza zapisane w PDF. Wykryte pola mają niebieską ramkę.</p>
-<p>Kliknij pole i pisz – czcionka i wielkość są dobierane z najbliższego tekstu. <kbd>Tab</kbd> przechodzi do następnego pola, <kbd>Enter</kbd> zatwierdza. Kwadracik – kliknięcie wstawia taki sam znak, jakiego używa dokument (krzyżyk ☒ albo ptaszek ✓); kliknięcie kwadracika zaznaczonego już w PDF go odznacza, ponowne – przywraca.</p>
+<p>Kliknij pole i pisz – czcionka i wielkość są dobierane z najbliższego tekstu. <kbd>Tab</kbd> przechodzi do następnego pola, <kbd>Enter</kbd> zatwierdza, a kliknięcie innego pola od razu zaczyna w nim pisanie. Kwadracik – kliknięcie wstawia taki sam znak, jakiego używa dokument (krzyżyk ☒ albo ptaszek ✓); kliknięcie kwadracika zaznaczonego już w PDF go odznacza, ponowne – przywraca.</p>
 <p>Jeśli jakiegoś pola nie wykryło, użyj „Dodaj tekst” i przeciągnij ramkę w tym miejscu.</p></details>
 <details><summary>Pasek nad wpisywanym tekstem</summary>
 <p><b>A A</b> – zmniejsz/powiększ tekst. <b>🗑</b> – usuń. <b>⟳▾</b> – zamień na symbol ✓ ✗ ●. <b>VA↔</b> – odstępy między literami. <b>💧</b> – skopiuj styl słowa z PDF do tego tekstu.</p></details>
 <details><summary>𝐓 Dodaj tekst <kbd>T</kbd></summary>
-<p>Kliknij, aby pisać w danym miejscu, albo przeciągnij, aby narysować ramkę. Ramkę można rozciągać za 8 uchwytów. Z włączonym „Dopasuj do ramki” tekst, który się nie mieści, sam się zmniejsza; po wyłączeniu powiększasz ramkę ręcznie.</p>
+<p>Kliknij, aby pisać w danym miejscu, albo przeciągnij, aby narysować ramkę. Narzędzie zostaje włączone – po wpisaniu kliknij od razu następne miejsce; <kbd>Esc</kbd> albo ponowne kliknięcie „Dodaj tekst” kończy. Ramkę można rozciągać za 8 uchwytów. Z włączonym „Dopasuj do ramki” tekst, który się nie mieści, sam się zmniejsza; po wyłączeniu powiększasz ramkę ręcznie.</p>
 <p>Z włączonym „Styl z PDF” nowy tekst dostaje czcionkę, wielkość i kolor najbliższego tekstu w dokumencie; wyłączone – ustawienia z paska (Tekst, Czcionka, B, I, Kolor).</p></details>
 <details><summary>💧 Próbnik <kbd>I</kbd></summary>
 <p>Kopiuje czcionkę, wielkość i kolor z tekstu w PDF. Po kliknięciu 💧 najedź na dokument – podświetli się linia, z której zostanie pobrany styl (nie trzeba trafiać w samo słowo).</p>
@@ -402,7 +413,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 </div>
 <div class="modal" id="fontsModal">
   <div class="card">
-    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v44</small></h3>
+    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v45</small></h3>
     <p class="muted">Przeglądarka nie może sama przeszukać dysku, więc wskaż raz foldery z czcionkami Worda i Acrobata. Edytor je zapamięta i będzie z nich automatycznie brał brakujące czcionki przy każdej edycji. Czcionki nie są nigdzie wysyłane.</p>
     <p class="muted"><b>Mac:</b> przeglądarka nie otworzy folderów wewnątrz aplikacji („pliki systemowe”), więc najpierw skopiuj czcionki do Dokumentów: otwórz <b>Terminal</b>, wklej polecenie poniżej i naciśnij Enter. Potem kliknij „Dodaj folder…” i wybierz <b>Dokumenty → Czcionki</b>.</p>
     <div class="paths"><div class="pt">Terminal (Mac)</div><code>mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki</code><button class="copyPath" data-path="mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki">Kopiuj</button></div>
@@ -1618,9 +1629,31 @@ async function renderPage(i) {
   } catch (e) { console.warn(e); }
   v.painted = true;
   drawOverlay(i);
+  renderTextSel(i);
   if (S.tool === 'edittext' || S.tool === 'text') loadItems(i);
   if (S.tool === 'form' && !S.pages[i].fields) detectFields(i).then(() => drawOverlay(i)).catch(() => {});
 }
+
+// Warstwa tekstu: w trybie „Zaznacz” tekst PDF można zaznaczyć myszą i skopiować (Ctrl/Cmd+C, prawy przycisk)
+async function renderTextSel(i) {
+  const v = views[i]; if (!v || v.tl) return;
+  const d = el('div', 'textLayer'); v.tl = d;
+  d.style.setProperty('--scale-factor', v.vp.scale);
+  v.box.appendChild(d);
+  try { await pdfjsLib.renderTextLayer({ textContentSource: await v.pp.getTextContent(), container: d, viewport: v.vp }).promise; } catch (e) { console.warn('Warstwa tekstu:', e); return; }
+  const end = el('div', 'endOfContent'); d.appendChild(end);
+  d.addEventListener('pointerdown', e => {
+    if (e.button > 0) return;
+    const [x, y] = loc(e, v);
+    // na dodanym elemencie (podpis, tekst, obraz…) – przesuwanie/zaznaczanie jak dotąd, nie zaznaczanie tekstu
+    if (handleAt(i, x, y) || hitTest(i, x, y) >= 0) { e.preventDefault(); onDown(e, i); return; }
+    commitEditor(); if (S.sel) setSel(null);
+    S.cur = i; updPageInfo();
+    end.classList.add('active');
+  });
+  d.addEventListener('dblclick', e => { const [x, y] = loc(e, v); if (hitTest(i, x, y) >= 0) onDbl(e, i); });
+}
+document.addEventListener('pointerup', () => document.querySelectorAll('.endOfContent.active').forEach(x => x.classList.remove('active')));
 
 /* ---------- wykrywanie istniejącego tekstu (do edycji) ---------- */
 const ocrCache = {};
@@ -2779,7 +2812,6 @@ function onDown(e, i) {
   }
   if (t === 'text') {
     e.preventDefault();
-    if (hadEditor) return;
     const hit = hitTest(i, x, y);
     if (hit >= 0 && page.annots[hit].type === 'text') { openEditor(i, hit); return; }
     // klik = pisz od tego miejsca; przeciągnięcie = ramka na tekst
@@ -2789,7 +2821,6 @@ function onDown(e, i) {
   }
   if (t === 'form') {
     e.preventDefault();
-    if (hadEditor) return;
     const hit = hitTest(i, x, y);
     if (hit >= 0 && page.annots[hit].type === 'text' && !page.annots[hit].formField) { openEditor(i, hit); return; }
     const k = fieldAt(i, x, y);
@@ -3104,9 +3135,18 @@ function edTools(ta) {
 }
 function placeTools(ta) {
   const t = ta._tools; if (!t) return;
-  const top = parseFloat(ta.style.top) || 0, h = ta.offsetHeight || 20;
-  t.style.left = (parseFloat(ta.style.left) || 0) + 'px';
-  t.style.top = (top >= 46 ? top - 42 : top + h + 6) + 'px';
+  const top = parseFloat(ta.style.top) || 0, h = ta.offsetHeight || 20, left = parseFloat(ta.style.left) || 0;
+  const tw = t.offsetWidth || 200, th = 36, above = top - 42, below = top + h + 6;
+  // pasek nie może zasłaniać sąsiednich pól formularza – wtedy idzie w drugą stronę albo w bok
+  let pos = top >= 46 ? above : below;
+  const ed = editor, v = ed && views[ed.i], fs = v && S.pages[ed.i] && S.pages[ed.i].fields;
+  if (fs && fs.length) {
+    const rs = fs.map(f => fieldScr(v, f)).filter(b => !(b.y >= top - 2 && b.y + b.h <= top + h + 2 && b.x <= left + 2 && b.x + b.w >= left - 2));
+    const hits = y => rs.some(b => b.x < left + tw && b.x + b.w > left && b.y < y + th && b.y + b.h > y);
+    if (hits(pos)) { const alt = pos === above ? below : above; if (!hits(alt) && alt >= 0) pos = alt; else { t.style.left = (left + (ta.offsetWidth || 60) + 8) + 'px'; t.style.top = top + 'px'; return; } }
+  }
+  t.style.left = left + 'px';
+  t.style.top = pos + 'px';
 }
 function edAction(act, ta, pop) {
   const ed = editor;
@@ -3265,8 +3305,7 @@ function commitEditor() {
     attach(i, na);
     page.annots.push(na); S.lastText = { pi: i, a: na };
   }
-  if (ai < 0 && !preset) backToSelect(i, txt ? page.annots.length - 1 : -1);
-  afterChange(i);
+  afterChange(i); // narzędzie zostaje włączone – można od razu kliknąć w następne miejsce (Esc kończy)
 }
 function backToSelect(i, ai) {
   setTimeout(() => {
@@ -3374,7 +3413,7 @@ function pasteClip(i) {
   setSel({ pi: i, ai: p.annots.length - 1 });
   return true;
 }
-document.addEventListener('copy', e => { if (/^(INPUT|TEXTAREA)$/.test(e.target.tagName) || editor || !S.sel) return; if (copySel()) e.preventDefault(); });
+document.addEventListener('copy', e => { if (/^(INPUT|TEXTAREA)$/.test(e.target.tagName) || editor || !S.sel || String(getSelection() || '').trim()) return; if (copySel()) e.preventDefault(); });
 document.addEventListener('paste', e => { if (/^(INPUT|TEXTAREA)$/.test(e.target.tagName) || editor) return; if (pasteClip()) e.preventDefault(); });
 function delSel() {
   if (!S.sel || !selA()) return;
@@ -3448,6 +3487,8 @@ function setTool(t) {
   if (t !== 'select') setSel(null);
   document.querySelectorAll('.tool').forEach(b => b.classList.toggle('active', b.dataset.tool === t || (t === 'place' && b.dataset.tool === S.placeTool)));
   document.body.classList.toggle('drawing', t !== 'select');
+  document.body.classList.toggle('t-select', t === 'select');
+  if (t !== 'select') { try { getSelection().removeAllRanges(); } catch (e) {} }
   document.body.classList.toggle('t-text', t === 'text' || t === 'edittext' || t === 'form');
   document.body.classList.toggle('t-place', t === 'place');
   views.forEach((v, i) => { v.hover = null; if ((t === 'edittext' || t === 'text') && v.painted) loadItems(i); });

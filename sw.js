@@ -1,5 +1,5 @@
 // Edytor PDF – pamięć podręczna, żeby aplikacja działała też bez internetu.
-const CACHE = 'edytor-pdf-v44';
+const CACHE = 'edytor-pdf-v45';
 const APP = ['./edytor-pdf.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './spell-worker.js', './lib/nspell.js', './lib/pdf-decrypt.js'];
 const CDN = [
   'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
