@@ -225,7 +225,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
         <button class="appx" data-m="app:releases">⬇ Pobierz najnowszą wersję aplikacji ↗</button>
         <div class="amsep"></div>
         <a href="https://github.com/wronglogin/edytor-pdf" target="_blank" rel="noopener">ℹ️ O edytorze (GitHub) ↗</a>
-        <div class="amver">Edytor PDF · wersja 45</div>
+        <div class="amver">Edytor PDF · wersja 46</div>
         <div class="amver appx" id="appVer"></div>
       </div>
     </div>
@@ -360,12 +360,12 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 <p>Gdy akapit się wydłuży, treść pod nim przesunie się w dół (opcja „Przesuwaj treść”); jeśli zabraknie miejsca, powstanie strona „ciąg dalszy”.</p></details>
 <details><summary>▦ Wypełnij <kbd>F</kbd></summary>
 <p>Wyszukuje na stronie miejsca do wpisania – puste komórki tabel, miejsce za etykietą („Date:”, „www:”), nad podkreśleniami i kropkami („........”), kwadraciki do zaznaczenia oraz prawdziwe pola formularza zapisane w PDF. Wykryte pola mają niebieską ramkę.</p>
-<p>Kliknij pole i pisz – czcionka i wielkość są dobierane z najbliższego tekstu. <kbd>Tab</kbd> przechodzi do następnego pola, <kbd>Enter</kbd> zatwierdza, a kliknięcie innego pola od razu zaczyna w nim pisanie. Kwadracik – kliknięcie wstawia taki sam znak, jakiego używa dokument (krzyżyk ☒ albo ptaszek ✓); kliknięcie kwadracika zaznaczonego już w PDF go odznacza, ponowne – przywraca.</p>
+<p>Kliknij pole i pisz – czcionka i wielkość są dobierane z najbliższego tekstu. <kbd>Tab</kbd> przechodzi do następnego pola, kliknięcie innego pola od razu zaczyna w nim pisanie, a <kbd>Enter</kbd> (albo <kbd>Esc</kbd>) zatwierdza i kończy wypełnianie. Kwadracik – kliknięcie wstawia taki sam znak, jakiego używa dokument (krzyżyk ☒ albo ptaszek ✓); kliknięcie kwadracika zaznaczonego już w PDF go odznacza, ponowne – przywraca.</p>
 <p>Jeśli jakiegoś pola nie wykryło, użyj „Dodaj tekst” i przeciągnij ramkę w tym miejscu.</p></details>
 <details><summary>Pasek nad wpisywanym tekstem</summary>
 <p><b>A A</b> – zmniejsz/powiększ tekst. <b>🗑</b> – usuń. <b>⟳▾</b> – zamień na symbol ✓ ✗ ●. <b>VA↔</b> – odstępy między literami. <b>💧</b> – skopiuj styl słowa z PDF do tego tekstu.</p></details>
 <details><summary>𝐓 Dodaj tekst <kbd>T</kbd></summary>
-<p>Kliknij, aby pisać w danym miejscu, albo przeciągnij, aby narysować ramkę. Narzędzie zostaje włączone – po wpisaniu kliknij od razu następne miejsce; <kbd>Esc</kbd> albo ponowne kliknięcie „Dodaj tekst” kończy. Ramkę można rozciągać za 8 uchwytów. Z włączonym „Dopasuj do ramki” tekst, który się nie mieści, sam się zmniejsza; po wyłączeniu powiększasz ramkę ręcznie.</p>
+<p>Kliknij, aby pisać w danym miejscu, albo przeciągnij, aby narysować ramkę. Narzędzie zostaje włączone – po wpisaniu kliknij od razu następne miejsce. <kbd>Enter</kbd> (albo <kbd>Esc</kbd>) zatwierdza tekst i kończy dodawanie; nowa linia w tekście: <kbd>Shift+Enter</kbd>. Ramkę można rozciągać za 8 uchwytów. Z włączonym „Dopasuj do ramki” tekst, który się nie mieści, sam się zmniejsza; po wyłączeniu powiększasz ramkę ręcznie.</p>
 <p>Z włączonym „Styl z PDF” nowy tekst dostaje czcionkę, wielkość i kolor najbliższego tekstu w dokumencie; wyłączone – ustawienia z paska (Tekst, Czcionka, B, I, Kolor).</p></details>
 <details><summary>💧 Próbnik <kbd>I</kbd></summary>
 <p>Kopiuje czcionkę, wielkość i kolor z tekstu w PDF. Po kliknięciu 💧 najedź na dokument – podświetli się linia, z której zostanie pobrany styl (nie trzeba trafiać w samo słowo).</p>
@@ -413,7 +413,7 @@ body.dragover #viewer{outline:3px dashed var(--acc);outline-offset:-8px}
 </div>
 <div class="modal" id="fontsModal">
   <div class="card">
-    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v45</small></h3>
+    <h3>Czcionki <small style="font-weight:400;color:var(--muted);font-size:12px">· edytor v46</small></h3>
     <p class="muted">Przeglądarka nie może sama przeszukać dysku, więc wskaż raz foldery z czcionkami Worda i Acrobata. Edytor je zapamięta i będzie z nich automatycznie brał brakujące czcionki przy każdej edycji. Czcionki nie są nigdzie wysyłane.</p>
     <p class="muted"><b>Mac:</b> przeglądarka nie otworzy folderów wewnątrz aplikacji („pliki systemowe”), więc najpierw skopiuj czcionki do Dokumentów: otwórz <b>Terminal</b>, wklej polecenie poniżej i naciśnij Enter. Potem kliknij „Dodaj folder…” i wybierz <b>Dokumenty → Czcionki</b>.</p>
     <div class="paths"><div class="pt">Terminal (Mac)</div><code>mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki</code><button class="copyPath" data-path="mkdir -p ~/Documents/Czcionki &amp;&amp; cp -R &quot;/Applications/Microsoft Word.app/Contents/Resources/DFonts&quot; ~/Documents/Czcionki/Word; cp -R &quot;/Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Resources/Resource/Font&quot; ~/Documents/Czcionki/Acrobat; open ~/Documents/Czcionki">Kopiuj</button></div>
@@ -3105,8 +3105,7 @@ function openBoxEditor(i, ai, x, y, spec, style) {
       if (nk >= 0 && nk < n) setTimeout(() => openField(fi, nk), 0);
       return;
     }
-    if (ev.key === 'Enter' && !ev.shiftKey) { ev.preventDefault(); commitEditor(); }
-    if (ev.key === 'Escape') commitEditor();
+    if ((ev.key === 'Enter' && !ev.shiftKey) || ev.key === 'Escape') { ev.preventDefault(); finishTyping(); }
   });
   ta.addEventListener('blur', () => setTimeout(() => { if (editor && editor.ta === ta) commitEditor(); }, 0));
   v.box.appendChild(ta);
@@ -3251,8 +3250,7 @@ function openEditor(i, ai, x, y, preset, style) {
   ta.addEventListener('input', fit);
   ta.addEventListener('keydown', ev => {
     ev.stopPropagation();
-    if (ev.key === 'Enter' && !ev.shiftKey) { ev.preventDefault(); commitEditor(); }
-    if (ev.key === 'Escape') commitEditor();
+    if ((ev.key === 'Enter' && !ev.shiftKey) || ev.key === 'Escape') { ev.preventDefault(); finishTyping(); }
   });
   ta.addEventListener('blur', () => setTimeout(() => { if (editor && editor.ta === ta) commitEditor(); }, 0));
   v.box.appendChild(ta);
@@ -3306,6 +3304,17 @@ function commitEditor() {
     page.annots.push(na); S.lastText = { pi: i, a: na };
   }
   afterChange(i); // narzędzie zostaje włączone – można od razu kliknąć w następne miejsce (Esc kończy)
+}
+// Enter / Esc: zatwierdza wpisany tekst i kończy „Dodaj tekst” / „Wypełnij” (powrót do zwykłego przeglądania).
+// Żeby pisać dalej w kolejnym miejscu – zamiast Enter kliknij po prostu następne miejsce.
+function finishTyping() {
+  const ed = editor, t = S.tool, i = ed && ed.i;
+  commitEditor();
+  if (t === 'text' || t === 'form') {
+    setTool('select');
+    const p = S.pages[i], L = S.lastText;
+    if (t === 'text' && p && L && L.pi === i) { const ai = p.annots.indexOf(L.a); if (ai >= 0) setSel({ pi: i, ai }); }
+  }
 }
 function backToSelect(i, ai) {
   setTimeout(() => {
